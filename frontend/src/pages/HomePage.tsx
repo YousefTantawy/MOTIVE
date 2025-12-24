@@ -3,7 +3,14 @@ import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Buttons";
 import { RatingStars } from "../components/ui/RatingStars";
 import { useNavigate } from "react-router-dom";
-import { courseService, Course } from "../services/courseService";
+import axiosInstance from "../lib/axios";
+
+export interface Course {
+  courseId: number;
+  title: string;
+  description: string;
+  reviews: string[];
+}
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,7 +21,7 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     async function loadCourses() {
       try {
-        const data = await courseService.getCourses();
+        const data = await axiosInstance.get<Course[]>("/courses");
         setCourses(data);
       } catch (err) {
         console.error(err);
@@ -41,22 +48,28 @@ export const HomePage: React.FC = () => {
       }}
     >
       {courses.map((course) => (
-        <Card key={course.id}>
-          {course.thumbnail && (
-            <img
-              src={course.thumbnail}
-              alt={course.title}
-              style={{ width: "100%", borderRadius: "6px", marginBottom: "8px" }}
-            />
-          )}
+        <Card key={course.courseId}>
           <h3>{course.title}</h3>
-          <p>{course.description}</p>
-          <p style={{ fontSize: "13px", color: "#888" }}>
-            Instructor: {course.instructor} | Price: ${course.price}
-          </p>
-          <RatingStars rating={course.rating ?? 4} />
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "auto" }}>
-            <Button onClick={() => navigate(`/course/${course.id}`)}>View Course</Button>
+
+          {/* Render HTML safely */}
+          <p
+            style={{ fontSize: "14px", color: "#555" }}
+            dangerouslySetInnerHTML={{ __html: course.description }}
+          />
+
+          {/* Show number of reviews as a pseudo-rating */}
+          <RatingStars rating={course.reviews.length > 0 ? 5 : 4} />
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: "auto",
+            }}
+          >
+            <Button onClick={() => navigate(`/course/${course.courseId}`)}>
+              View Course
+            </Button>
           </div>
         </Card>
       ))}
