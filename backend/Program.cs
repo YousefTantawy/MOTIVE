@@ -10,11 +10,12 @@ builder.Services.AddDbContext<Ecen424DbProjectContext>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
-        policy => policy
-            .WithOrigins("http://localhost:5173") // The URL of your React App
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()  // Allows http://localhost:5173, 3000, 8080... anything
+              .AllowAnyMethod()  // Allows GET, POST, PUT, DELETE
+              .AllowAnyHeader(); // Allows any custom headers
+    });
 });
 
 builder.Services.AddControllers();
@@ -31,6 +32,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors();
 }
 
 app.UseHttpsRedirection();
