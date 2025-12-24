@@ -21,7 +21,7 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     async function loadCourses() {
       try {
-        const data = await axiosInstance.get<Course[]>("/courses");
+        const data = await axiosInstance.get<Course[]>("/Courses");
         setCourses(data);
       } catch (err) {
         console.error(err);
