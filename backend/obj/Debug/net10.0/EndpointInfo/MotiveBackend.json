@@ -5,6 +5,18 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/Courses": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Users": {
       "get": {
         "tags": [
@@ -20,6 +32,9 @@
   },
   "components": { },
   "tags": [
+    {
+      "name": "Courses"
+    },
     {
       "name": "Users"
     }

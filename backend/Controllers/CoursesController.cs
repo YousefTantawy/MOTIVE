@@ -1,17 +1,17 @@
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MotiveBackend.Models;
 using MotiveBackend.Data;
+using MotiveBackend.Models;
 
 namespace MotiveBackend.Controllers
 {
     [Route("api/[controller]")]
-    // Name of the api
     [ApiController]
-    public class UsersController : ControllerBase
+    public class CoursesController : ControllerBase
     {
         private readonly Ecen424DbProjectContext _context;
-        public UsersController(Ecen424DbProjectContext context)
+        public CoursesController(Ecen424DbProjectContext context)
         {
             _context = context;
         }
@@ -21,21 +21,19 @@ namespace MotiveBackend.Controllers
         // Editable depending on the database
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllCourses()
         {
-            // Debugging Step: Remove the "Role" part for a second.
-            // Let's just try to get the raw user data.
-            var users = await _context.Users
-                .Select(u => new
+            var courses = await _context.Courses
+                .Select(c => new
                 {
-                    u.UserId,
-                    u.FirstName,
-                    u.Email
-                    // Removed RoleName to test safety
+                    c.CourseId, 
+                    c.Title,
+                    Description = c.CourseDescription != null ? c.CourseDescription.FullText : "No description",
+                    Reviews = c.UserReviews.Select(r => r.Comment)
                 })
                 .ToListAsync();
 
-            return Ok(users);
+            return Ok(courses);
         }
-}
+    }
 }
