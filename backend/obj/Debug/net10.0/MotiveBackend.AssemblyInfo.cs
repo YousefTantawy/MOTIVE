@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MotiveBackend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+219a3c6b6ca42a203208eb35ad76fa4b9e9b5b4c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b6f34cc693afd51d3d6daad734ce771db97ff757")]
 [assembly: System.Reflection.AssemblyProductAttribute("MotiveBackend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MotiveBackend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
