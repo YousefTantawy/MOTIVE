@@ -1,0 +1,6 @@
+@MotiveBackend_HostAddress = http://localhost:5168
+
+GET {{MotiveBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
