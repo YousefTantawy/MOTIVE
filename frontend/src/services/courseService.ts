@@ -13,26 +13,25 @@ export interface Course {
 
 export const courseService = {
   getCourses: async (): Promise<Course[]> => {
-    const response = await axiosInstance.get("/courses");
-    return response.data;
+    return await axiosInstance.get<Course[]>("/Courses");
   },
 
   getCourseById: async (id: string): Promise<Course> => {
-    const response = await axiosInstance.get(`/courses/${id}`);
-    return response.data;
+    return await axiosInstance.get<Course>(`/Courses/${id}`);
   },
 
   createCourse: async (courseData: Partial<Course>): Promise<Course> => {
-    const response = await axiosInstance.post("/courses", courseData);
-    return response.data;
+    return await axiosInstance.post<Course>("/Courses", courseData);
   },
 
-  updateCourse: async (id: string, courseData: Partial<Course>): Promise<Course> => {
-    const response = await axiosInstance.put(`/courses/${id}`, courseData);
-    return response.data;
+  updateCourse: async (
+    id: string,
+    courseData: Partial<Course>
+  ): Promise<Course> => {
+    return await axiosInstance.put<Course>(`/Courses/${id}`, courseData);
   },
 
   deleteCourse: async (id: string): Promise<void> => {
-    await axiosInstance.delete(`/courses/${id}`);
+    await axiosInstance.delete(`/Courses/${id}`);
   },
 };
