@@ -3,16 +3,24 @@
   "WorkspaceRootPath": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\data\\ecen424dbprojectcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:data\\ecen424dbprojectcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\models\\coursetargetaudience.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:models\\coursetargetaudience.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,7 +38,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
+              "Title": "AuthDtos.cs",
+              "DocumentMoniker": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\DTOs\\AuthDtos.cs",
+              "RelativeDocumentMoniker": "DTOs\\AuthDtos.cs",
+              "ToolTip": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\DTOs\\AuthDtos.cs",
+              "RelativeToolTip": "DTOs\\AuthDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-26T21:58:24.694Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Ecen424DbProjectContext.cs",
+              "DocumentMoniker": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Data\\Ecen424DbProjectContext.cs",
+              "RelativeDocumentMoniker": "Data\\Ecen424DbProjectContext.cs",
+              "ToolTip": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Data\\Ecen424DbProjectContext.cs",
+              "RelativeToolTip": "Data\\Ecen424DbProjectContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-26T19:12:43.09Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "CourseTargetAudience.cs",
               "DocumentMoniker": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Models\\CourseTargetAudience.cs",
               "RelativeDocumentMoniker": "Models\\CourseTargetAudience.cs",
@@ -38,25 +72,24 @@
               "RelativeToolTip": "Models\\CourseTargetAudience.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-26T18:00:16.164Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-26T18:00:16.164Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "AuthController.cs",
               "DocumentMoniker": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
               "ToolTip": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Controllers\\AuthController.cs",
               "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAxwB8AAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-26T16:18:11.409Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "CoursesController.cs",
               "DocumentMoniker": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Controllers\\CoursesController.cs",
               "RelativeDocumentMoniker": "Controllers\\CoursesController.cs",
@@ -64,8 +97,7 @@
               "RelativeToolTip": "Controllers\\CoursesController.cs",
               "ViewState": "AgIAABAAAAAAAAAAAAAmwBIAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-24T18:53:12.307Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-24T18:53:12.307Z"
             }
           ]
         }
