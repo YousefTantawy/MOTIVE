@@ -67,9 +67,17 @@ public partial class Ecen424DbProjectContext : DbContext
 
     public virtual DbSet<UserReview> UserReviews { get; set; }
 
+    public virtual DbSet<ViewMostEnrolled> ViewMostEnrolleds { get; set; }
+
+    public virtual DbSet<ViewMostRecent> ViewMostRecents { get; set; }
+
+    public virtual DbSet<ViewMostTrending> ViewMostTrendings { get; set; }
+
+    public virtual DbSet<ViewTopRated> ViewTopRateds { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=motivedatabase.mysql.database.azure.com;database=ecen424_db_project;user id=YousefTantawy;password=el7amamsyel7amamsy!!;sslmode=Required", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.42-mysql"));
+        => optionsBuilder.UseMySql("server=motivedatabase.mysql.database.azure.com;database=ecen424_db_project;userid=YousefTantawy;password=el7amamsyel7amamsy!!;sslmode=Required", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.42-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -758,6 +766,94 @@ public partial class Ecen424DbProjectContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.UserReviews)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("user_reviews_ibfk_1");
+        });
+
+        modelBuilder.Entity<ViewMostEnrolled>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("view_most_enrolled");
+
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Price)
+                .HasPrecision(10, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.Title)
+                .HasMaxLength(200)
+                .HasColumnName("title");
+            entity.Property(e => e.TotalEnrollments).HasColumnName("total_enrollments");
+        });
+
+        modelBuilder.Entity<ViewMostRecent>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("view_most_recent");
+
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.DaysSinceRelease).HasColumnName("days_since_release");
+            entity.Property(e => e.Price)
+                .HasPrecision(10, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.Title)
+                .HasMaxLength(200)
+                .HasColumnName("title");
+        });
+
+        modelBuilder.Entity<ViewMostTrending>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("view_most_trending");
+
+            entity.Property(e => e.AvgRating)
+                .HasPrecision(7, 4)
+                .HasColumnName("avg_rating");
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Price)
+                .HasPrecision(10, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.Title)
+                .HasMaxLength(200)
+                .HasColumnName("title");
+            entity.Property(e => e.TrendingScore)
+                .HasPrecision(27, 4)
+                .HasColumnName("trending_score");
+        });
+
+        modelBuilder.Entity<ViewTopRated>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("view_top_rated");
+
+            entity.Property(e => e.AvgRating)
+                .HasPrecision(7, 4)
+                .HasColumnName("avg_rating");
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Price)
+                .HasPrecision(10, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.ReviewCount).HasColumnName("review_count");
+            entity.Property(e => e.Title)
+                .HasMaxLength(200)
+                .HasColumnName("title");
         });
 
         OnModelCreatingPartial(modelBuilder);

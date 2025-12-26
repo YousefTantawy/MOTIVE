@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace MotiveBackend.Models;
+
+public partial class ViewMostTrending
+{
+    public ulong CourseId { get; set; }
+
+    public string Title { get; set; } = null!;
+
+    public decimal Price { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public decimal AvgRating { get; set; }
+
+    public decimal TrendingScore { get; set; }
+}
