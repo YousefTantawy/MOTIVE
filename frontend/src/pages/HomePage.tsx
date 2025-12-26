@@ -65,7 +65,7 @@ export const HomePage: React.FC = () => {
             dangerouslySetInnerHTML={{ __html: course.description }}
           />
 
-          <RatingStars rating={course.reviews.length > 0 ? 5 : 4} />
+          <RatingStars rating={(course.reviews?.length ?? 0) > 0 ? 5 : 4} />
 
           <div
             style={{
