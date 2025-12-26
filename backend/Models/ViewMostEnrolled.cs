@@ -12,6 +12,4 @@ public partial class ViewMostEnrolled
     public decimal Price { get; set; }
 
     public DateTime? CreatedAt { get; set; }
-
-    public long TotalEnrollments { get; set; }
 }

@@ -14,6 +14,4 @@ public partial class ViewTopRated
     public DateTime? CreatedAt { get; set; }
 
     public decimal AvgRating { get; set; }
-
-    public long ReviewCount { get; set; }
 }

@@ -12,6 +12,4 @@ public partial class ViewMostRecent
     public decimal Price { get; set; }
 
     public DateTime? CreatedAt { get; set; }
-
-    public int? DaysSinceRelease { get; set; }
 }

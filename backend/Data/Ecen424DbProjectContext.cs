@@ -785,7 +785,6 @@ public partial class Ecen424DbProjectContext : DbContext
             entity.Property(e => e.Title)
                 .HasMaxLength(200)
                 .HasColumnName("title");
-            entity.Property(e => e.TotalEnrollments).HasColumnName("total_enrollments");
         });
 
         modelBuilder.Entity<ViewMostRecent>(entity =>
@@ -799,7 +798,6 @@ public partial class Ecen424DbProjectContext : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.DaysSinceRelease).HasColumnName("days_since_release");
             entity.Property(e => e.Price)
                 .HasPrecision(10, 2)
                 .HasColumnName("price");
@@ -828,9 +826,6 @@ public partial class Ecen424DbProjectContext : DbContext
             entity.Property(e => e.Title)
                 .HasMaxLength(200)
                 .HasColumnName("title");
-            entity.Property(e => e.TrendingScore)
-                .HasPrecision(27, 4)
-                .HasColumnName("trending_score");
         });
 
         modelBuilder.Entity<ViewTopRated>(entity =>
@@ -850,7 +845,6 @@ public partial class Ecen424DbProjectContext : DbContext
             entity.Property(e => e.Price)
                 .HasPrecision(10, 2)
                 .HasColumnName("price");
-            entity.Property(e => e.ReviewCount).HasColumnName("review_count");
             entity.Property(e => e.Title)
                 .HasMaxLength(200)
                 .HasColumnName("title");

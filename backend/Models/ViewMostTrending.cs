@@ -14,6 +14,4 @@ public partial class ViewMostTrending
     public DateTime? CreatedAt { get; set; }
 
     public decimal AvgRating { get; set; }
-
-    public decimal TrendingScore { get; set; }
 }
