@@ -12,6 +12,13 @@ export interface Course {
   reviews: string[];
 }
 
+interface HomeCoursesResponse {
+  trending: Course[];
+  topRated: Course[];
+  newest: Course[];
+  bestSellers: Course[];
+}
+
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
@@ -21,8 +28,10 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     async function loadCourses() {
       try {
-        const data = await axiosInstance.get<Course[]>("/Courses");
-        setCourses(data);
+        const data = await axiosInstance.get<HomeCoursesResponse>("/Courses");
+
+        // 👈 pick which list to show (currently trending)
+        setCourses(data.trending);
       } catch (err) {
         console.error(err);
         setError("Failed to load courses");
@@ -51,13 +60,11 @@ export const HomePage: React.FC = () => {
         <Card key={course.courseId}>
           <h3>{course.title}</h3>
 
-          {/* Render HTML safely */}
           <p
             style={{ fontSize: "14px", color: "#555" }}
             dangerouslySetInnerHTML={{ __html: course.description }}
           />
 
-          {/* Show number of reviews as a pseudo-rating */}
           <RatingStars rating={course.reviews.length > 0 ? 5 : 4} />
 
           <div

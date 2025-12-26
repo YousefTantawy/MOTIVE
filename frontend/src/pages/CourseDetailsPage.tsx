@@ -5,7 +5,7 @@ import { CourseHero } from "../features/store/CourseHero";
 import { ReviewList } from "../features/store/ReviewList";
 import { courseService } from "../services/courseService";
 import { enrollmentService } from "../services/enrollmentService";
-import { useSearchParams } from "react-router-dom";
+import { authService } from "../services/authService";
 
 export const CourseDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,42 +51,58 @@ export const CourseDetailsPage: React.FC = () => {
     const params = new URLSearchParams();
     if (id) params.set("courseId", id);
     if (course && course.price) params.set("price", String(course.price));
+
     const path = `/payment?${params.toString()}`;
+
     if (!user) {
-      // redirect to login and include intended destination
       navigate(`/login?redirect=${encodeURIComponent(path)}`);
       return;
     }
+
     navigate(path);
   };
 
-  if (loading) return <MainLayout><div>Loading...</div></MainLayout>;
-  if (!course) return <MainLayout><div>Course not found</div></MainLayout>;
+  if (loading)
+    return (
+      <MainLayout>
+        <div>Loading...</div>
+      </MainLayout>
+    );
 
-  const mockReviews = [
-    {
-      id: "1",
-      author: "John Doe",
-      rating: 5,
-      text: "Amazing course! Highly recommended.",
-      date: "2025-12-20",
-    },
-    {
-      id: "2",
-      author: "Jane Smith",
-      rating: 4,
-      text: "Great content, could use more examples.",
-      date: "2025-12-15",
-    },
-  ];
+  if (!course)
+    return (
+      <MainLayout>
+        <div>Course not found</div>
+      </MainLayout>
+    );
+
+  // --- NEW: derive values from backend shape ---
+
+  const instructorName =
+    course.instructor?.length > 0 ? course.instructor[0].userName : "Instructor";
+
+  const avgRating =
+    course.reviews && course.reviews.length > 0
+      ? course.reviews.reduce((s: number, r: any) => s + r.rating, 0) /
+        course.reviews.length
+      : 0;
+
+  const mappedReviews =
+    course.reviews?.map((r: any, i: number) => ({
+      id: String(i + 1),
+      author: r.userName,
+      rating: r.rating,
+      text: r.comment,
+      date: r.date?.slice(0, 10) ?? "",
+    })) ?? [];
 
   return (
     <MainLayout>
       <CourseHero
         title={course.title}
         description={course.description}
-        instructor={course.instructor}
-        rating={course.rating}
+        instructor={instructorName}
+        rating={avgRating}
         price={course.price}
         onEnroll={handleEnroll}
       />
@@ -95,7 +111,14 @@ export const CourseDetailsPage: React.FC = () => {
         {course.price ? (
           <button
             onClick={handleBuyNow}
-            style={{ padding: "10px 14px", background: "#646cff", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer" }}
+            style={{
+              padding: "10px 14px",
+              background: "#646cff",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer",
+            }}
           >
             Buy now
           </button>
@@ -104,14 +127,20 @@ export const CourseDetailsPage: React.FC = () => {
         <button
           onClick={handleEnroll}
           disabled={isEnrolling}
-          style={{ padding: "10px 14px", background: "transparent", color: "#111", border: "1px solid #ddd", borderRadius: 8, cursor: "pointer" }}
+          style={{
+            padding: "10px 14px",
+            background: "transparent",
+            color: "#111",
+            border: "1px solid #ddd",
+            borderRadius: 8,
+            cursor: "pointer",
+          }}
         >
-          {isEnrolling ? "Enrolling..." : "Enroll"
-          }
+          {isEnrolling ? "Enrolling..." : "Enroll"}
         </button>
       </div>
 
-      <ReviewList reviews={mockReviews} />
+      <ReviewList reviews={mappedReviews} />
     </MainLayout>
   );
 };
