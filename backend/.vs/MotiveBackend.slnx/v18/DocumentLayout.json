@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|d:\\college\\7th semester\\ecen424\\motive\\backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86C984A5-3B1E-9AE3-E0F6-CAC4B141DABE}|MotiveBackend.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -27,26 +27,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-26T16:18:11.409Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "CoursesController.cs",
               "DocumentMoniker": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Controllers\\CoursesController.cs",
               "RelativeDocumentMoniker": "Controllers\\CoursesController.cs",
               "ToolTip": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Controllers\\CoursesController.cs",
               "RelativeToolTip": "Controllers\\CoursesController.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAqwB4AAABiAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAADQAAABfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-24T18:53:12.307Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "D:\\College\\7th Semester\\ECEN424\\MOTIVE\\backend\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAYwCsAAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-24T17:56:05.085Z",
+              "WhenOpened": "2025-12-24T18:53:12.307Z",
               "EditorCaption": ""
             }
           ]
