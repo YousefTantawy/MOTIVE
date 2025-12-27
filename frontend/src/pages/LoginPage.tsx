@@ -41,36 +41,51 @@ export const LoginPage: React.FC = () => {
         <h2>Login</h2>
         {error && <div style={{ color: "red", marginBottom: 16 }}>{error}</div>}
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ width: "100%", padding: "8px", marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ width: "100%", padding: "8px", marginBottom: 16, borderRadius: 6, border: "1px solid #ccc" }}
-        />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              marginBottom: 12,
+              borderRadius: 8,
+              border: "1px solid #ccc",
+              boxSizing: "border-box", // important for consistent sizing
+            }}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              marginBottom: 16,
+              borderRadius: 8,
+              border: "1px solid #ccc",
+              boxSizing: "border-box",
+            }}
+          />
 
-        <button
-          onClick={() => handleLogin(email, password)}
-          disabled={isLoading}
-          style={{
-            width: "100%",
-            padding: "10px",
-            background: "#646cff",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
-        >
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
+          <button
+            onClick={() => handleLogin(email, password)}
+            disabled={isLoading}
+            style={{
+              width: "100%", // make it full width like inputs
+              padding: "10px 12px", // same vertical and horizontal padding
+              background: "#646cff",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer",
+              boxSizing: "border-box",
+            }}
+          >
+            {isLoading ? "Logging in..." : "Login"}
+          </button>
 
         <p style={{ marginTop: 16, textAlign: "center" }}>
           Don't have an account? <Link to="/register">Register here</Link>
