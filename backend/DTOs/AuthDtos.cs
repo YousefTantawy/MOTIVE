@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MotiveBackend.Models.DTOs
+namespace MotiveBackend.DTOs
 {
 	public class RegisterDto
 	{
@@ -55,5 +55,9 @@ namespace MotiveBackend.Models.DTOs
     public class UpdateProfilePictureDto
     {
         public string ProfilePictureUrl { get; set; }
+    }
+    public class UpdateUserPhonesDto
+    {
+        public List<string> PhoneNumbers { get; set; } = new List<string>();
     }
 }

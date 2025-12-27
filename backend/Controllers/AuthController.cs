@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BCrypt.Net; // Import the hashing tool
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MotiveBackend.Data;
 using MotiveBackend.Models;
-using MotiveBackend.Models.DTOs;
-using BCrypt.Net; // Import the hashing tool
+using MotiveBackend.DTOs;
 
 namespace MotiveBackend.Controllers
 {
@@ -230,6 +230,67 @@ namespace MotiveBackend.Controllers
             }
 
             return Ok(new { message = "Profile picture updated successfully.", profilePictureUrl = user.ProfilePictureUrl });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(ulong id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            _context.Users.Remove(user);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Error deleting user: {ex.InnerException?.Message ?? ex.Message}");
+            }
+
+            return Ok(new { message = "User and all related data deleted successfully." });
+        }
+
+        [HttpPut("{userId}/phones")]
+        public async Task<IActionResult> UpdateUserPhones(ulong userId, [FromBody] UpdateUserPhonesDto request)
+        {
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == userId);
+            if (!userExists)
+            {
+                return NotFound("User not found.");
+            }
+
+            var currentPhones = await _context.UserPhones
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+
+            _context.UserPhones.RemoveRange(currentPhones);
+
+            if (request.PhoneNumbers != null && request.PhoneNumbers.Any())
+            {
+                var newPhones = request.PhoneNumbers.Select(num => new UserPhone
+                {
+                    UserId = userId,
+                    PhoneNumber = num
+                });
+
+                await _context.UserPhones.AddRangeAsync(newPhones);
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Error updating phone numbers.");
+            }
+
+            return Ok(new { message = "Phone numbers updated successfully.", phones = request.PhoneNumbers });
         }
     }
 }
