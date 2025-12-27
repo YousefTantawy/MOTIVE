@@ -8,6 +8,7 @@ export const Navbar: React.FC = () => {
   const [user, setUser] = useState<{ name?: string; email?: string; role?: string } | null>(
     authService.getCurrentUser()
   );
+  const [searchTerm, setSearchTerm] = useState("");
 
   const linkStyle = (path: string) => ({
     marginRight: "20px",
@@ -26,6 +27,14 @@ export const Navbar: React.FC = () => {
     authService.logout();
     window.dispatchEvent(new Event("authChanged"));
     navigate("/");
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchTerm("");
+    }
   };
 
   return (
@@ -51,10 +60,18 @@ export const Navbar: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
+      {/* Left Links */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, overflow: "hidden", minWidth: 0 }}>
         <Link
           to="/"
-          style={{ color: "#fff", fontWeight: "bold", fontSize: "20px", marginRight: "40px", textDecoration: "none", whiteSpace: "nowrap" }}
+          style={{
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: "20px",
+            marginRight: "40px",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
         >
           CoursePlatform
         </Link>
@@ -75,6 +92,38 @@ export const Navbar: React.FC = () => {
         )}
       </div>
 
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", maxWidth: 300, margin: "0 12px" }}>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search courses..."
+          style={{
+            flex: 1,
+            padding: "6px 10px",
+            borderRadius: 4,
+            border: "1px solid #ccc",
+            fontSize: 14,
+          }}
+        />
+        <button
+          type="submit"
+          style={{
+            padding: "6px 12px",
+            marginLeft: 6,
+            background: "#646cff",
+            color: "#fff",
+            border: "none",
+            borderRadius: 4,
+            cursor: "pointer",
+          }}
+        >
+          Search
+        </button>
+      </form>
+
+      {/* Right Login/Logout */}
       <div style={{ flex: "0 0 auto", marginLeft: 12 }}>
         {!user ? (
           <Link
