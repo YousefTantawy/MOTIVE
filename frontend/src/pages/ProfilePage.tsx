@@ -20,27 +20,32 @@ export const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     if (!userId) return;
+const loadProfile = async () => {
+  try {
+    const response = await axiosInstance.get(`/Auth/profile/${userId}`);
+    // Check what you actually got
+    console.log("Profile API response:", response);
 
-    const loadProfile = async () => {
-      try {
-        const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-        const data = response?.data || {};
-        setProfile(data);
+    // If axiosInstance returns { data: {...} }:
+    const data = response.data || response; // fallback if it's direct
 
-        setFirstName(data.firstName || "");
-        setLastName(data.lastName || "");
-        setHeadline(data.headline || "");
-        setBiography(data.biography || "");
-        setEmail(data.email || "");
-        setProfilePictureUrl(data.profilePictureUrl || "");
+    setProfile(data);
 
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-        alert("Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    };
+    setFirstName(data.firstName ?? "");
+    setLastName(data.lastName ?? "");
+    setHeadline(data.headline ?? "");
+    setBiography(data.biography ?? "");
+    setEmail(data.email ?? "");
+    setProfilePictureUrl(data.profilePictureUrl ?? "");
+
+  } catch (err) {
+    console.error("Failed to load profile:", err);
+    alert("Failed to load profile");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     loadProfile();
   }, [userId]);
