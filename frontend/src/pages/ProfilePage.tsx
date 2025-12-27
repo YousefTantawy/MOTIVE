@@ -1,4 +1,3 @@
-// src/pages/ProfilePage.tsx
 import React, { useState } from "react";
 import { MainLayout } from "../layouts/MainLayout";
 import { authService } from "../services/authService";
@@ -16,7 +15,7 @@ export const ProfilePage: React.FC = () => {
     );
   }
 
-  // State for fields + edit mode
+  // Initialize state with user info
   const [firstName, setFirstName] = useState(user.firstName || "");
   const [lastName, setLastName] = useState(user.lastName || "");
   const [headline, setHeadline] = useState(user.headline || "");
@@ -24,7 +23,7 @@ export const ProfilePage: React.FC = () => {
   const [email, setEmail] = useState(user.email || "");
   const [profilePictureUrl, setProfilePictureUrl] = useState(user.profilePictureUrl || "");
 
-  const [editField, setEditField] = useState<null | string>(null); // tracks which field is editable
+  const [editField, setEditField] = useState<null | string>(null);
 
   const handleSave = async (field: string) => {
     try {
@@ -45,7 +44,7 @@ export const ProfilePage: React.FC = () => {
           alert("Profile picture updated successfully");
           break;
       }
-      setEditField(null); // exit edit mode
+      setEditField(null);
     } catch (err) {
       console.error(err);
       alert("Error updating " + field);
@@ -85,69 +84,49 @@ export const ProfilePage: React.FC = () => {
         <section style={{ marginBottom: 30 }}>
           <h2>Personal Info</h2>
 
-          {/* First Name */}
-          <div style={{ marginBottom: 10 }}>
-            <label>First Name: </label>
-            {editField === "firstName" ? (
-              <>
-                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                <button onClick={() => handleSave("firstName")}>Save</button>
-              </>
-            ) : (
-              <>
-                <span>{firstName}</span>
-                <button onClick={() => setEditField("firstName")}>Change</button>
-              </>
-            )}
-          </div>
+          {["firstName", "lastName", "headline", "biography"].map((field) => {
+            const value = (() => {
+              switch (field) {
+                case "firstName": return firstName;
+                case "lastName": return lastName;
+                case "headline": return headline;
+                case "biography": return biography;
+              }
+            })();
 
-          {/* Last Name */}
-          <div style={{ marginBottom: 10 }}>
-            <label>Last Name: </label>
-            {editField === "lastName" ? (
-              <>
-                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                <button onClick={() => handleSave("lastName")}>Save</button>
-              </>
-            ) : (
-              <>
-                <span>{lastName}</span>
-                <button onClick={() => setEditField("lastName")}>Change</button>
-              </>
-            )}
-          </div>
+            const setValue = (() => {
+              switch (field) {
+                case "firstName": return setFirstName;
+                case "lastName": return setLastName;
+                case "headline": return setHeadline;
+                case "biography": return setBiography;
+              }
+            })();
 
-          {/* Headline */}
-          <div style={{ marginBottom: 10 }}>
-            <label>Headline: </label>
-            {editField === "headline" ? (
-              <>
-                <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} style={{ width: "70%" }} />
-                <button onClick={() => handleSave("headline")}>Save</button>
-              </>
-            ) : (
-              <>
-                <span>{headline}</span>
-                <button onClick={() => setEditField("headline")}>Change</button>
-              </>
-            )}
-          </div>
+            const isTextarea = field === "biography";
+            const inputStyle = { width: field === "headline" || isTextarea ? "70%" : "50%", minHeight: isTextarea ? 100 : undefined, padding: 8 };
 
-          {/* Biography */}
-          <div style={{ marginBottom: 10 }}>
-            <label>Biography: </label>
-            {editField === "biography" ? (
-              <>
-                <textarea value={biography} onChange={(e) => setBiography(e.target.value)} style={{ width: "70%", minHeight: 100 }} />
-                <button onClick={() => handleSave("biography")}>Save</button>
-              </>
-            ) : (
-              <>
-                <span>{biography}</span>
-                <button onClick={() => setEditField("biography")}>Change</button>
-              </>
-            )}
-          </div>
+            return (
+              <div key={field} style={{ marginBottom: 10 }}>
+                <label>{field.charAt(0).toUpperCase() + field.slice(1)}: </label>
+                {editField === field ? (
+                  <>
+                    {isTextarea ? (
+                      <textarea value={value} onChange={(e) => setValue(e.target.value)} style={inputStyle} />
+                    ) : (
+                      <input type="text" value={value} onChange={(e) => setValue(e.target.value)} style={inputStyle} />
+                    )}
+                    <button onClick={() => handleSave(field)}>Save</button>
+                  </>
+                ) : (
+                  <>
+                    <span>{value || "—"}</span>
+                    <button onClick={() => setEditField(field)}>Change</button>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </section>
 
         {/* Email */}
@@ -155,12 +134,12 @@ export const ProfilePage: React.FC = () => {
           <h2>Email</h2>
           {editField === "email" ? (
             <>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "50%" }} />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "50%", padding: 8 }} />
               <button onClick={() => handleSave("email")}>Save</button>
             </>
           ) : (
             <>
-              <span>{email}</span>
+              <span>{email || "—"}</span>
               <button onClick={() => setEditField("email")}>Change</button>
             </>
           )}
