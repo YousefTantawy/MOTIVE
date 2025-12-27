@@ -14,8 +14,25 @@ export const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(authService.getCurrentUser());
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch live profile to get roleId
   useEffect(() => {
-    const onAuthChange = () => setUser(authService.getCurrentUser());
+    const fetchUserProfile = async () => {
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
+        try {
+          const profile = await authService.fetchProfile(currentUser.userId);
+          setUser({ ...currentUser, roleId: profile.roleId });
+        } catch (error) {
+          console.error("Failed to fetch profile:", error);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    fetchUserProfile();
+
+    const onAuthChange = () => fetchUserProfile();
     window.addEventListener("authChanged", onAuthChange);
     return () => window.removeEventListener("authChanged", onAuthChange);
   }, []);
