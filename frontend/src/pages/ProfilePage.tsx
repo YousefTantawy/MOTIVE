@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import { authService } from "../services/authService";
 import axiosInstance from "../lib/axios";
 
 export const ProfilePage: React.FC = () => {
+  const navigate = useNavigate(); // <-- Add this
   const currentUser = authService.getCurrentUser();
   const userId = currentUser?.userId;
 
@@ -92,12 +94,12 @@ export const ProfilePage: React.FC = () => {
   return (
     <MainLayout>
       <div style={{ width: "70%", margin: "0 auto", paddingTop: 40 }}>
-        
-        {/* Instructor Stats Button */}
-        {profile?.roleId === 2 && (
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
+        {/* Profile Header with Instructor Stats Button on the right */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h1>Profile</h1>
+          {profile?.roleId === 2 && (
             <button
-              onClick={() => window.location.href = "/instructor"}
+              onClick={() => navigate("/instructor")}
               style={{
                 padding: "8px 16px",
                 backgroundColor: "#646cff",
@@ -110,8 +112,8 @@ export const ProfilePage: React.FC = () => {
             >
               Instructor Stats
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Profile Picture */}
         <section style={{ marginBottom: 30 }}>
@@ -141,7 +143,6 @@ export const ProfilePage: React.FC = () => {
         {/* Personal Info */}
         <section style={{ marginBottom: 30 }}>
           <h2>Personal Info</h2>
-
           {["firstName", "lastName", "headline", "biography"].map((field) => (
             <div key={field} style={{ marginBottom: 10 }}>
               <label>{field.charAt(0).toUpperCase() + field.slice(1)}: </label>
