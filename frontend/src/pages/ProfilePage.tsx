@@ -20,32 +20,27 @@ export const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     if (!userId) return;
-const loadProfile = async () => {
-  try {
-    const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-    // Check what you actually got
-    console.log("Profile API response:", response);
+    const loadProfile = async () => {
+      try {
+        const response = await axiosInstance.get(`/Auth/profile/${userId}`);
+        console.log("Profile API response:", response);
+        const data = response.data || response;
 
-    // If axiosInstance returns { data: {...} }:
-    const data = response.data || response; // fallback if it's direct
+        setProfile(data);
 
-    setProfile(data);
-
-    setFirstName(data.firstName ?? "");
-    setLastName(data.lastName ?? "");
-    setHeadline(data.headline ?? "");
-    setBiography(data.biography ?? "");
-    setEmail(data.email ?? "");
-    setProfilePictureUrl(data.profilePictureUrl ?? "");
-
-  } catch (err) {
-    console.error("Failed to load profile:", err);
-    alert("Failed to load profile");
-  } finally {
-    setLoading(false);
-  }
-};
-
+        setFirstName(data.firstName ?? "");
+        setLastName(data.lastName ?? "");
+        setHeadline(data.headline ?? "");
+        setBiography(data.biography ?? "");
+        setEmail(data.email ?? "");
+        setProfilePictureUrl(data.profilePictureUrl ?? "");
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+        alert("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     loadProfile();
   }, [userId]);
@@ -53,7 +48,9 @@ const loadProfile = async () => {
   if (!currentUser || !userId) {
     return (
       <MainLayout>
-        <p>You are not logged in. Please <a href="/login">login</a>.</p>
+        <p>
+          You are not logged in. Please <a href="/login">login</a>.
+        </p>
       </MainLayout>
     );
   }
@@ -95,12 +92,33 @@ const loadProfile = async () => {
   return (
     <MainLayout>
       <div style={{ width: "70%", margin: "0 auto", paddingTop: 40 }}>
+        
+        {/* Instructor Stats Button */}
+        {profile?.roleId === 2 && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
+            <button
+              onClick={() => window.location.href = "/instructor"}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#646cff",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              Instructor Stats
+            </button>
+          </div>
+        )}
+
         {/* Profile Picture */}
         <section style={{ marginBottom: 30 }}>
           <h2>Profile Picture</h2>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
             <img
-              src={profilePictureUrl || "/fallback-profile.png"} // use a local fallback
+              src={profilePictureUrl || "/fallback-profile.png"}
               alt="Profile"
               style={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", border: "2px solid #ddd" }}
             />
