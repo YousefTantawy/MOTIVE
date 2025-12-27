@@ -11,39 +11,39 @@ interface User {
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // <-- loading state
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-  const fetchUserProfile = async () => {
-  const currentUser = authService.getCurrentUser();
-  if (!currentUser) {
-    setUser(null);
-    setLoading(false);
-    return;
-  }
+    const fetchUserProfile = async () => {
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
 
-  try {
-    const profile = await authService.fetchProfile(currentUser.userId);
+      try {
+        const profile = await authService.fetchProfile(currentUser.userId);
 
-    // Make sure profile exists before using roleId
-    setUser({
-      ...currentUser,
-      roleId: profile?.roleId ?? currentUser.roleId ?? 3, // fallback to 3 if undefined
-    });
+        console.log("Profile fetched:", profile); // safe log
 
-    console.log("Profile fetched:", profile);
-  } catch (err) {
-    console.error("Failed to fetch profile:", err);
-    setUser({
-      ...currentUser,
-      roleId: currentUser.roleId ?? 3, // fallback if API fails
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+        setUser({
+          ...currentUser,
+          roleId: profile?.roleId ?? currentUser.roleId ?? 3,
+        });
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+        setUser({
+          ...currentUser,
+          roleId: currentUser.roleId ?? 3,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchUserProfile();
     const onAuthChange = () => fetchUserProfile();
@@ -71,30 +71,20 @@ export const Navbar: React.FC = () => {
     whiteSpace: "nowrap" as const,
   });
 
+  // Delay rendering until user is loaded
   if (loading) {
-    // Delay rendering links until user is fetched
     return (
       <nav
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 24px",
+          justifyContent: "center",
+          height: 64,
           backgroundColor: "#111",
           color: "#fff",
-          position: "sticky",
-          top: 0,
-          zIndex: 1000,
-          height: 64,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          borderBottom: "1px solid rgba(255,255,255,0.04)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}>
-            CoursePlatform
-          </Link>
-        </div>
+        Loading...
       </nav>
     );
   }
@@ -116,19 +106,41 @@ export const Navbar: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
+      {/* LEFT: Logo + links */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}>
+        <Link
+          to="/"
+          style={{
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: 20,
+            textDecoration: "none",
+          }}
+        >
           CoursePlatform
         </Link>
 
-        <Link to="/" style={linkStyle("/")}>Home</Link>
+        <Link to="/" style={linkStyle("/")}>
+          Home
+        </Link>
 
         {user && (
           <>
-            <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
+            <Link to="/my-courses" style={linkStyle("/my-courses")}>
+              My Learning
+            </Link>
 
-            {user.roleId === 2 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
-            {user.roleId === 1 && <Link to="/admin" style={linkStyle("/admin")}>Admin Dashboard</Link>}
+            {user.roleId === 2 && (
+              <Link to="/instructor" style={linkStyle("/instructor")}>
+                Studio
+              </Link>
+            )}
+
+            {user.roleId === 1 && (
+              <Link to="/admin" style={linkStyle("/admin")}>
+                Admin Dashboard
+              </Link>
+            )}
 
             <Link
               to="/profile"
@@ -145,7 +157,11 @@ export const Navbar: React.FC = () => {
         )}
       </div>
 
-      <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+      {/* MIDDLE: Search bar */}
+      <form
+        onSubmit={handleSearch}
+        style={{ flex: 1, display: "flex", justifyContent: "center" }}
+      >
         <input
           type="text"
           value={searchQuery}
@@ -161,6 +177,7 @@ export const Navbar: React.FC = () => {
         />
       </form>
 
+      {/* RIGHT: Login/Logout */}
       <div>
         {!user ? (
           <Link
