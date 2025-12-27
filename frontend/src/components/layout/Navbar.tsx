@@ -5,9 +5,8 @@ import { authService } from "../../services/authService";
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [user, setUser] = useState<{ name?: string; email?: string; role?: string } | null>(
-    authService.getCurrentUser()
-  );
+  const [user, setUser] = useState(authService.getCurrentUser());
+  const [searchTerm, setSearchTerm] = useState("");
 
   const linkStyle = (path: string) => ({
     marginRight: "20px",
@@ -26,6 +25,14 @@ export const Navbar: React.FC = () => {
     authService.logout();
     window.dispatchEvent(new Event("authChanged"));
     navigate("/");
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
+      setSearchTerm("");
+    }
   };
 
   return (
@@ -47,29 +54,34 @@ export const Navbar: React.FC = () => {
         zIndex: 1000,
       }}
     >
+      {/* Left links */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Link
-          to="/"
-          style={{
-            color: "#fff",
-            fontWeight: "bold",
-            fontSize: "20px",
-            marginRight: "40px",
-            textDecoration: "none",
-          }}
-        >
+        <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: "20px", marginRight: "40px", textDecoration: "none" }}>
           CoursePlatform
         </Link>
         <Link to="/" style={linkStyle("/")}>Home</Link>
-        {user && (
-          <>
-            <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
-            {user.role === "instructor" && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
-            <Link to="/profile" style={linkStyle("/profile")}>Profile</Link>
-          </>
-        )}
+        {user && <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>}
+        {user?.role === "instructor" && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
+        {user && <Link to="/profile" style={linkStyle("/profile")}>Profile</Link>}
       </div>
 
+      {/* Search bar */}
+      <form onSubmit={handleSearch} style={{ flex: 1, marginLeft: 20, marginRight: 20 }}>
+        <input
+          type="text"
+          placeholder="Search courses..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "6px 12px",
+            borderRadius: 8,
+            border: "1px solid #ccc",
+          }}
+        />
+      </form>
+
+      {/* Right buttons */}
       <div>
         {!user ? (
           <Link
