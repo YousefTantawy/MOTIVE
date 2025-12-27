@@ -22,7 +22,14 @@ export const authService = {
       return user;
 
     } catch (error: any) {
-      const message = error.message || "Unknown error";
+      // Map HTTP status codes to custom messages
+      let message = error.message || "Unknown error";
+      if (message.includes("status: 401")) message = "Unauthorized access";
+      else if (message.includes("status: 403")) message = "Forbidden access";
+      else if (message.includes("status: 404")) message = "Resource not found";
+      else if (message.includes("status: 409")) message = "Conflict: resource already exists";
+      else if (message.includes("status: 500")) message = "Server error, please try again later";
+
       console.error("Login error:", message);
       throw new Error(message);
     }
@@ -44,12 +51,18 @@ export const authService = {
 
       localStorage.setItem("authToken", "mock_token_" + Date.now());
       localStorage.setItem("user", JSON.stringify(user));
-
       window.dispatchEvent(new Event("authChanged"));
-      return user;
 
+      return user;
     } catch (error: any) {
-      const message = error.message || "Unknown error";
+      let message = error.message || "Unknown error";
+      if (message.includes("status: 400")) message = "Bad request, check your input";
+      else if (message.includes("status: 401")) message = "Unauthorized access";
+      else if (message.includes("status: 403")) message = "Forbidden access";
+      else if (message.includes("status: 404")) message = "Resource not found";
+      else if (message.includes("status: 409")) message = "Email already exists";
+      else if (message.includes("status: 500")) message = "Server error, please try again later";
+
       console.error("Register error:", message);
       throw new Error(message);
     }
