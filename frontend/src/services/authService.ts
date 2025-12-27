@@ -90,4 +90,27 @@ export const authService = {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   },
+},
+
+fetchCurrentUser: async (userId: number) => {
+    try {
+      // This should match your backend endpoint returning full user info
+      const user = await axiosInstance.get<{
+        userId: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+        headline: string;
+        biography: string;
+        profilePictureUrl: string;
+        roleId: number;
+      }>(`/Auth/get-user/${userId}`);
+
+      return user;
+    } catch (err) {
+      console.error("Failed to fetch full user info:", err);
+      throw err;
+    }
+  },
 };
+;
