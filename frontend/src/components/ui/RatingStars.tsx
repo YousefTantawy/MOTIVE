@@ -1,12 +1,12 @@
 // RatingStars.tsx
 import React from "react";
 
-interface Props {
-  fractions: number[]; // [1, 1, 0.5, 0, 0]
-  size?: number;
+interface RatingStarsProps {
+  fractions: number[]; // array of 5 numbers between 0 and 1
+  size?: number; // optional star size
 }
 
-export const RatingStars: React.FC<Props> = ({ fractions, size = 20 }) => {
+export const RatingStars: React.FC<RatingStarsProps> = ({ fractions, size = 16 }) => {
   return (
     <div style={{ display: "flex", gap: 2 }}>
       {fractions.map((f, i) => (
@@ -16,14 +16,9 @@ export const RatingStars: React.FC<Props> = ({ fractions, size = 20 }) => {
             width: size,
             height: size,
             background: `linear-gradient(to right, gold ${f * 100}%, #ddd ${f * 100}%)`,
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            fontSize: size,
-            lineHeight: 1,
+            clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
           }}
-        >
-          ★
-        </div>
+        />
       ))}
     </div>
   );
