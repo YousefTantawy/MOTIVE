@@ -13,6 +13,7 @@ import { StudentDashboard } from "./pages/StudentDashboard";
 import { InstructorDashboard } from "./pages/InstructorDashboard";
 import { CourseDetailsPage } from "./pages/CourseDetailsPage";
 import { PaymentPage } from "./pages/PaymentPage";
+import { ProfilePage } from "./pages/ProfilePage";
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/my-courses" element={<StudentDashboard />} />
             <Route path="/instructor" element={<InstructorDashboard />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </div>
 
