@@ -87,7 +87,7 @@ export const authService = {
         return user ? JSON.parse(user) : null;
     },
 
-    // --- NEW FUNCTION: FETCH PROFILE ---
+    // --- FETCH PROFILE ---
     fetchProfile: async (userId: number) => {
         try {
             const response = await axiosInstance.get(`/Auth/profile/${userId}`);
@@ -97,23 +97,22 @@ export const authService = {
             throw new Error("Failed to fetch user profile");
         }
     },
-},
-// --- NEW FUNCTION: GET USER WITH ROLE ---
-async getUserWithRole(): Promise<User | null> {
-    const currentUser = authService.getCurrentUser();
-    if (!currentUser) return null;
 
-    try {
-        const profile = await authService.fetchProfile(currentUser.userId);
-        return {
-            userId: currentUser.userId,
-            email: currentUser.email,
-            roleId: profile?.roleId ?? 3, // fallback to student
-        };
-    } catch (err) {
-        console.error("Failed to fetch profile for role:", err);
-        return currentUser; // fallback if profile fetch fails
-    }
-}
+    // --- GET USER WITH ROLE ---
+    async getUserWithRole(): Promise<User | null> {
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser) return null;
 
-;
+        try {
+            const profile = await authService.fetchProfile(currentUser.userId);
+            return {
+                userId: currentUser.userId,
+                email: currentUser.email,
+                roleId: profile?.roleId ?? 3, // fallback to student
+            };
+        } catch (err) {
+            console.error("Failed to fetch profile for role:", err);
+            return currentUser; // fallback if profile fetch fails
+        }
+    },
+};
