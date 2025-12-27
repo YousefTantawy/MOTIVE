@@ -80,7 +80,7 @@ namespace MotiveBackend.Controllers
             {
                 message = "Login successful",
                 userId = authRecord.UserId,
-                role = authRecord.User.Role.RoleId
+                roleId = authRecord.User.Role.RoleId
             });
         }
     }
