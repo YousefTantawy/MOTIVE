@@ -23,18 +23,18 @@ const fetchUserProfile = async () => {
 
   try {
     const profile = await authService.fetchProfile(currentUser.userId);
-    console.log("Profile fetched:", profile); // should log full profile
+    console.log("Profile fetched:", profile); // should log {userId: 7, roleId: 2, ...}
 
-    // Use profile only if it exists
     setUser({
       ...currentUser,
-      roleId: profile?.roleId ?? currentUser.roleId ?? 3, // fallback to student if missing
+      roleId: profile?.roleId ?? currentUser.roleId ?? 3,
     });
   } catch (err) {
     console.error("Failed to fetch profile:", err);
     setUser(currentUser); // fallback
   }
 };
+
 
 
 
