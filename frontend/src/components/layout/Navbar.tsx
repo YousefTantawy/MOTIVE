@@ -18,60 +18,23 @@ export const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    let isMounted = true; // to prevent state update after unmount
+    let isMounted = true;
 
-    const fetchUser = async () => {
+    const loadUser = async () => {
       setLoading(true);
-
-      const currentUser = authService.getCurrentUser();
-      if (!currentUser) {
-        if (isMounted) {
-          setUser(null);
-          setLoading(false);
-        }
-        return;
-      }
-
       try {
-        const profile = await authService.fetchProfile(currentUser.userId);
-
-        if (!profile) {
-          if (isMounted) {
-            setUser({
-              userId: currentUser.userId,
-              email: currentUser.email,
-              roleId: currentUser.roleId ?? 3,
-            });
-            setLoading(false);
-          }
-          return;
-        }
-
-        if (isMounted) {
-          setUser({
-            userId: profile.userId,
-            email: profile.email,
-            roleId: profile.roleId ?? 3,
-            name: profile.firstName ? `${profile.firstName} ${profile.lastName}` : undefined,
-          });
-          setLoading(false);
-        }
+        const fetchedUser = await authService.getUserWithRole(); // uses the new helper
+        if (isMounted) setUser(fetchedUser);
       } catch (err) {
-        console.error("Failed to fetch profile:", err);
-        if (isMounted) {
-          setUser({
-            userId: currentUser.userId,
-            email: currentUser.email,
-            roleId: currentUser.roleId ?? 3,
-          });
-          setLoading(false);
-        }
+        console.error("Failed to get user with role:", err);
+        if (isMounted) setUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
 
-    fetchUser();
-
-    const onAuthChange = () => fetchUser();
+    loadUser();
+    const onAuthChange = () => loadUser();
     window.addEventListener("authChanged", onAuthChange);
 
     return () => {
@@ -134,20 +97,16 @@ export const Navbar: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
+      {/* LEFT: Logo + Links */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Link
-          to="/"
-          style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}
-        >
+        <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}>
           CoursePlatform
         </Link>
-
         <Link to="/" style={linkStyle("/")}>Home</Link>
 
         {user && (
           <>
             <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
-
             {user.roleId === 2 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
             {user.roleId === 1 && <Link to="/admin" style={linkStyle("/admin")}>Admin Dashboard</Link>}
 
@@ -155,66 +114,4 @@ export const Navbar: React.FC = () => {
               to="/profile"
               style={{
                 ...linkStyle("/profile"),
-                padding: "6px 10px",
-                border: "1px solid #646cff",
-                borderRadius: 6,
-              }}
-            >
-              Profile
-            </Link>
-          </>
-        )}
-      </div>
-
-      <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search courses..."
-          style={{
-            width: "60%",
-            maxWidth: 400,
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "1px solid #ccc",
-          }}
-        />
-      </form>
-
-      <div>
-        {!user ? (
-          <Link
-            to="/login"
-            style={{
-              display: "inline-block",
-              padding: "8px 12px",
-              backgroundColor: "#646cff",
-              color: "#fff",
-              borderRadius: 8,
-              fontWeight: 600,
-              boxShadow: "0 2px 6px rgba(100,108,255,0.25)",
-              textDecoration: "none",
-            }}
-          >
-            Login
-          </Link>
-        ) : (
-          <button
-            onClick={handleLogout}
-            style={{
-              background: "transparent",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: 600,
-              padding: "8px 12px",
-            }}
-          >
-            Log Out
-          </button>
-        )}
-      </div>
-    </nav>
-  );
-};
+                pad

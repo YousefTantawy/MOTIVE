@@ -115,4 +115,24 @@ export const authService = {
             return currentUser; // fallback if profile fetch fails
         }
     },
+},
+getUserWithRole: async (): Promise<User | null> => {
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser) return null;
+
+    try {
+        const profile = await authService.fetchProfile(currentUser.userId);
+        return {
+            userId: currentUser.userId,
+            email: currentUser.email,
+            roleId: profile?.roleId ?? 3,
+            name: profile?.firstName ? `${profile.firstName} ${profile.lastName}` : undefined,
+        };
+    } catch {
+        return {
+            userId: currentUser.userId,
+            email: currentUser.email,
+            roleId: currentUser.roleId ?? 3,
+        };
+    }
 };
