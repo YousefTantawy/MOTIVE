@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import { authService } from "../services/authService";
 import axiosInstance from "../lib/axios";
+import PhoneNumbersSection from "../components/PhoneNumbersSection";
 
 export const ProfilePage: React.FC = () => {
-  const navigate = useNavigate(); // <-- Add this
+  const navigate = useNavigate();
   const currentUser = authService.getCurrentUser();
   const userId = currentUser?.userId;
 
@@ -29,7 +30,6 @@ export const ProfilePage: React.FC = () => {
     const loadProfile = async () => {
       try {
         const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-        console.log("Profile API response:", response);
         const data = response.data || response;
 
         setProfile(data);
@@ -95,15 +95,24 @@ export const ProfilePage: React.FC = () => {
         case "lastName":
         case "headline":
         case "biography":
-          await axiosInstance.put(`/Auth/update-details/${userId}`, { firstName, lastName, headline, biography });
+          await axiosInstance.put(`/Auth/update-details/${userId}`, {
+            firstName,
+            lastName,
+            headline,
+            biography,
+          });
           alert("Details updated successfully");
           break;
         case "email":
-          await axiosInstance.put(`/Auth/change-email/${userId}`, { newEmail: email });
+          await axiosInstance.put(`/Auth/change-email/${userId}`, {
+            newEmail: email,
+          });
           alert("Email updated successfully");
           break;
         case "profilePictureUrl":
-          await axiosInstance.put(`/Auth/update-picture/${userId}`, { profilePictureUrl });
+          await axiosInstance.put(`/Auth/update-picture/${userId}`, {
+            profilePictureUrl,
+          });
           alert("Profile picture updated successfully");
           break;
       }
@@ -132,7 +141,14 @@ export const ProfilePage: React.FC = () => {
     <MainLayout>
       <div style={{ width: "70%", margin: "0 auto", paddingTop: 40 }}>
         {/* Profile Header with Instructor Stats Button on the right */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
+        >
           <h1>Profile</h1>
           {profile?.roleId === 2 && (
             <button
@@ -159,7 +175,13 @@ export const ProfilePage: React.FC = () => {
             <img
               src={profilePictureUrl || "/fallback-profile.png"}
               alt="Profile"
-              style={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", border: "2px solid #ddd" }}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "2px solid #ddd",
+              }}
             />
             {editField === "profilePictureUrl" ? (
               <>
@@ -169,10 +191,14 @@ export const ProfilePage: React.FC = () => {
                   onChange={(e) => setProfilePictureUrl(e.target.value)}
                   style={{ padding: 8, width: "300px" }}
                 />
-                <button onClick={() => handleSave("profilePictureUrl")}>Save</button>
+                <button onClick={() => handleSave("profilePictureUrl")}>
+                  Save
+                </button>
               </>
             ) : (
-              <button onClick={() => setEditField("profilePictureUrl")}>Change</button>
+              <button onClick={() => setEditField("profilePictureUrl")}>
+                Change
+              </button>
             )}
           </div>
         </section>
@@ -180,52 +206,97 @@ export const ProfilePage: React.FC = () => {
         {/* Personal Info */}
         <section style={{ marginBottom: 30 }}>
           <h2>Personal Info</h2>
-          {["firstName", "lastName", "headline", "biography"].map((field) => (
-            <div key={field} style={{ marginBottom: 10 }}>
-              <label>{field.charAt(0).toUpperCase() + field.slice(1)}: </label>
-              {editField === field ? (
-                <>
-                  {field === "biography" ? (
-                    <textarea
-                      value={biography}
-                      onChange={(e) => setBiography(e.target.value)}
-                      style={{ width: "70%", minHeight: 100 }}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={
-                        field === "firstName"
-                          ? firstName
-                          : field === "lastName"
-                          ? lastName
-                          : headline
-                      }
-                      onChange={(e) => {
-                        if (field === "firstName") setFirstName(e.target.value);
-                        else if (field === "lastName") setLastName(e.target.value);
-                        else setHeadline(e.target.value);
-                      }}
-                    />
-                  )}
-                  <button onClick={() => handleSave(field)}>Save</button>
-                </>
-              ) : (
-                <>
-                  <span>
-                    {field === "firstName"
-                      ? firstName
-                      : field === "lastName"
-                      ? lastName
-                      : field === "biography"
-                      ? biography
-                      : headline}
-                  </span>
-                  <button onClick={() => setEditField(field)}>Change</button>
-                </>
-              )}
-            </div>
-          ))}
+
+          {/* FIRST NAME */}
+          <div style={{ marginBottom: 10 }}>
+            <label>First Name: </label>
+            {editField === "firstName" ? (
+              <>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+                <button onClick={() => handleSave("firstName")}>Save</button>
+              </>
+            ) : (
+              <>
+                <span>{firstName}</span>
+                <button onClick={() => setEditField("firstName")}>
+                  Change
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* LAST NAME */}
+          <div style={{ marginBottom: 10 }}>
+            <label>Last Name: </label>
+            {editField === "lastName" ? (
+              <>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+                <button onClick={() => handleSave("lastName")}>Save</button>
+              </>
+            ) : (
+              <>
+                <span>{lastName}</span>
+                <button onClick={() => setEditField("lastName")}>
+                  Change
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* ⭐ PHONE NUMBERS SECTION ⭐ */}
+          <PhoneNumbersSection />
+
+          {/* HEADLINE */}
+          <div style={{ marginBottom: 10 }}>
+            <label>Headline: </label>
+            {editField === "headline" ? (
+              <>
+                <input
+                  type="text"
+                  value={headline}
+                  onChange={(e) => setHeadline(e.target.value)}
+                />
+                <button onClick={() => handleSave("headline")}>Save</button>
+              </>
+            ) : (
+              <>
+                <span>{headline}</span>
+                <button onClick={() => setEditField("headline")}>
+                  Change
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* BIOGRAPHY */}
+          <div style={{ marginBottom: 10 }}>
+            <label>Biography: </label>
+            {editField === "biography" ? (
+              <>
+                <textarea
+                  value={biography}
+                  onChange={(e) => setBiography(e.target.value)}
+                  style={{ width: "70%", minHeight: 100 }}
+                />
+                <button onClick={() => handleSave("biography")}>Save</button>
+              </>
+            ) : (
+              <>
+                <span>{biography}</span>
+                <button onClick={() => setEditField("biography")}>
+                  Change
+                </button>
+              </>
+            )}
+          </div>
         </section>
 
         {/* Email */}
@@ -233,7 +304,12 @@ export const ProfilePage: React.FC = () => {
           <h2>Email</h2>
           {editField === "email" ? (
             <>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "50%" }} />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ width: "50%" }}
+              />
               <button onClick={() => handleSave("email")}>Save</button>
             </>
           ) : (
@@ -245,7 +321,9 @@ export const ProfilePage: React.FC = () => {
         </section>
 
         {/* --------- DANGER ZONE --------- */}
-        <section style={{ marginTop: 50, borderTop: "1px solid #ddd", paddingTop: 20 }}>
+        <section
+          style={{ marginTop: 50, borderTop: "1px solid #ddd", paddingTop: 20 }}
+        >
           <h2 style={{ color: "red" }}>Danger Zone</h2>
 
           {!showDeleteConfirm ? (
@@ -265,7 +343,9 @@ export const ProfilePage: React.FC = () => {
             </button>
           ) : (
             <div style={{ marginTop: 10 }}>
-              <p>This will permanently delete your account and all related data.</p>
+              <p>
+                This will permanently delete your account and all related data.
+              </p>
               <p>
                 Confirm available in: <strong>{countdown}</strong> seconds
               </p>
