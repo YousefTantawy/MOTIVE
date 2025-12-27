@@ -3,8 +3,15 @@ import { StudioLayout } from "../layouts/StudioLayout";
 import { UploadWidget } from "../features/studio/UploadWidget";
 import { CourseBuilder } from "../features/studio/CourseBuilder";
 
+interface Stats {
+  views: number;
+  earnings: number;
+  totalCourses: number;
+}
+
 export const InstructorDashboard: React.FC = () => {
-  const [mockStats] = useState({ views: 1245, earnings: 3500, students: 420 });
+  // Mock stats
+  const [mockStats] = useState<Stats>({ views: 1245, earnings: 3500, totalCourses: 12 });
 
   const mockSidebar = (
     <div>
@@ -34,8 +41,32 @@ export const InstructorDashboard: React.FC = () => {
     </div>
   );
 
+  // Stats Card Component
+  const StatsCard: React.FC<{ label: string; value: number | string }> = ({ label, value }) => (
+    <div
+      style={{
+        flex: 1,
+        padding: "20px",
+        backgroundColor: "#f0f0f5",
+        borderRadius: 8,
+        textAlign: "center",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      }}
+    >
+      <h3 style={{ margin: 0, fontSize: "18px", color: "#555" }}>{label}</h3>
+      <p style={{ margin: 0, fontSize: "24px", fontWeight: "bold" }}>{value}</p>
+    </div>
+  );
+
   return (
     <StudioLayout sidebar={mockSidebar}>
+      {/* Stats Section */}
+      <section style={{ display: "flex", gap: "20px", marginBottom: "40px" }}>
+        <StatsCard label="Total Views" value={mockStats.views} />
+        <StatsCard label="Earnings ($)" value={mockStats.earnings} />
+        <StatsCard label="Total Courses" value={mockStats.totalCourses} />
+      </section>
+
       {/* My Courses Section */}
       <section id="courses">
         <h1>My Courses</h1>
