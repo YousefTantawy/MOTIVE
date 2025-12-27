@@ -6,6 +6,7 @@ interface User {
   name?: string;
   email?: string;
   roleId?: number; // 1=admin, 2=instructor, 3=student
+  userId?: number;
 }
 
 export const Navbar: React.FC = () => {
@@ -14,37 +15,35 @@ export const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch live profile on mount and on auth change
-// Fetch live profile on mount and on auth change
-useEffect(() => {
-const fetchUserProfile = async () => {
-  const currentUser = authService.getCurrentUser();
-  if (!currentUser) return setUser(null);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) return setUser(null);
 
-  try {
-    const profile = await authService.fetchProfile(currentUser.userId);
-    console.log("Profile fetched:", profile); // should log {userId: 7, roleId: 2, ...}
+      try {
+        // FIX: fetchProfile should return the actual profile object
+        const profile = await authService.fetchProfile(currentUser.userId);
+        console.log("Profile fetched:", profile);
 
-    setUser({
-      ...currentUser,
-      roleId: profile?.roleId ?? currentUser.roleId ?? 3,
-    });
-  } catch (err) {
-    console.error("Failed to fetch profile:", err);
-    setUser(currentUser); // fallback
-  }
-};
+        setUser({
+          ...currentUser,
+          roleId: profile?.roleId ?? 3, // fallback to student if missing
+        });
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+        setUser({
+          ...currentUser,
+          roleId: currentUser.roleId ?? 3,
+        });
+      }
+    };
 
+    fetchUserProfile();
 
-
-
-
-  fetchUserProfile();
-
-  const onAuthChange = () => fetchUserProfile();
-  window.addEventListener("authChanged", onAuthChange);
-  return () => window.removeEventListener("authChanged", onAuthChange);
-}, []);
+    const onAuthChange = () => fetchUserProfile();
+    window.addEventListener("authChanged", onAuthChange);
+    return () => window.removeEventListener("authChanged", onAuthChange);
+  }, []);
 
   const handleLogout = () => {
     authService.logout();
@@ -66,7 +65,6 @@ const fetchUserProfile = async () => {
     whiteSpace: "nowrap" as const,
   });
 
-  // Debug log to verify roleId
   console.log("Navbar user:", user);
 
   return (
@@ -86,23 +84,35 @@ const fetchUserProfile = async () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
-      {/* LEFT: Logo + links */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}>
+        <Link
+          to="/"
+          style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}
+        >
           CoursePlatform
         </Link>
 
-        <Link to="/" style={linkStyle("/")}>Home</Link>
+        <Link to="/" style={linkStyle("/")}>
+          Home
+        </Link>
 
         {user && (
           <>
-            <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
+            <Link to="/my-courses" style={linkStyle("/my-courses")}>
+              My Learning
+            </Link>
 
-            {/* Instructor Studio only for roleId 2 */}
-            {user.roleId === 2 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
+            {user.roleId === 2 && (
+              <Link to="/instructor" style={linkStyle("/instructor")}>
+                Studio
+              </Link>
+            )}
 
-            {/* Admin Dashboard only for roleId 1 */}
-            {user.roleId === 1 && <Link to="/admin" style={linkStyle("/admin")}>Admin Dashboard</Link>}
+            {user.roleId === 1 && (
+              <Link to="/admin" style={linkStyle("/admin")}>
+                Admin Dashboard
+              </Link>
+            )}
 
             <Link
               to="/profile"
@@ -119,7 +129,6 @@ const fetchUserProfile = async () => {
         )}
       </div>
 
-      {/* MIDDLE: Search bar */}
       <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
         <input
           type="text"
@@ -136,7 +145,6 @@ const fetchUserProfile = async () => {
         />
       </form>
 
-      {/* RIGHT: Login/Logout */}
       <div>
         {!user ? (
           <Link
