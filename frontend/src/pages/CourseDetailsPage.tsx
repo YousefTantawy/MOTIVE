@@ -4,14 +4,13 @@ import { MainLayout } from "../layouts/MainLayout";
 import { CourseHero } from "../features/store/CourseHero";
 import { ReviewList } from "../features/store/ReviewList";
 import { courseService } from "../services/courseService";
-import { enrollmentService } from "../services/enrollmentService";
+import { authService } from "../services/authService";
 
 export const CourseDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isEnrolling, setIsEnrolling] = useState(false);
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -30,19 +29,18 @@ export const CourseDetailsPage: React.FC = () => {
     fetchCourse();
   }, [id]);
 
-  const handleEnroll = async () => {
-    try {
-      setIsEnrolling(true);
-      if (id) {
-        await enrollmentService.enrollCourse(id);
-        navigate("/my-courses");
-      }
-    } catch (error) {
-      console.error("Failed to enroll:", error);
-      alert("Failed to enroll in course");
-    } finally {
-      setIsEnrolling(false);
+  const handleBuyNow = () => {
+    const user = authService.getCurrentUser();
+    const params = new URLSearchParams();
+    if (id) params.set("courseId", id);
+    if (course && course.price) params.set("price", String(course.price));
+    const path = `/payment?${params.toString()}`;
+
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(path)}`);
+      return;
     }
+    navigate(path);
   };
 
   const toggleSection = (sectionId: number) => {
@@ -86,14 +84,14 @@ export const CourseDetailsPage: React.FC = () => {
 
   return (
     <MainLayout>
-      {/* --- Hero Section --- */}
+      {/* --- Hero Section with Buy Now --- */}
       <CourseHero
         title={course.title}
         description={course.description}
         instructor={instructorName}
         rating={avgRating}
         price={course.price}
-        onEnroll={handleEnroll} // Enroll now button
+        onEnroll={handleBuyNow} // now "Buy Now"
       />
 
       {/* --- Course Info --- */}

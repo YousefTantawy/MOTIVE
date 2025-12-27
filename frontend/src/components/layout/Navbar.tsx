@@ -11,19 +11,23 @@ interface User {
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(authService.getCurrentUser());
+  const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch live profile to get roleId
+  // Fetch live profile on mount and on auth change
   useEffect(() => {
     const fetchUserProfile = async () => {
       const currentUser = authService.getCurrentUser();
       if (currentUser) {
         try {
           const profile = await authService.fetchProfile(currentUser.userId);
-          setUser({ ...currentUser, roleId: profile.roleId });
+          setUser({
+            ...currentUser,
+            roleId: Number(profile.roleId), // Ensure number
+          });
         } catch (error) {
           console.error("Failed to fetch profile:", error);
+          setUser(currentUser); // fallback to localStorage user
         }
       } else {
         setUser(null);
@@ -56,6 +60,9 @@ export const Navbar: React.FC = () => {
     fontWeight: location.pathname === path ? "bold" : "normal",
     whiteSpace: "nowrap" as const,
   });
+
+  // Debug log to verify roleId
+  console.log("Navbar user:", user);
 
   return (
     <nav
