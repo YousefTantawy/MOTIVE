@@ -27,25 +27,27 @@ export const ProfilePage: React.FC = () => {
   const [editField, setEditField] = useState<null | string>(null); // tracks editable field
 
   // Load profile from API
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-        const data = response.data;
-        setProfile(data);
-        setFirstName(data.firstName || "");
-        setLastName(data.lastName || "");
-        setHeadline(data.headline || "");
-        setBiography(data.biography || "");
-        setEmail(data.email || "");
-        setProfilePictureUrl(data.profilePictureUrl || "");
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-      }
-    };
+useEffect(() => {
+  const loadProfile = async () => {
+    try {
+      const response = await axiosInstance.get(`/Auth/profile/${userId}`);
+      // Safely get data, fallback to empty object if undefined
+      const data = response?.data || {};
+      setProfile(data);
+      setFirstName(data.firstName || "");
+      setLastName(data.lastName || "");
+      setHeadline(data.headline || "");
+      setBiography(data.biography || "");
+      setEmail(data.email || "");
+      setProfilePictureUrl(data.profilePictureUrl || "");
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+    }
+  };
 
-    loadProfile();
-  }, [userId]);
+  loadProfile();
+}, [userId]);
+
 
   const handleSave = async (field: string) => {
     try {
