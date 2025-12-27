@@ -30,7 +30,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         dangerouslySetInnerHTML={{ __html: description }}
       />
 
-      {reviews.length > 0 && <RatingStars fractions={reviews} />}
+      {reviews.length > 0 && <RatingStars rating={reviews[0]} />}
 
       <div
         style={{
