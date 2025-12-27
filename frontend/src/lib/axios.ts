@@ -1,5 +1,5 @@
 // src/lib/axios.ts
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5168/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://172.213.228.233:5168/api";
 
 export const axiosInstance = {
   // Generic request function
