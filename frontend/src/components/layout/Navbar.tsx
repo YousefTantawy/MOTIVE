@@ -5,7 +5,7 @@ import { authService } from "../../services/authService";
 interface User {
   name?: string;
   email?: string;
-  roleId?: number; // 0=admin, 1=instructor, 2=student
+  roleId?: number; // 1=admin, 2=instructor, 3=student
 }
 
 export const Navbar: React.FC = () => {
@@ -62,11 +62,19 @@ export const Navbar: React.FC = () => {
         <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}>
           CoursePlatform
         </Link>
+
         <Link to="/" style={linkStyle("/")}>Home</Link>
+
         {user && (
           <>
             <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
-            {user.roleId === 1 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
+
+            {/* Instructor Studio only for roleId 2 */}
+            {user.roleId === 2 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
+
+            {/* Admin Dashboard only for roleId 1 */}
+            {user.roleId === 1 && <Link to="/admin" style={linkStyle("/admin")}>Admin Dashboard</Link>}
+
             <Link
               to="/profile"
               style={{
