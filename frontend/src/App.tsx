@@ -14,7 +14,6 @@ import { InstructorDashboard } from "./pages/InstructorDashboard";
 import { CourseDetailsPage } from "./pages/CourseDetailsPage";
 import { PaymentPage } from "./pages/PaymentPage";
 import { TestPage } from "./pages/TestPage";
-import { InstructorDashboard } from "./pages/InstructorDashboard";
 import { NewCoursePage } from "./pages/NewCoursePage";
 
 export default function App() {
