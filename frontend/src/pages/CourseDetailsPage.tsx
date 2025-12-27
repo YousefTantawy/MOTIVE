@@ -13,6 +13,7 @@ export const CourseDetailsPage: React.FC = () => {
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -57,6 +58,13 @@ export const CourseDetailsPage: React.FC = () => {
       return;
     }
     navigate(path);
+  };
+
+  const toggleSection = (sectionId: number) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
   };
 
   if (loading)
@@ -140,7 +148,6 @@ export const CourseDetailsPage: React.FC = () => {
       {/* --- Course Info --- */}
       <div style={{ marginTop: 20, display: "flex", flexWrap: "wrap", gap: 20 }}>
         <div><strong>Category:</strong> {course.category}</div>
-        <div><strong>Level:</strong> {course.difficultyLevel}</div>
         <div><strong>Language:</strong> {course.language}</div>
         <div><strong>Status:</strong> {course.status}</div>
         <div><strong>Created:</strong> {new Date(course.createdAt).toLocaleDateString()}</div>
@@ -182,18 +189,34 @@ export const CourseDetailsPage: React.FC = () => {
         </div>
       )}
 
-      {/* --- Sections & Lessons --- */}
+      {/* --- Sections & Lessons as Dropdown --- */}
       {course.sections?.length > 0 && (
         <div style={{ marginTop: 20 }}>
           <h3>Course Content</h3>
           {course.sections.map((s: any) => (
             <div key={s.sectionId} style={{ marginBottom: 12 }}>
-              <strong>{s.title}</strong>
-              <ul>
-                {s.lessons.map((l: any) => (
-                  <li key={l.lessonId}>{l.title}</li>
-                ))}
-              </ul>
+              <button
+                onClick={() => toggleSection(s.sectionId)}
+                style={{
+                  background: "#f0f0f0",
+                  border: "1px solid #ccc",
+                  borderRadius: 4,
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  width: "100%",
+                  textAlign: "left",
+                  fontWeight: "bold"
+                }}
+              >
+                {s.title} {openSections[s.sectionId] ? "▲" : "▼"}
+              </button>
+              {openSections[s.sectionId] && (
+                <ul style={{ paddingLeft: 20, marginTop: 8 }}>
+                  {s.lessons.map((l: any) => (
+                    <li key={l.lessonId}>{l.title}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </div>
