@@ -68,59 +68,82 @@ export const RegisterPage: React.FC = () => {
             Instructor
           </button>
         </div>
-
-        {/* First Name */}
         <input
           type="text"
           placeholder="First Name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
-          style={{ width: "100%", padding: "8px", marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" }}
+          style={{
+            width: "100%",
+            padding: "10px 12px",
+            marginBottom: 12,
+            borderRadius: 8,
+            border: "1px solid #ccc",
+            boxSizing: "border-box",
+          }}
         />
 
-        {/* Last Name */}
         <input
           type="text"
           placeholder="Last Name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
-          style={{ width: "100%", padding: "8px", marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" }}
+          style={{
+            width: "100%",
+            padding: "10px 12px",
+            marginBottom: 12,
+            borderRadius: 8,
+            border: "1px solid #ccc",
+            boxSizing: "border-box",
+          }}
         />
 
-        {/* Email */}
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={{ width: "100%", padding: "8px", marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" }}
+          style={{
+            width: "100%",
+            padding: "10px 12px",
+            marginBottom: 12,
+            borderRadius: 8,
+            border: "1px solid #ccc",
+            boxSizing: "border-box",
+          }}
         />
 
-        {/* Password */}
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ width: "100%", padding: "8px", marginBottom: 16, borderRadius: 6, border: "1px solid #ccc" }}
+          style={{
+            width: "100%",
+            padding: "10px 12px",
+            marginBottom: 16,
+            borderRadius: 8,
+            border: "1px solid #ccc",
+            boxSizing: "border-box",
+          }}
         />
 
         <button
-          onClick={handleRegister}
+          onClick={handleRegisterClick}
           disabled={isLoading}
           style={{
             width: "100%",
-            padding: "10px",
+            padding: "10px 12px",
             background: "#646cff",
             color: "#fff",
             border: "none",
             borderRadius: 8,
             cursor: "pointer",
+            boxSizing: "border-box",
           }}
         >
           {isLoading ? "Registering..." : "Register"}
         </button>
-
         <p style={{ marginTop: 16, textAlign: "center" }}>
           Already have an account? <Link to="/login">Login here</Link>
         </p>
