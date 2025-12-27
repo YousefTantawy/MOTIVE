@@ -4,7 +4,6 @@ export interface User {
     userId: number;
     email: string;
     roleId: number; // 1=admin, 2=instructor, 3=student
-    name?: string;
 }
 
 export const authService = {
@@ -92,7 +91,7 @@ export const authService = {
     fetchProfile: async (userId: number) => {
         try {
             const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-            return response.data;
+            return response.data; // return full profile object
         } catch (error: any) {
             console.error("Fetch profile failed:", error);
             throw new Error("Failed to fetch user profile");
@@ -100,7 +99,7 @@ export const authService = {
     },
 
     // --- GET USER WITH ROLE ---
-    getUserWithRole: async (): Promise<User | null> => {
+    async getUserWithRole(): Promise<User | null> {
         const currentUser = authService.getCurrentUser();
         if (!currentUser) return null;
 
@@ -109,16 +108,11 @@ export const authService = {
             return {
                 userId: currentUser.userId,
                 email: currentUser.email,
-                roleId: profile?.roleId ?? 3,
-                name: profile?.firstName ? `${profile.firstName} ${profile.lastName}` : undefined,
+                roleId: profile?.roleId ?? 3, // fallback to student
             };
         } catch (err) {
             console.error("Failed to fetch profile for role:", err);
-            return {
-                userId: currentUser.userId,
-                email: currentUser.email,
-                roleId: currentUser.roleId ?? 3,
-            };
+            return currentUser; // fallback if profile fetch fails
         }
     },
 };
