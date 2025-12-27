@@ -18,7 +18,7 @@ namespace MotiveBackend.Controllers
         }
 
         [HttpPost("checkout")]
-        public async Task<IActionResult> ProcessCheckout([FromBody] ProcessPaymentDto request)
+        public async Task<IActionResult> ProcessCheckout([FromBody] PaymentProcessDto request)
         {
             var course = await _context.Courses.FindAsync(request.CourseId);
             if (course == null)
