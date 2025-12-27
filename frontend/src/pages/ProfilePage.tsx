@@ -12,19 +12,21 @@ export const ProfilePage: React.FC = () => {
 
   // Fetch profile from API
   useEffect(() => {
-    if (!userId) return;
+  if (!userId) return;
 
-    const loadProfile = async () => {
-      try {
-        const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-        setProfile(response.data);
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-      }
-    };
+  const loadProfile = async () => {
+    try {
+      const response = await axiosInstance.get(`/Auth/profile/${userId}`);
+      console.log("API response:", response); // debug output
+      setProfile(response.data); // make sure it's response.data
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+    }
+  };
 
-    loadProfile();
-  }, [userId]);
+  loadProfile();
+}, [userId]);
+
 
   if (!user || !userId) {
     return (
