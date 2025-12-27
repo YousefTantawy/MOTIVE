@@ -18,6 +18,8 @@ namespace MotiveBackend.Controllers
             _context = context;
         }
 
+        // ------------------------------------------------------------------ Login APIs  ------------------------------------------------------------------
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto request)
         {
@@ -82,6 +84,152 @@ namespace MotiveBackend.Controllers
                 userId = authRecord.UserId,
                 roleId = authRecord.User.Role.RoleId
             });
+        }
+
+        // ------------------------------------------------------------------ Profile APIs ------------------------------------------------------------------
+
+        [HttpGet("profile/{userId}")]
+        public async Task<IActionResult> GetProfile(ulong userId)
+        {
+            var user = await _context.Users
+                .Select(u => new
+                {
+                    u.UserId,
+                    u.FirstName,
+                    u.LastName,
+                    u.Email,
+                    u.RoleId,
+                    u.Headline,
+                    u.Biography,
+                    u.ProfilePictureUrl,
+                    u.CreatedAt
+                })
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(user);
+        }
+
+        [HttpPut("change-password/{userId}")]
+        public async Task<IActionResult> ChangePassword(ulong userId, [FromBody] ChangePasswordDto request)
+        {
+            var authRecord = await _context.Authidentities
+                .FirstOrDefaultAsync(ai => ai.UserId == userId && ai.Provider == "Local");
+
+            if (authRecord == null)
+            {
+                return NotFound("User authentication record not found.");
+            }
+
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.CurrentPassword, authRecord.PasswordHash);
+            if (!isPasswordValid)
+            {
+                return Unauthorized("Invalid current password.");
+            }
+
+            authRecord.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "An error occurred while updating the password.");
+            }
+
+            return Ok(new { message = "Password updated successfully." });
+        }
+
+        [HttpPut("change-email/{userId}")]
+        public async Task<IActionResult> ChangeEmail(ulong userId, [FromBody] ChangeEmailDto request)
+        {
+            if (await _context.Users.AnyAsync(u => u.Email == request.NewEmail))
+            {
+                return BadRequest("Email is already in use.");
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var authRecord = await _context.Authidentities
+                .FirstOrDefaultAsync(ai => ai.UserId == userId && ai.Provider == "Local");
+
+            user.Email = request.NewEmail;
+
+            if (authRecord != null)
+            {
+                authRecord.ProviderKey = request.NewEmail;
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "An error occurred while updating the email.");
+            }
+
+            return Ok(new { message = "Email updated successfully.", newEmail = user.Email });
+        }
+
+        [HttpPut("update-details/{userId}")]
+        public async Task<IActionResult> UpdateProfileDetails(long userId, [FromBody] UpdateProfileDetailsDto request)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            user.FirstName = request.FirstName;
+            user.LastName = request.LastName;
+            user.Headline = request.Headline;
+            user.Biography = request.Biography;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "An error occurred while updating profile details.");
+            }
+
+            return Ok(new { message = "Profile details updated successfully.", user });
+        }
+
+        [HttpPut("update-picture/{userId}")]
+        public async Task<IActionResult> UpdateProfilePicture(long userId, [FromBody] UpdateProfilePictureDto request)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            user.ProfilePictureUrl = request.ProfilePictureUrl;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "An error occurred while updating the profile picture.");
+            }
+
+            return Ok(new { message = "Profile picture updated successfully.", profilePictureUrl = user.ProfilePictureUrl });
         }
     }
 }

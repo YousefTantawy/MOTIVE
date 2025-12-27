@@ -30,4 +30,30 @@ namespace MotiveBackend.Models.DTOs
 		[Required]
 		public string Password { get; set; }
 	}
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    public class ChangePasswordDto
+    {
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
+    }
+
+    public class ChangeEmailDto
+    {
+        public string NewEmail { get; set; }
+    }
+
+    public class UpdateProfileDetailsDto
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string? Headline { get; set; }
+        public string? Biography { get; set; }
+    }
+
+    public class UpdateProfilePictureDto
+    {
+        public string ProfilePictureUrl { get; set; }
+    }
 }
