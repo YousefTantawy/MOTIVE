@@ -13,34 +13,6 @@ export const InstructorDashboard: React.FC = () => {
   // Mock stats
   const [mockStats] = useState<Stats>({ views: 1245, earnings: 3500, totalCourses: 12 });
 
-  const mockSidebar = (
-    <div>
-      <h3 style={{ color: "#fff", marginBottom: "20px" }}>Dashboard Menu</h3>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        <li style={{ marginBottom: "12px" }}>
-          <a href="#courses" style={{ color: "#fff", textDecoration: "none" }}>
-            📚 My Courses
-          </a>
-        </li>
-        <li style={{ marginBottom: "12px" }}>
-          <a href="#upload" style={{ color: "#fff", textDecoration: "none" }}>
-            ⬆️ Upload Lesson
-          </a>
-        </li>
-        <li style={{ marginBottom: "12px" }}>
-          <a href="#new-course" style={{ color: "#fff", textDecoration: "none" }}>
-            🆕 New Course
-          </a>
-        </li>
-        <li style={{ marginBottom: "12px" }}>
-          <a href="#settings" style={{ color: "#fff", textDecoration: "none" }}>
-            ⚙️ Settings
-          </a>
-        </li>
-      </ul>
-    </div>
-  );
-
   // Stats Card Component
   const StatsCard: React.FC<{ label: string; value: number | string }> = ({ label, value }) => (
     <div
@@ -59,7 +31,7 @@ export const InstructorDashboard: React.FC = () => {
   );
 
   return (
-    <StudioLayout sidebar={mockSidebar}>
+    <StudioLayout>
       {/* Stats Section */}
       <section style={{ display: "flex", gap: "20px", marginBottom: "40px" }}>
         <StatsCard label="Total Views" value={mockStats.views} />
