@@ -83,8 +83,10 @@ namespace MotiveBackend.Controllers
 
                     TargetAudience = c.CourseDescription.CourseTargetAudiences.Select(a => a.AudienceText),
 
-                    Category = c.CourseCategories.Select(cc => cc.Category.Name)
-                        .FirstOrDefault() ?? "Uncategorized",
+                    Categories = c.CourseCategories
+                    .Select(cc => cc.Category.Name)
+                    .ToList(),
+
                     Description = c.CourseDescription != null ? c.CourseDescription.FullText : "No description",
                     
                     Reviews = c.UserReviews.Select(ur => new
