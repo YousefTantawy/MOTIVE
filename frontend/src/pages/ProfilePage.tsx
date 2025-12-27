@@ -8,15 +8,14 @@ export const ProfilePage: React.FC = () => {
   const user = authService.getCurrentUser();
   const userId = user?.userId;
 
-  // Form states
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newEmail, setNewEmail] = useState(user?.email || "");
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
-  const [headline, setHeadline] = useState("");
-  const [biography, setBiography] = useState("");
-  const [profilePictureUrl, setProfilePictureUrl] = useState("");
+  const [headline, setHeadline] = useState(user?.headline || "");
+  const [biography, setBiography] = useState(user?.biography || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [profilePictureUrl, setProfilePictureUrl] = useState(user?.profilePictureUrl || "");
 
   if (!user || !userId) {
     return (
@@ -25,6 +24,26 @@ export const ProfilePage: React.FC = () => {
       </MainLayout>
     );
   }
+
+  const handleUpdateDetails = async () => {
+    try {
+      await axios.put(`/api/Auth/update-details/${userId}`, { firstName, lastName, headline, biography });
+      alert("Details updated successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Error updating details");
+    }
+  };
+
+  const handleChangeEmail = async () => {
+    try {
+      await axios.put(`/api/Auth/change-email/${userId}`, { newEmail: email });
+      alert("Email updated successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Error updating email");
+    }
+  };
 
   const handleChangePassword = async () => {
     try {
@@ -35,26 +54,6 @@ export const ProfilePage: React.FC = () => {
     } catch (err) {
       console.error(err);
       alert("Error changing password");
-    }
-  };
-
-  const handleChangeEmail = async () => {
-    try {
-      await axios.put(`/api/Auth/change-email/${userId}`, { newEmail });
-      alert("Email updated successfully");
-    } catch (err) {
-      console.error(err);
-      alert("Error updating email");
-    }
-  };
-
-  const handleUpdateDetails = async () => {
-    try {
-      await axios.put(`/api/Auth/update-details/${userId}`, { firstName, lastName, headline, biography });
-      alert("Details updated successfully");
-    } catch (err) {
-      console.error(err);
-      alert("Error updating details");
     }
   };
 
@@ -70,94 +69,100 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <MainLayout>
-      <h1>Profile</h1>
+      <div style={{ width: "70%", margin: "0 auto", paddingTop: 40 }}>
+        {/* Profile Header */}
+        <div style={{ display: "flex", gap: 20, alignItems: "center", marginBottom: 40 }}>
+          <img
+            src={profilePictureUrl || "https://via.placeholder.com/120"}
+            alt="Profile"
+            style={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", border: "2px solid #ddd" }}
+          />
+          <div>
+            <h1>{firstName} {lastName}</h1>
+            <p style={{ fontSize: 16, color: "#666" }}>{headline || "Your headline here"}</p>
+            <p style={{ maxWidth: 500, color: "#444" }}>{biography || "Your biography goes here."}</p>
+          </div>
+        </div>
 
-      <div style={{ marginTop: 20 }}>
-        <p><strong>Name:</strong> {user.firstName} {user.lastName}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Role:</strong> {user.role}</p>
+        {/* Update Profile Picture */}
+        <section style={{ marginBottom: 30 }}>
+          <h2>Profile Picture</h2>
+          <input
+            type="text"
+            placeholder="Profile Picture URL"
+            value={profilePictureUrl}
+            onChange={(e) => setProfilePictureUrl(e.target.value)}
+            style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
+          />
+          <button onClick={handleUpdatePicture} style={{ padding: "8px 16px" }}>Update Picture</button>
+        </section>
+
+        {/* Personal Info */}
+        <section style={{ marginBottom: 30 }}>
+          <h2>Personal Info</h2>
+          <input
+            type="text"
+            placeholder="First Name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
+          />
+          <input
+            type="text"
+            placeholder="Last Name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
+          />
+          <input
+            type="text"
+            placeholder="Headline"
+            value={headline}
+            onChange={(e) => setHeadline(e.target.value)}
+            style={{ display: "block", marginBottom: 10, padding: 8, width: "70%" }}
+          />
+          <textarea
+            placeholder="Biography"
+            value={biography}
+            onChange={(e) => setBiography(e.target.value)}
+            style={{ display: "block", marginBottom: 10, padding: 8, width: "70%", minHeight: 100 }}
+          />
+          <button onClick={handleUpdateDetails} style={{ padding: "8px 16px" }}>Update Details</button>
+        </section>
+
+        {/* Email */}
+        <section style={{ marginBottom: 30 }}>
+          <h2>Email</h2>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
+          />
+          <button onClick={handleChangeEmail} style={{ padding: "8px 16px" }}>Update Email</button>
+        </section>
+
+        {/* Password */}
+        <section style={{ marginBottom: 30 }}>
+          <h2>Password</h2>
+          <input
+            type="password"
+            placeholder="Current Password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
+          />
+          <input
+            type="password"
+            placeholder="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
+          />
+          <button onClick={handleChangePassword} style={{ padding: "8px 16px" }}>Change Password</button>
+        </section>
       </div>
-
-      <hr style={{ margin: "30px 0" }} />
-
-      {/* Change Password */}
-      <section style={{ marginBottom: 30 }}>
-        <h2>Change Password</h2>
-        <input
-          type="password"
-          placeholder="Current Password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 8 }}
-        />
-        <input
-          type="password"
-          placeholder="New Password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 8 }}
-        />
-        <button onClick={handleChangePassword}>Change Password</button>
-      </section>
-
-      {/* Change Email */}
-      <section style={{ marginBottom: 30 }}>
-        <h2>Change Email</h2>
-        <input
-          type="email"
-          placeholder="New Email"
-          value={newEmail}
-          onChange={(e) => setNewEmail(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 8 }}
-        />
-        <button onClick={handleChangeEmail}>Update Email</button>
-      </section>
-
-      {/* Update Details */}
-      <section style={{ marginBottom: 30 }}>
-        <h2>Update Details</h2>
-        <input
-          type="text"
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 8 }}
-        />
-        <input
-          type="text"
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 8 }}
-        />
-        <input
-          type="text"
-          placeholder="Headline"
-          value={headline}
-          onChange={(e) => setHeadline(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 8 }}
-        />
-        <textarea
-          placeholder="Biography"
-          value={biography}
-          onChange={(e) => setBiography(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 8, minHeight: 80 }}
-        />
-        <button onClick={handleUpdateDetails}>Update Details</button>
-      </section>
-
-      {/* Update Profile Picture */}
-      <section>
-        <h2>Update Profile Picture</h2>
-        <input
-          type="text"
-          placeholder="Profile Picture URL"
-          value={profilePictureUrl}
-          onChange={(e) => setProfilePictureUrl(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 8 }}
-        />
-        <button onClick={handleUpdatePicture}>Update Picture</button>
-      </section>
     </MainLayout>
   );
 };
