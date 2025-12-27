@@ -16,40 +16,46 @@ export const Navbar: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      const currentUser = authService.getCurrentUser();
-      if (!currentUser) {
-        setUser(null);
-        setLoading(false);
+ useEffect(() => {
+  const fetchUserProfile = async () => {
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const profile = await authService.fetchProfile(currentUser.userId);
+      
+      if (!profile) {
+        console.log("Profile is null or undefined");
+        setUser(currentUser); // fallback
         return;
       }
 
-      try {
-        const profile = await authService.fetchProfile(currentUser.userId);
+      console.log("Profile fetched:", profile); // now this will correctly log the object
 
-        console.log("Profile fetched:", profile); // safe log
+      setUser({
+        ...currentUser,
+        roleId: profile.roleId ?? 3, // fallback to student
+      });
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+      setUser({
+        ...currentUser,
+        roleId: currentUser.roleId ?? 3,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        setUser({
-          ...currentUser,
-          roleId: profile?.roleId ?? currentUser.roleId ?? 3,
-        });
-      } catch (err) {
-        console.error("Failed to fetch profile:", err);
-        setUser({
-          ...currentUser,
-          roleId: currentUser.roleId ?? 3,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserProfile();
-    const onAuthChange = () => fetchUserProfile();
-    window.addEventListener("authChanged", onAuthChange);
-    return () => window.removeEventListener("authChanged", onAuthChange);
-  }, []);
+  fetchUserProfile();
+  const onAuthChange = () => fetchUserProfile();
+  window.addEventListener("authChanged", onAuthChange);
+  return () => window.removeEventListener("authChanged", onAuthChange);
+}, []);
 
   const handleLogout = () => {
     authService.logout();
