@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axiosInstance from "../lib/axios";
 import { CourseCard } from "../components/CourseCard";
 
 export interface SimpleCourse {
@@ -20,12 +21,10 @@ export const HomePage: React.FC = () => {
 
   async function fetchSection(
     url: string,
-    setState: React.Dispatch<React.SetStateAction<SimpleCourse[]>>
+    setter: React.Dispatch<React.SetStateAction<SimpleCourse[]>>
   ) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`${url} failed`);
-    const data = await res.json();
-    setState(data);
+    const data = await axiosInstance.get<SimpleCourse[]>(url);
+    setter(data);
   }
 
   useEffect(() => {
@@ -33,10 +32,10 @@ export const HomePage: React.FC = () => {
     setError(null);
 
     Promise.all([
-      fetchSection("/api/Courses/trending", setTrending),
-      fetchSection("/api/Courses/recent", setRecent),
-      fetchSection("/api/Courses/bestsellers", setBestSellers),
-      fetchSection("/api/Courses/toprated", setTopRated)
+      fetchSection("/Courses/trending", setTrending),
+      fetchSection("/Courses/recent", setRecent),
+      fetchSection("/Courses/bestsellers", setBestSellers),
+      fetchSection("/Courses/toprated", setTopRated)
     ])
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
@@ -46,10 +45,9 @@ export const HomePage: React.FC = () => {
   if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1100px", margin: "0 auto" }}>
+    <div style={{ padding: 20, maxWidth: 1100, margin: "0 auto" }}>
       <h1>Welcome to Motive</h1>
 
-      {/* Trending */}
       <Section title="Trending">
         {trending.map(c => (
           <CourseCard
@@ -62,7 +60,6 @@ export const HomePage: React.FC = () => {
         ))}
       </Section>
 
-      {/* Recent */}
       <Section title="Recently Added">
         {recent.map(c => (
           <CourseCard
@@ -75,7 +72,6 @@ export const HomePage: React.FC = () => {
         ))}
       </Section>
 
-      {/* Best Sellers */}
       <Section title="Best Sellers">
         {bestSellers.map(c => (
           <CourseCard
@@ -88,7 +84,6 @@ export const HomePage: React.FC = () => {
         ))}
       </Section>
 
-      {/* Top Rated */}
       <Section title="Top Rated">
         {topRated.map(c => (
           <CourseCard
@@ -108,13 +103,13 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
   children
 }) => (
-  <div style={{ marginTop: "25px" }}>
+  <div style={{ marginTop: 25 }}>
     <h2>{title}</h2>
 
     <div
       style={{
         display: "grid",
-        gap: "16px",
+        gap: 16,
         gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))"
       }}
     >
