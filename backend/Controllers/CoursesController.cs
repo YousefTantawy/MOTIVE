@@ -24,7 +24,7 @@ namespace MotiveBackend.Controllers
         [HttpGet("trending")]
         public async Task<IActionResult> GetMostTrendings()
         {
-            var trending = await _context.ViewMostTrendings.Take(10).ToListAsync();
+            var trending = await _context.ViewMostTrendings.Take(8).ToListAsync();
             return Ok(trending);
         }
 
@@ -32,7 +32,7 @@ namespace MotiveBackend.Controllers
         [HttpGet("recent")]
         public async Task<IActionResult> GetMostRecent()
         {
-            var newest = await _context.ViewMostRecents.Take(10).ToListAsync();
+            var newest = await _context.ViewMostRecents.Take(8).ToListAsync();
             return Ok(newest);
         }
 
@@ -40,7 +40,7 @@ namespace MotiveBackend.Controllers
         [HttpGet("bestsellers")]
         public async Task<IActionResult> ViewBestSellers()
         {
-            var bestSellers = await _context.ViewMostEnrolleds.Take(10).ToListAsync();
+            var bestSellers = await _context.ViewMostEnrolleds.Take(8).ToListAsync();
             return Ok(bestSellers);
         }
 
@@ -48,7 +48,7 @@ namespace MotiveBackend.Controllers
         [HttpGet("toprated")]
         public async Task<IActionResult> ViewTopRated()
         {
-            var topRated = await _context.ViewTopRateds.Take(10).ToListAsync();
+            var topRated = await _context.ViewTopRateds.Take(8).ToListAsync();
             return Ok(topRated);
         }
 

@@ -774,6 +774,9 @@ public partial class Ecen424DbProjectContext : DbContext
                 .HasNoKey()
                 .ToView("view_most_enrolled");
 
+            entity.Property(e => e.AvgRating)
+                .HasPrecision(7, 4)
+                .HasColumnName("avg_rating");
             entity.Property(e => e.CourseId).HasColumnName("course_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -793,6 +796,9 @@ public partial class Ecen424DbProjectContext : DbContext
                 .HasNoKey()
                 .ToView("view_most_recent");
 
+            entity.Property(e => e.AvgRating)
+                .HasPrecision(7, 4)
+                .HasColumnName("avg_rating");
             entity.Property(e => e.CourseId).HasColumnName("course_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
