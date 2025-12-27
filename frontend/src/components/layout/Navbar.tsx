@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 
 interface User {
-  userId?: number;
   name?: string;
   email?: string;
   roleId?: number; // 1=admin, 2=instructor, 3=student
@@ -13,30 +12,30 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true); // <-- loading state
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       const currentUser = authService.getCurrentUser();
-      if (!currentUser) return setUser(null);
+      if (!currentUser) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
 
       try {
-        const profile = await authService.fetchProfile(currentUser.userId!);
-
-        console.log("Profile fetched:", profile);
-
-        setUser({
-          ...currentUser,
-          roleId: profile?.roleId ?? currentUser.roleId ?? 3,
-        });
+        const profile = await authService.fetchProfile(currentUser.userId);
+        setUser({ ...currentUser, roleId: profile.roleId });
       } catch (err) {
         console.error("Failed to fetch profile:", err);
-        setUser(currentUser); // fallback to localStorage user
+        setUser(currentUser); // fallback
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchUserProfile();
-
     const onAuthChange = () => fetchUserProfile();
     window.addEventListener("authChanged", onAuthChange);
     return () => window.removeEventListener("authChanged", onAuthChange);
@@ -62,7 +61,33 @@ export const Navbar: React.FC = () => {
     whiteSpace: "nowrap" as const,
   });
 
-  console.log("Navbar user:", user);
+  if (loading) {
+    // Delay rendering links until user is fetched
+    return (
+      <nav
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 24px",
+          backgroundColor: "#111",
+          color: "#fff",
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          height: 64,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          borderBottom: "1px solid rgba(255,255,255,0.04)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}>
+            CoursePlatform
+          </Link>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav
@@ -81,38 +106,19 @@ export const Navbar: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
-      {/* LEFT: Logo + links */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Link
-          to="/"
-          style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}
-        >
+        <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}>
           CoursePlatform
         </Link>
 
-        <Link to="/" style={linkStyle("/")}>
-          Home
-        </Link>
+        <Link to="/" style={linkStyle("/")}>Home</Link>
 
         {user && (
           <>
-            <Link to="/my-courses" style={linkStyle("/my-courses")}>
-              My Learning
-            </Link>
+            <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
 
-            {/* Instructor Studio only for roleId 2 */}
-            {user.roleId === 2 && (
-              <Link to="/instructor" style={linkStyle("/instructor")}>
-                Studio
-              </Link>
-            )}
-
-            {/* Admin Dashboard only for roleId 1 */}
-            {user.roleId === 1 && (
-              <Link to="/admin" style={linkStyle("/admin")}>
-                Admin Dashboard
-              </Link>
-            )}
+            {user.roleId === 2 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
+            {user.roleId === 1 && <Link to="/admin" style={linkStyle("/admin")}>Admin Dashboard</Link>}
 
             <Link
               to="/profile"
@@ -129,7 +135,6 @@ export const Navbar: React.FC = () => {
         )}
       </div>
 
-      {/* MIDDLE: Search bar */}
       <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
         <input
           type="text"
@@ -146,7 +151,6 @@ export const Navbar: React.FC = () => {
         />
       </form>
 
-      {/* RIGHT: Login/Logout */}
       <div>
         {!user ? (
           <Link
