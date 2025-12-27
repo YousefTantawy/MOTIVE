@@ -16,7 +16,7 @@ export const Navbar: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
- useEffect(() => {
+useEffect(() => {
   const fetchUserProfile = async () => {
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
@@ -30,20 +30,23 @@ export const Navbar: React.FC = () => {
       
       if (!profile) {
         console.log("Profile is null or undefined");
-        setUser(currentUser); // fallback
+        setUser(currentUser);
         return;
       }
 
-      console.log("Profile fetched:", profile); // now this will correctly log the object
+      console.log("Profile fetched:", profile);
 
       setUser({
-        ...currentUser,
-        roleId: profile.roleId ?? 3, // fallback to student
+        userId: profile.userId,
+        email: profile.email,
+        roleId: profile.roleId ?? 3,
+        name: profile.firstName ? `${profile.firstName} ${profile.lastName}` : undefined,
       });
     } catch (err) {
       console.error("Failed to fetch profile:", err);
       setUser({
-        ...currentUser,
+        userId: currentUser.userId,
+        email: currentUser.email,
         roleId: currentUser.roleId ?? 3,
       });
     } finally {
@@ -56,6 +59,7 @@ export const Navbar: React.FC = () => {
   window.addEventListener("authChanged", onAuthChange);
   return () => window.removeEventListener("authChanged", onAuthChange);
 }, []);
+
 
   const handleLogout = () => {
     authService.logout();
