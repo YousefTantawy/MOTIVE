@@ -17,17 +17,21 @@ export const Navbar: React.FC = () => {
   // Fetch live profile on mount and on auth change
 // Fetch live profile on mount and on auth change
 useEffect(() => {
- const fetchUserProfile = async () => {
+const fetchUserProfile = async () => {
   const currentUser = authService.getCurrentUser();
   if (currentUser) {
     try {
       const profile = await authService.fetchProfile(currentUser.userId);
-      console.log("Profile fetched:", profile); // should log the object you posted
+      console.log("Profile fetched:", profile); // should log full profile
 
-      setUser({
-        ...currentUser,
-        roleId: Number(profile.roleId), // safe number
-      });
+      if (profile) {
+        setUser({
+          ...currentUser,
+          roleId: Number(profile.roleId),
+        });
+      } else {
+        setUser(currentUser); // fallback
+      }
     } catch (error) {
       console.error("Failed to fetch profile:", error);
       setUser(currentUser); // fallback
@@ -36,6 +40,7 @@ useEffect(() => {
     setUser(null);
   }
 };
+
 
 
 
