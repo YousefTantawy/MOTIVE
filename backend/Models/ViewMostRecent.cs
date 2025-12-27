@@ -12,4 +12,6 @@ public partial class ViewMostRecent
     public decimal Price { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public decimal AvgRating { get; set; }
 }
