@@ -1,17 +1,29 @@
 import axiosInstance from "../lib/axios";
 
 export const authService = {
-  login: async (email: string, password: string) => {
+login: async (email: string, password: string) => {
+  try {
     const response = await axiosInstance.post("/Auth/login", { email, password });
-    const { userId, role } = response.data;
 
+    if (!response.data || typeof response.data.userId === "undefined") {
+      throw new Error("Login failed: invalid response from server");
+    }
+
+    const { userId, role } = response.data;
     const user = { userId, role, email };
+
     localStorage.setItem("authToken", "mock_token_" + Date.now());
     localStorage.setItem("user", JSON.stringify(user));
 
     window.dispatchEvent(new Event("authChanged"));
     return user;
-  },
+
+  } catch (error: any) {
+    console.error("Login error:", error);
+    throw error;
+  }
+}
+
 
   register: async (name: string, email: string, password: string, role: string = "student") => {
     const response = await axiosInstance.post("/Auth/register", { name, email, password, role });
