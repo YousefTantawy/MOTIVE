@@ -4,13 +4,14 @@ import { MainLayout } from "../layouts/MainLayout";
 import { CourseHero } from "../features/store/CourseHero";
 import { ReviewList } from "../features/store/ReviewList";
 import { courseService } from "../services/courseService";
-import { authService } from "../services/authService";
+import { enrollmentService } from "../services/enrollmentService";
 
 export const CourseDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isEnrolling, setIsEnrolling] = useState(false);
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -29,18 +30,19 @@ export const CourseDetailsPage: React.FC = () => {
     fetchCourse();
   }, [id]);
 
-  const handleBuyNow = () => {
-    const user = authService.getCurrentUser();
-    const params = new URLSearchParams();
-    if (id) params.set("courseId", id);
-    if (course && course.price) params.set("price", String(course.price));
-    const path = `/payment?${params.toString()}`;
-
-    if (!user) {
-      navigate(`/login?redirect=${encodeURIComponent(path)}`);
-      return;
+  const handleEnroll = async () => {
+    try {
+      setIsEnrolling(true);
+      if (id) {
+        await enrollmentService.enrollCourse(id);
+        navigate("/my-courses");
+      }
+    } catch (error) {
+      console.error("Failed to enroll:", error);
+      alert("Failed to enroll in course");
+    } finally {
+      setIsEnrolling(false);
     }
-    navigate(path);
   };
 
   const toggleSection = (sectionId: number) => {
@@ -91,27 +93,8 @@ export const CourseDetailsPage: React.FC = () => {
         instructor={instructorName}
         rating={avgRating}
         price={course.price}
-        onEnroll={handleBuyNow} // now clicking hero enroll triggers Buy now
+        onEnroll={handleEnroll} // Enroll now button
       />
-
-      {/* --- Buy Button Only --- */}
-      <div style={{ padding: "16px 0", display: "flex", gap: 12 }}>
-        {course.price && (
-          <button
-            onClick={handleBuyNow}
-            style={{
-              padding: "10px 14px",
-              background: "#646cff",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-            }}
-          >
-            Buy now
-          </button>
-        )}
-      </div>
 
       {/* --- Course Info --- */}
       <div style={{ marginTop: 20, display: "flex", flexWrap: "wrap", gap: 20 }}>
