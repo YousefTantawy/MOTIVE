@@ -3,7 +3,7 @@ import axiosInstance from "../lib/axios";
 export const authService = {
   login: async (email: string, password: string) => {
     try {
-      const response = await axiosInstance.post<{ message: string; userId: number; role: string }>(
+      const response = await axiosInstance.post<{ message: string; userId: number; roleId: number }>(
         "/Auth/login",
         { email, password }
       );
@@ -12,21 +12,19 @@ export const authService = {
         throw new Error("Login failed: invalid response from server");
       }
 
-      const { userId, role } = response;
-      const user = { userId, role, email };
+      const { userId, roleId } = response;
+      const user = { userId, email, roleId };
 
       localStorage.setItem("authToken", "mock_token_" + Date.now());
       localStorage.setItem("user", JSON.stringify(user));
-
       window.dispatchEvent(new Event("authChanged"));
-      return user;
 
+      return user;
     } catch (error: any) {
       let message = error.message || "Unknown error";
       if (message.includes("status: 401")) message = "Unauthorized access";
       else if (message.includes("status: 403")) message = "Forbidden access";
       else if (message.includes("status: 404")) message = "Resource not found";
-      else if (message.includes("status: 409")) message = "Conflict: resource already exists";
       else if (message.includes("status: 500")) message = "Server error, please try again later";
 
       console.error("Login error:", message);
@@ -34,9 +32,15 @@ export const authService = {
     }
   },
 
-  register: async (firstName: string, lastName: string, email: string, password: string, roleId: number) => {
+  register: async (
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+    roleId: number
+  ) => {
     try {
-      const response = await axiosInstance.post<{ message: string; userId: number; role: string }>(
+      const response = await axiosInstance.post<{ message: string; userId: number; roleId: number }>(
         "/Auth/register",
         { firstName, lastName, email, password, roleId }
       );
@@ -45,8 +49,8 @@ export const authService = {
         throw new Error("Register failed: invalid response from server");
       }
 
-      const { userId, role } = response;
-      const user = { userId, role, email };
+      const { userId, roleId: returnedRoleId } = response;
+      const user = { userId, email, roleId: returnedRoleId };
 
       localStorage.setItem("authToken", "mock_token_" + Date.now());
       localStorage.setItem("user", JSON.stringify(user));
@@ -73,5 +77,5 @@ export const authService = {
   getCurrentUser: () => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
-  }
-}; // <-- no semicolon needed here if this is the end
+  },
+};
