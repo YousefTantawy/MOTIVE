@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import { RegisterForm } from "../features/auth/RegisterForm";
+import { authService } from "../services/authService";
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -9,13 +10,24 @@ export const RegisterPage: React.FC = () => {
   const [error, setError] = useState("");
   const [role, setRole] = useState<"student" | "instructor">("student");
 
-  const handleRegister = async (name: string, email: string, password: string) => {
+  const handleRegister = async (
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  ) => {
     try {
       setIsLoading(true);
       setError("");
-      // For mock demo, just store user data
-      localStorage.setItem("authToken", "mock_token_" + Date.now());
-      localStorage.setItem("user", JSON.stringify({ name, email, role }));
+
+      // Map role string to roleId
+      let roleId = 2; // default student
+      if (role === "instructor") roleId = 1;
+      else if (role === "admin") roleId = 0; // if you allow admin
+
+      // Call authService with correct payload
+      await authService.register(firstName, lastName, email, password, roleId);
+
       navigate("/my-courses");
     } catch (err: any) {
       setError(err.message || "Registration failed");
@@ -30,6 +42,7 @@ export const RegisterPage: React.FC = () => {
         <h2>Register</h2>
         {error && <div style={{ color: "red", marginBottom: "16px" }}>{error}</div>}
 
+        {/* Role selection */}
         <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
           <button
             type="button"
@@ -59,7 +72,14 @@ export const RegisterPage: React.FC = () => {
           </button>
         </div>
 
-        <RegisterForm onSubmit={handleRegister} isLoading={isLoading} selectedRole={role} />
+        {/* Register Form with separate first & last name */}
+        <RegisterForm
+          onSubmit={handleRegister}
+          isLoading={isLoading}
+          selectedRole={role}
+          useSeparateNameFields={true} // optional flag to render two inputs
+        />
+
         <p style={{ marginTop: "16px", textAlign: "center" }}>
           Already have an account? <Link to="/login">Login here</Link>
         </p>
@@ -67,4 +87,3 @@ export const RegisterPage: React.FC = () => {
     </MainLayout>
   );
 };
-
