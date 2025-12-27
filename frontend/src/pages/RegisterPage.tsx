@@ -1,31 +1,28 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
-import { RegisterForm } from "../features/auth/RegisterForm";
 import { authService } from "../services/authService";
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "instructor">("student");
 
-  const handleRegister = async (
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string
-  ) => {
+  const handleRegister = async () => {
     try {
       setIsLoading(true);
       setError("");
 
-      // Map role string to roleId
       let roleId = 2; // default student
       if (role === "instructor") roleId = 1;
-      else if (role === "admin") roleId = 0; // if you allow admin
+      else if (role === "admin") roleId = 0; // optional
 
-      // Call authService with correct payload
       await authService.register(firstName, lastName, email, password, roleId);
 
       navigate("/my-courses");
@@ -40,7 +37,7 @@ export const RegisterPage: React.FC = () => {
     <MainLayout>
       <div style={{ maxWidth: "400px", margin: "40px auto" }}>
         <h2>Register</h2>
-        {error && <div style={{ color: "red", marginBottom: "16px" }}>{error}</div>}
+        {error && <div style={{ color: "red", marginBottom: 16 }}>{error}</div>}
 
         {/* Role selection */}
         <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
@@ -72,15 +69,59 @@ export const RegisterPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Register Form with separate first & last name */}
-        <RegisterForm
-          onSubmit={handleRegister}
-          isLoading={isLoading}
-          selectedRole={role}
-          useSeparateNameFields={true} // optional flag to render two inputs
+        {/* First Name */}
+        <input
+          type="text"
+          placeholder="First Name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          style={{ width: "100%", padding: "8px", marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" }}
         />
 
-        <p style={{ marginTop: "16px", textAlign: "center" }}>
+        {/* Last Name */}
+        <input
+          type="text"
+          placeholder="Last Name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          style={{ width: "100%", padding: "8px", marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" }}
+        />
+
+        {/* Email */}
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ width: "100%", padding: "8px", marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" }}
+        />
+
+        {/* Password */}
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{ width: "100%", padding: "8px", marginBottom: 16, borderRadius: 6, border: "1px solid #ccc" }}
+        />
+
+        <button
+          onClick={handleRegister}
+          disabled={isLoading}
+          style={{
+            width: "100%",
+            padding: "10px",
+            background: "#646cff",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            cursor: "pointer",
+          }}
+        >
+          {isLoading ? "Registering..." : "Register"}
+        </button>
+
+        <p style={{ marginTop: 16, textAlign: "center" }}>
           Already have an account? <Link to="/login">Login here</Link>
         </p>
       </div>
