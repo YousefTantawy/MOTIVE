@@ -209,7 +209,7 @@ namespace MotiveBackend.Controllers
         }
 
         [HttpPut("update-picture/{userId}")]
-        public async Task<IActionResult> UpdateProfilePicture(long userId, [FromBody] UpdateProfilePictureDto request)
+        public async Task<IActionResult> UpdateProfilePicture(ulong userId, [FromBody] UpdateProfilePictureDto request)
         {
             var user = await _context.Users.FindAsync(userId);
 
