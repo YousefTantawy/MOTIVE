@@ -182,7 +182,7 @@ namespace MotiveBackend.Controllers
         }
 
         [HttpPut("update-details/{userId}")]
-        public async Task<IActionResult> UpdateProfileDetails(long userId, [FromBody] UpdateProfileDetailsDto request)
+        public async Task<IActionResult> UpdateProfileDetails(ulong userId, [FromBody] UpdateProfileDetailsDto request)
         {
             var user = await _context.Users.FindAsync(userId);
 
