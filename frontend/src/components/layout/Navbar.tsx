@@ -1,3 +1,4 @@
+// Navbar.tsx
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
@@ -8,7 +9,7 @@ export const Navbar: React.FC = () => {
   const [user, setUser] = useState<{ name?: string; email?: string; role?: string } | null>(
     authService.getCurrentUser()
   );
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
 
   const linkStyle = (path: string) => ({
     marginRight: "20px",
@@ -29,30 +30,26 @@ export const Navbar: React.FC = () => {
     navigate("/");
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
-      setSearchTerm("");
+    if (search.trim()) {
+      navigate(`/search?query=${encodeURIComponent(search.trim())}`);
+      setSearch("");
     }
   };
 
   return (
     <nav
       role="navigation"
-      data-test-id="main-navbar"
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         padding: "12px 24px",
-        boxSizing: "border-box",
         backgroundColor: "#111",
         color: "#fff",
         position: "sticky",
         top: 0,
-        right: 0,
-        left: 0,
         zIndex: 1000,
         width: "100%",
         height: 64,
@@ -60,8 +57,7 @@ export const Navbar: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
-      {/* Left Links */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, overflow: "hidden", minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
         <Link
           to="/"
           style={{
@@ -83,6 +79,9 @@ export const Navbar: React.FC = () => {
             <Link to="/my-courses" style={{ ...linkStyle("/my-courses"), whiteSpace: "nowrap" }}>
               My Learning
             </Link>
+            <Link to="/profile" style={{ ...linkStyle("/profile"), whiteSpace: "nowrap" }}>
+              Profile
+            </Link>
             {user.role === "instructor" && (
               <Link to="/instructor" style={{ ...linkStyle("/instructor"), whiteSpace: "nowrap" }}>
                 Studio
@@ -92,39 +91,36 @@ export const Navbar: React.FC = () => {
         )}
       </div>
 
-      {/* Search Bar */}
-      <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", maxWidth: 300, margin: "0 12px" }}>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search courses..."
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            borderRadius: 4,
-            border: "1px solid #ccc",
-            fontSize: 14,
-          }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: "6px 12px",
-            marginLeft: 6,
-            background: "#646cff",
-            color: "#fff",
-            border: "none",
-            borderRadius: 4,
-            cursor: "pointer",
-          }}
-        >
-          Search
-        </button>
-      </form>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <form onSubmit={handleSearchSubmit}>
+          <input
+            type="text"
+            placeholder="Search courses..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              padding: "6px 10px",
+              borderRadius: 6,
+              border: "1px solid #ccc",
+              outline: "none",
+            }}
+          />
+          <button
+            type="submit"
+            style={{
+              marginLeft: 6,
+              padding: "6px 10px",
+              borderRadius: 6,
+              border: "none",
+              backgroundColor: "#646cff",
+              color: "#fff",
+              cursor: "pointer",
+            }}
+          >
+            Search
+          </button>
+        </form>
 
-      {/* Right Login/Logout */}
-      <div style={{ flex: "0 0 auto", marginLeft: 12 }}>
         {!user ? (
           <Link
             to="/login"
