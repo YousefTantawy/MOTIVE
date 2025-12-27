@@ -1,100 +1,84 @@
 import React, { useEffect, useState } from "react";
-import axiosInstance from "../lib/axios";
-import { CourseCard } from "../components/CourseCard";
 
-interface Course {
+type Course = {
   courseId: number;
   title: string;
-  description: string;
-  reviews?: any[];
-}
+  price: number;
+  createdAt: string;
+  avgRating: number;
+};
 
-interface HomeData {
-  trending: Course[];
-  topRated: Course[];
-  newest: Course[];
-  bestSellers: Course[];
-}
-
-export const HomePage: React.FC = () => {
-  const [courses, setCourses] = useState<HomeData>({
-    trending: [],
-    topRated: [],
-    newest: [],
-    bestSellers: []
-  });
+const HomePage: React.FC = () => {
+  const [trending, setTrending] = useState<Course[]>([]);
+  const [recent, setRecent] = useState<Course[]>([]);
+  const [bestSellers, setBestSellers] = useState<Course[]>([]);
+  const [topRated, setTopRated] = useState<Course[]>([]);
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const API_BASE = "https://your-backend-domain.com/api/Courses";
 
   useEffect(() => {
-    async function load() {
+    const loadData = async () => {
       try {
-        // IMPORTANT — your backend HomePage data is here:
-        // GET /api/Courses
-        const res = await axiosInstance.get("/Courses");
+        const [trendRes, recentRes, bestRes, topRes] = await Promise.all([
+          fetch(`${API_BASE}/trending`),
+          fetch(`${API_BASE}/recent`),
+          fetch(`${API_BASE}/bestsellers`),
+          fetch(`${API_BASE}/toprated`)
+        ]);
 
-        setCourses({
-          trending: res.data.Trending ?? [],
-          topRated: res.data.TopRated ?? [],
-          newest: res.data.Newest ?? [],
-          bestSellers: res.data.BestSellers ?? []
-        });
+        if (!trendRes.ok || !recentRes.ok || !bestRes.ok || !topRes.ok) {
+          throw new Error("One or more API calls failed");
+        }
+
+        const trendingData = await trendRes.json();
+        const recentData = await recentRes.json();
+        const bestSellerData = await bestRes.json();
+        const topRatedData = await topRes.json();
+
+        setTrending(trendingData);
+        setRecent(recentData);
+        setBestSellers(bestSellerData);
+        setTopRated(topRatedData);
       } catch (err: any) {
-        console.error(err);
-        setError("Failed to load courses");
+        setError(err.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    load();
+    loadData();
   }, []);
 
-  if (loading) return <p style={{ padding: 40 }}>Loading…</p>;
-  if (error) return <p style={{ padding: 40 }}>{error}</p>;
+  if (loading) return <p>Loading home page...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+
+  const renderCourses = (list: Course[]) =>
+    list.map(c => (
+      <li key={c.courseId}>
+        <strong>{c.title}</strong> — ${c.price} — ⭐ {c.avgRating}
+      </li>
+    ));
 
   return (
-    <main
-      style={{
-        padding: 40,
-        display: "flex",
-        flexDirection: "column",
-        gap: 40
-      }}
-    >
-      <Section title="Trending" list={courses.trending} />
-      <Section title="Top Rated" list={courses.topRated} />
-      <Section title="Newest" list={courses.newest} />
-      <Section title="Best Sellers" list={courses.bestSellers} />
-    </main>
+    <div>
+      <h1>Home Page</h1>
+
+      <h2>🔥 Trending</h2>
+      <ul>{renderCourses(trending)}</ul>
+
+      <h2>⭐ Top Rated</h2>
+      <ul>{renderCourses(topRated)}</ul>
+
+      <h2>🆕 Recently Added</h2>
+      <ul>{renderCourses(recent)}</ul>
+
+      <h2>🏆 Best Sellers</h2>
+      <ul>{renderCourses(bestSellers)}</ul>
+    </div>
   );
 };
 
-const Section: React.FC<{ title: string; list: Course[] }> = ({
-  title,
-  list
-}) => (
-  <section>
-    <h2 style={{ marginBottom: 16 }}>{title}</h2>
-
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-        gap: 16,
-        alignItems: "stretch"
-      }}
-    >
-      {list?.map((c) => (
-        <CourseCard
-          key={c.courseId}
-          courseId={c.courseId}
-          title={c.title}
-          description={c.description}
-          reviews={c.reviews}
-        />
-      ))}
-    </div>
-  </section>
-);
+export default HomePage;
