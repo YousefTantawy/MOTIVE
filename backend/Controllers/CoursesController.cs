@@ -17,7 +17,6 @@ namespace MotiveBackend.Controllers
         }
         // Dbcontext is the connection between database and backend
         // Done using the following command: 
-        // Scaffold-DbContext "Server=motivedatabase.mysql.database.azure.com;Database=myshop;User ID=ousefTantawy;Password=el7amamsyel7amamsy!!;SslMode=Required;" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -ContextDir Data -Force
         // Editable depending on the database
 
         // 1. Trending -> api/Courses/trending
