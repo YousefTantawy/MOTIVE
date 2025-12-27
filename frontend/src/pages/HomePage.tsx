@@ -30,9 +30,8 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     async function load() {
       try {
-        const res = await axiosInstance.get("/Courses/home");
+        const res = await axiosInstance.get("/Courses/HomePage");
 
-        // ⚠️ IMPORTANT — match backend casing:
         setCourses({
           trending: res.data.Trending ?? [],
           topRated: res.data.TopRated ?? [],
@@ -54,28 +53,26 @@ export const HomePage: React.FC = () => {
   if (error) return <p style={{ padding: 40 }}>{error}</p>;
 
   return (
-    <main style={{ padding: 40, display: "flex", flexDirection: "column", gap: 40 }}>
+    <main style={{ padding: 40 }}>
 
       <Section title="Most Trending" list={courses.trending} />
-
       <Section title="Top Rated" list={courses.topRated} />
-
       <Section title="Newest" list={courses.newest} />
-
       <Section title="Best Sellers" list={courses.bestSellers} />
+
     </main>
   );
 };
 
 const Section: React.FC<{ title: string; list: Course[] }> = ({ title, list }) => (
-  <section>
+  <section style={{ marginBottom: 40 }}>
     <h2 style={{ marginBottom: 16 }}>{title}</h2>
 
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: 16
+        gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+        gap: 20
       }}
     >
       {list.map(c => (

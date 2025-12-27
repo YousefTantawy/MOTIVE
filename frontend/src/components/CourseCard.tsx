@@ -20,17 +20,26 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   const navigate = useNavigate();
 
   return (
-    <Card>
-      <h3>{title}</h3>
+    <Card
+      // ⬇️ IMPORTANT — make card fill the grid cell
+      className="w-full h-full"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 10
+      }}
+    >
+      <h3 style={{ fontSize: 18, fontWeight: 600 }}>{title}</h3>
 
       <p
-        style={{ fontSize: "14px", color: "#555" }}
+        style={{ fontSize: 14, color: "#555" }}
         dangerouslySetInnerHTML={{ __html: description }}
       />
 
       <RatingStars rating={reviews.length > 0 ? 5 : 4} />
 
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "auto" }}>
+      {/* push button to bottom */}
+      <div style={{ marginTop: "auto", display: "flex", justifyContent: "flex-end" }}>
         <Button onClick={() => navigate(`/course/${courseId}`)}>
           View Course
         </Button>
