@@ -8,38 +8,36 @@ export interface CourseCardProps {
   courseId: number;
   title: string;
   description: string;
-  reviews?: string[];
+  rating?: number; // new prop
 }
 
 export const CourseCard: React.FC<CourseCardProps> = ({
   courseId,
   title,
   description,
-  reviews = []
+  rating,
 }) => {
   const navigate = useNavigate();
 
   return (
-    <Card
-      // ⬇️ IMPORTANT — make card fill the grid cell
-      className="w-full h-full"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 10
-      }}
-    >
-      <h3 style={{ fontSize: 18, fontWeight: 600 }}>{title}</h3>
+    <Card style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <h3>{title}</h3>
 
       <p
-        style={{ fontSize: 14, color: "#555" }}
+        style={{ fontSize: "14px", color: "#555" }}
         dangerouslySetInnerHTML={{ __html: description }}
       />
 
-      <RatingStars rating={reviews.length > 0 ? 5 : 4} />
+      {rating !== undefined && (
+        <div style={{ margin: "8px 0" }}>
+          <RatingStars rating={rating} />
+          <span style={{ marginLeft: 6, fontSize: 14, color: "#333" }}>
+            {rating.toFixed(1)} / 5.0
+          </span>
+        </div>
+      )}
 
-      {/* push button to bottom */}
-      <div style={{ marginTop: "auto", display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "auto" }}>
         <Button onClick={() => navigate(`/course/${courseId}`)}>
           View Course
         </Button>
