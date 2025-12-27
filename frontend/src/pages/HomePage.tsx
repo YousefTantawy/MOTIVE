@@ -54,8 +54,7 @@ export const HomePage: React.FC = () => {
             key={c.courseId}
             courseId={c.courseId}
             title={c.title}
-            description={`<strong>Price:</strong> $${c.price}`}
-            reviews={Array(c.avgRating).fill("⭐")}
+            description={`<strong>Price:</strong> $${c.price}<br/><strong>Rating:</strong> ${c.avgRating.toFixed(1)}/5`}
           />
         ))}
       </Section>
