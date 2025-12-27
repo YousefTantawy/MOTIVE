@@ -44,14 +44,21 @@ export const HomePage: React.FC = () => {
   if (loading) return <p style={{ textAlign: "center" }}>Loading…</p>;
   if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
 
-  const renderCourseCard = (c: SimpleCourse) => (
+const renderCourseCard = (c: SimpleCourse) => {
+  const ratingText = c.avgRating !== undefined && c.avgRating !== null
+    ? `${c.avgRating.toFixed(1)} / 5.0`
+    : "N/A";
+
+  return (
     <CourseCard
       key={c.courseId}
       courseId={c.courseId}
       title={c.title}
-      description={`<strong>Price:</strong> $${c.price}<br/><strong>Rating:</strong> ${c.avgRating.toFixed(1)} / 5.0`}
+      description={`<strong>Price:</strong> $${c.price}<br/><strong>Rating:</strong> ${ratingText}`}
     />
   );
+};
+
 
   return (
     <div style={{ padding: 20, maxWidth: 1100, margin: "0 auto" }}>
