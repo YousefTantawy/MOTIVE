@@ -55,18 +55,37 @@ export const Navbar: React.FC = () => {
       }}
     >
       {/* Left links */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: "20px", marginRight: "40px", textDecoration: "none" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+        <Link
+          to="/"
+          style={{
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: "20px",
+            marginRight: "24px",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
           CoursePlatform
         </Link>
-        <Link to="/" style={linkStyle("/")}>Home</Link>
+        <Link to="/" style={linkStyle("/")}>
+          Home
+        </Link>
         {user && <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>}
         {user?.role === "instructor" && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
         {user && <Link to="/profile" style={linkStyle("/profile")}>Profile</Link>}
       </div>
 
       {/* Search bar */}
-      <form onSubmit={handleSearch} style={{ flex: 1, marginLeft: 20, marginRight: 20 }}>
+      <form
+        onSubmit={handleSearch}
+        style={{
+          flex: "0 0 200px", // small fixed width
+          marginLeft: 20,
+          marginRight: 20,
+        }}
+      >
         <input
           type="text"
           placeholder="Search courses..."
@@ -74,15 +93,16 @@ export const Navbar: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{
             width: "100%",
-            padding: "6px 12px",
+            padding: "6px 10px",
             borderRadius: 8,
             border: "1px solid #ccc",
+            fontSize: 14,
           }}
         />
       </form>
 
       {/* Right buttons */}
-      <div>
+      <div style={{ flex: "0 0 auto" }}>
         {!user ? (
           <Link
             to="/login"
