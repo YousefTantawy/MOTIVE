@@ -1,34 +1,14 @@
 // src/pages/ProfilePage.tsx
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { MainLayout } from "../layouts/MainLayout";
 import { authService } from "../services/authService";
 import axiosInstance from "../lib/axios";
 
 export const ProfilePage: React.FC = () => {
-  const currentUser = authService.getCurrentUser();
-  const userId = currentUser?.userId;
+  const user = authService.getCurrentUser();
+  const userId = user?.userId;
 
-  const [user, setUser] = useState<{
-    userId: number;
-    email: string;
-    firstName: string;
-    lastName: string;
-    headline: string;
-    biography: string;
-    profilePictureUrl: string;
-    roleId: number;
-  } | null>(null);
-
-  // Track which field is currently editable
-  const [editableField, setEditableField] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (userId) {
-      authService.fetchCurrentUser(userId).then(setUser).catch(console.error);
-    }
-  }, [userId]);
-
-  if (!currentUser || !userId) {
+  if (!user || !userId) {
     return (
       <MainLayout>
         <p>You are not logged in. Please <a href="/login">login</a>.</p>
@@ -36,116 +16,156 @@ export const ProfilePage: React.FC = () => {
     );
   }
 
-  if (!user) {
-    return (
-      <MainLayout>
-        <p>Loading profile...</p>
-      </MainLayout>
-    );
-  }
+  // State for fields + edit mode
+  const [firstName, setFirstName] = useState(user.firstName || "");
+  const [lastName, setLastName] = useState(user.lastName || "");
+  const [headline, setHeadline] = useState(user.headline || "");
+  const [biography, setBiography] = useState(user.biography || "");
+  const [email, setEmail] = useState(user.email || "");
+  const [profilePictureUrl, setProfilePictureUrl] = useState(user.profilePictureUrl || "");
 
-  const handleFieldChange = (field: string, value: string) => {
-    setUser((prev) => prev ? { ...prev, [field]: value } : prev);
-  };
+  const [editField, setEditField] = useState<null | string>(null); // tracks which field is editable
 
-  const handleUpdateField = async (field: string) => {
+  const handleSave = async (field: string) => {
     try {
-      let endpoint = "";
-      let payload: any = {};
-
       switch (field) {
         case "firstName":
         case "lastName":
         case "headline":
         case "biography":
-          endpoint = `/Auth/update-details/${userId}`;
-          payload = {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            headline: user.headline,
-            biography: user.biography,
-          };
+          await axiosInstance.put(`/Auth/update-details/${userId}`, { firstName, lastName, headline, biography });
+          alert("Details updated successfully");
           break;
         case "email":
-          endpoint = `/Auth/change-email/${userId}`;
-          payload = { newEmail: user.email };
+          await axiosInstance.put(`/Auth/change-email/${userId}`, { newEmail: email });
+          alert("Email updated successfully");
           break;
         case "profilePictureUrl":
-          endpoint = `/Auth/update-picture/${userId}`;
-          payload = { profilePictureUrl: user.profilePictureUrl };
+          await axiosInstance.put(`/Auth/update-picture/${userId}`, { profilePictureUrl });
+          alert("Profile picture updated successfully");
           break;
-        default:
-          return;
       }
-
-      await axiosInstance.put(endpoint, payload);
-      alert(`${field} updated successfully`);
-      setEditableField(null);
+      setEditField(null); // exit edit mode
     } catch (err) {
       console.error(err);
-      alert(`Error updating ${field}`);
+      alert("Error updating " + field);
     }
   };
 
   return (
     <MainLayout>
       <div style={{ width: "70%", margin: "0 auto", paddingTop: 40 }}>
-        {/* Profile Header */}
-        <div style={{ display: "flex", gap: 20, alignItems: "center", marginBottom: 40 }}>
-          <img
-            src={user.profilePictureUrl || "https://via.placeholder.com/120"}
-            alt="Profile"
-            style={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", border: "2px solid #ddd" }}
-          />
-          <div>
-            <h1>{user.firstName} {user.lastName}</h1>
-            <p style={{ fontSize: 16, color: "#666" }}>{user.headline || "Your headline here"}</p>
-            <p style={{ maxWidth: 500, color: "#444" }}>{user.biography || "Your biography goes here."}</p>
-          </div>
-        </div>
 
-        {/* Profile Fields */}
-        {[
-          { label: "First Name", field: "firstName" },
-          { label: "Last Name", field: "lastName" },
-          { label: "Headline", field: "headline" },
-          { label: "Biography", field: "biography" },
-          { label: "Email", field: "email" },
-          { label: "Profile Picture URL", field: "profilePictureUrl" },
-        ].map(({ label, field }) => (
-          <section key={field} style={{ marginBottom: 20 }}>
-            <label style={{ fontWeight: "bold" }}>{label}:</label>
-            {editableField === field ? (
+        {/* Profile Picture */}
+        <section style={{ marginBottom: 30 }}>
+          <h2>Profile Picture</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <img
+              src={profilePictureUrl || "https://via.placeholder.com/120"}
+              alt="Profile"
+              style={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", border: "2px solid #ddd" }}
+            />
+            {editField === "profilePictureUrl" ? (
               <>
-                {field === "biography" ? (
-                  <textarea
-                    value={user[field]}
-                    onChange={(e) => handleFieldChange(field, e.target.value)}
-                    style={{ display: "block", marginBottom: 10, padding: 8, width: "70%", minHeight: 80 }}
-                  />
-                ) : (
-                  <input
-                    type={field === "email" ? "email" : "text"}
-                    value={user[field]}
-                    onChange={(e) => handleFieldChange(field, e.target.value)}
-                    style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
-                  />
-                )}
-                <button onClick={() => handleUpdateField(field)} style={{ padding: "6px 12px" }}>Save</button>
-                <button onClick={() => setEditableField(null)} style={{ padding: "6px 12px", marginLeft: 8 }}>Cancel</button>
+                <input
+                  type="text"
+                  value={profilePictureUrl}
+                  onChange={(e) => setProfilePictureUrl(e.target.value)}
+                  style={{ padding: 8, width: "300px" }}
+                />
+                <button onClick={() => handleSave("profilePictureUrl")}>Save</button>
               </>
             ) : (
-              <span style={{ marginLeft: 10 }}>
-                {field === "profilePictureUrl" ? (
-                  <a href={user[field]} target="_blank" rel="noreferrer">View</a>
-                ) : (
-                  user[field] || "—"
-                )}
-                <button onClick={() => setEditableField(field)} style={{ marginLeft: 10, padding: "4px 8px" }}>Change</button>
-              </span>
+              <button onClick={() => setEditField("profilePictureUrl")}>Change</button>
             )}
-          </section>
-        ))}
+          </div>
+        </section>
+
+        {/* Personal Info */}
+        <section style={{ marginBottom: 30 }}>
+          <h2>Personal Info</h2>
+
+          {/* First Name */}
+          <div style={{ marginBottom: 10 }}>
+            <label>First Name: </label>
+            {editField === "firstName" ? (
+              <>
+                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                <button onClick={() => handleSave("firstName")}>Save</button>
+              </>
+            ) : (
+              <>
+                <span>{firstName}</span>
+                <button onClick={() => setEditField("firstName")}>Change</button>
+              </>
+            )}
+          </div>
+
+          {/* Last Name */}
+          <div style={{ marginBottom: 10 }}>
+            <label>Last Name: </label>
+            {editField === "lastName" ? (
+              <>
+                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                <button onClick={() => handleSave("lastName")}>Save</button>
+              </>
+            ) : (
+              <>
+                <span>{lastName}</span>
+                <button onClick={() => setEditField("lastName")}>Change</button>
+              </>
+            )}
+          </div>
+
+          {/* Headline */}
+          <div style={{ marginBottom: 10 }}>
+            <label>Headline: </label>
+            {editField === "headline" ? (
+              <>
+                <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} style={{ width: "70%" }} />
+                <button onClick={() => handleSave("headline")}>Save</button>
+              </>
+            ) : (
+              <>
+                <span>{headline}</span>
+                <button onClick={() => setEditField("headline")}>Change</button>
+              </>
+            )}
+          </div>
+
+          {/* Biography */}
+          <div style={{ marginBottom: 10 }}>
+            <label>Biography: </label>
+            {editField === "biography" ? (
+              <>
+                <textarea value={biography} onChange={(e) => setBiography(e.target.value)} style={{ width: "70%", minHeight: 100 }} />
+                <button onClick={() => handleSave("biography")}>Save</button>
+              </>
+            ) : (
+              <>
+                <span>{biography}</span>
+                <button onClick={() => setEditField("biography")}>Change</button>
+              </>
+            )}
+          </div>
+        </section>
+
+        {/* Email */}
+        <section style={{ marginBottom: 30 }}>
+          <h2>Email</h2>
+          {editField === "email" ? (
+            <>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "50%" }} />
+              <button onClick={() => handleSave("email")}>Save</button>
+            </>
+          ) : (
+            <>
+              <span>{email}</span>
+              <button onClick={() => setEditField("email")}>Change</button>
+            </>
+          )}
+        </section>
+
       </div>
     </MainLayout>
   );
