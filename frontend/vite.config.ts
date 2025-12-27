@@ -12,5 +12,10 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
+    
+    allowedHosts: [
+      'motive.italynorth.cloudapp.azure.com',
+      'localhost'
+    ]
   },
 })
