@@ -18,12 +18,16 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       const currentUser = authService.getCurrentUser();
+
+
       if (currentUser) {
         try {
           const profile = await authService.fetchProfile(currentUser.userId);
           setUser({
             ...currentUser,
             roleId: Number(profile.roleId), // Ensure number
+                  console.log("CurrentUser:", currentUser);
+                  console.log("Profile fetched:", profile);
           });
         } catch (error) {
           console.error("Failed to fetch profile:", error);
