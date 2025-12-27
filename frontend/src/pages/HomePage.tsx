@@ -44,55 +44,33 @@ export const HomePage: React.FC = () => {
   if (loading) return <p style={{ textAlign: "center" }}>Loading…</p>;
   if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
 
+  const renderCourseCard = (c: SimpleCourse) => (
+    <CourseCard
+      key={c.courseId}
+      courseId={c.courseId}
+      title={c.title}
+      description={`<strong>Price:</strong> $${c.price}<br/><strong>Rating:</strong> ${c.avgRating.toFixed(1)} / 5.0`}
+    />
+  );
+
   return (
     <div style={{ padding: 20, maxWidth: 1100, margin: "0 auto" }}>
       <h1>Welcome to Motive</h1>
 
       <Section title="Trending">
-        {trending.map(c => (
-          <CourseCard
-            key={c.courseId}
-            courseId={c.courseId}
-            title={c.title}
-            description={`<strong>Price:</strong> $${c.price}<br/><strong>Rating:</strong> ${c.avgRating.toFixed(1)}/5`}
-          />
-        ))}
+        {trending.map(renderCourseCard)}
       </Section>
 
       <Section title="Recently Added">
-        {recent.map(c => (
-          <CourseCard
-            key={c.courseId}
-            courseId={c.courseId}
-            title={c.title}
-            description={`<strong>Price:</strong> $${c.price}`}
-            reviews={Array(c.avgRating).fill("⭐")}
-          />
-        ))}
+        {recent.map(renderCourseCard)}
       </Section>
 
       <Section title="Best Sellers">
-        {bestSellers.map(c => (
-          <CourseCard
-            key={c.courseId}
-            courseId={c.courseId}
-            title={c.title}
-            description={`<strong>Price:</strong> $${c.price}`}
-            reviews={Array(c.avgRating).fill("⭐")}
-          />
-        ))}
+        {bestSellers.map(renderCourseCard)}
       </Section>
 
       <Section title="Top Rated">
-        {topRated.map(c => (
-          <CourseCard
-            key={c.courseId}
-            courseId={c.courseId}
-            title={c.title}
-            description={`<strong>Price:</strong> $${c.price}`}
-            reviews={Array(c.avgRating).fill("⭐")}
-          />
-        ))}
+        {topRated.map(renderCourseCard)}
       </Section>
     </div>
   );
