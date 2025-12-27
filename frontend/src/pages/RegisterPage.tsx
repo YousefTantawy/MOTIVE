@@ -19,9 +19,9 @@ export const RegisterPage: React.FC = () => {
       setIsLoading(true);
       setError("");
 
-      let roleId = 2; // default student
-      if (role === "instructor") roleId = 1;
-      else if (role === "admin") roleId = 0; // optional
+      let roleId = 3; // default student
+      if (role === "instructor") roleId = 2;
+      else if (role === "admin") roleId = 1; // optional
 
       await authService.register(firstName, lastName, email, password, roleId);
 
