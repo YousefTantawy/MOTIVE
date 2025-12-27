@@ -1,8 +1,16 @@
 import axiosInstance from "../lib/axios";
 
+export interface User {
+  userId: number;
+  email: string;
+  roleId: number; // 1=admin, 2=instructor, 3=student
+}
+
 export const authService = {
-  login: async (email: string, password: string) => {
+  // --- LOGIN ---
+  login: async (email: string, password: string): Promise<User> => {
     try {
+      // Call backend
       const response = await axiosInstance.post<{ message: string; userId: number; roleId: number }>(
         "/Auth/login",
         { email, password }
@@ -13,8 +21,9 @@ export const authService = {
       }
 
       const { userId, roleId } = response;
-      const user = { userId, email, roleId };
+      const user: User = { userId, email, roleId };
 
+      // Store locally for auth persistence
       localStorage.setItem("authToken", "mock_token_" + Date.now());
       localStorage.setItem("user", JSON.stringify(user));
       window.dispatchEvent(new Event("authChanged"));
@@ -32,13 +41,14 @@ export const authService = {
     }
   },
 
+  // --- REGISTER ---
   register: async (
     firstName: string,
     lastName: string,
     email: string,
     password: string,
     roleId: number
-  ) => {
+  ): Promise<User> => {
     try {
       const response = await axiosInstance.post<{ message: string; userId: number; roleId: number }>(
         "/Auth/register",
@@ -50,7 +60,7 @@ export const authService = {
       }
 
       const { userId, roleId: returnedRoleId } = response;
-      const user = { userId, email, roleId: returnedRoleId };
+      const user: User = { userId, email, roleId: returnedRoleId };
 
       localStorage.setItem("authToken", "mock_token_" + Date.now());
       localStorage.setItem("user", JSON.stringify(user));
@@ -68,13 +78,15 @@ export const authService = {
     }
   },
 
+  // --- LOGOUT ---
   logout: () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     window.dispatchEvent(new Event("authChanged"));
   },
 
-  getCurrentUser: () => {
+  // --- GET CURRENT USER ---
+  getCurrentUser: (): User | null => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   },
