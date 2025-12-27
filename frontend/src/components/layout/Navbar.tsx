@@ -19,25 +19,20 @@ export const Navbar: React.FC = () => {
 useEffect(() => {
 const fetchUserProfile = async () => {
   const currentUser = authService.getCurrentUser();
-  if (currentUser) {
-    try {
-      const profile = await authService.fetchProfile(currentUser.userId);
-      console.log("Profile fetched:", profile); // should log full profile
+  if (!currentUser) return setUser(null);
 
-      if (profile) {
-        setUser({
-          ...currentUser,
-          roleId: Number(profile.roleId),
-        });
-      } else {
-        setUser(currentUser); // fallback
-      }
-    } catch (error) {
-      console.error("Failed to fetch profile:", error);
-      setUser(currentUser); // fallback
-    }
-  } else {
-    setUser(null);
+  try {
+    const profile = await authService.fetchProfile(currentUser.userId);
+    console.log("Profile fetched:", profile); // should log full profile
+
+    // Use profile only if it exists
+    setUser({
+      ...currentUser,
+      roleId: profile?.roleId ?? currentUser.roleId ?? 3, // fallback to student if missing
+    });
+  } catch (err) {
+    console.error("Failed to fetch profile:", err);
+    setUser(currentUser); // fallback
   }
 };
 
