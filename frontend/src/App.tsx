@@ -13,8 +13,6 @@ import { StudentDashboard } from "./pages/StudentDashboard";
 import { InstructorDashboard } from "./pages/InstructorDashboard";
 import { CourseDetailsPage } from "./pages/CourseDetailsPage";
 import { PaymentPage } from "./pages/PaymentPage";
-import { TestPage } from "./pages/TestPage";
-import { NewCoursePage } from "./pages/NewCoursePage";
 
 export default function App() {
   return (
@@ -36,11 +34,9 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/course/:id" element={<CourseDetailsPage />} />
             <Route path="/payment" element={<PaymentPage />} />
-            <Route path="/test" element={<TestPage />} />
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/my-courses" element={<StudentDashboard />} />
             <Route path="/instructor" element={<InstructorDashboard />} />
-            <Route path="new-course" element={<NewCoursePage />} />
           </Routes>
         </div>
 
