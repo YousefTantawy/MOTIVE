@@ -97,4 +97,22 @@ export const authService = {
             throw new Error("Failed to fetch user profile");
         }
     },
-};
+},
+// --- NEW FUNCTION: GET USER WITH ROLE ---
+getUserWithRole: async (): Promise<User | null> => {
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser) return null;
+
+    try {
+        const profile = await authService.fetchProfile(currentUser.userId);
+        return {
+            userId: currentUser.userId,
+            email: currentUser.email,
+            roleId: profile?.roleId ?? 3, // fallback to student
+        };
+    } catch (err) {
+        console.error("Failed to fetch profile for role:", err);
+        return currentUser; // fallback if profile fetch fails
+    }
+}
+;
