@@ -6,17 +6,9 @@ export const ProfilePage: React.FC = () => {
   const user = authService.getCurrentUser();
   const userId = user?.userId;
 
-  const [profile, setProfile] = useState<any>(null); // full profile from backend
+  const [profile, setProfile] = useState<any>(null);
   const [editField, setEditField] = useState<null | string>(null);
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [headline, setHeadline] = useState("");
-  const [biography, setBiography] = useState("");
-  const [email, setEmail] = useState("");
-  const [profilePictureUrl, setProfilePictureUrl] = useState("");
-
-  // Fetch full profile when page loads
   useEffect(() => {
     if (!userId) return;
 
@@ -24,14 +16,6 @@ export const ProfilePage: React.FC = () => {
       try {
         const data = await authService.fetchProfile(userId);
         setProfile(data);
-
-        // Populate state fields
-        setFirstName(data.firstName || "");
-        setLastName(data.lastName || "");
-        setHeadline(data.headline || "");
-        setBiography(data.biography || "");
-        setEmail(data.email || "");
-        setProfilePictureUrl(data.profilePictureUrl || "");
       } catch (err) {
         console.error("Failed to load profile:", err);
       }
@@ -48,37 +32,13 @@ export const ProfilePage: React.FC = () => {
     );
   }
 
-  const handleSave = async (field: string) => {
-    try {
-      switch (field) {
-        case "firstName":
-        case "lastName":
-        case "headline":
-        case "biography":
-          await axiosInstance.put(`/Auth/update-details/${userId}`, { firstName, lastName, headline, biography });
-          alert("Details updated successfully");
-          break;
-        case "email":
-          await axiosInstance.put(`/Auth/change-email/${userId}`, { newEmail: email });
-          alert("Email updated successfully");
-          break;
-        case "profilePictureUrl":
-          await axiosInstance.put(`/Auth/update-picture/${userId}`, { profilePictureUrl });
-          alert("Profile picture updated successfully");
-          break;
-      }
-      setEditField(null);
-    } catch (err) {
-      console.error(err);
-      alert("Error updating " + field);
-    }
-  };
+  if (!profile) {
+    return <MainLayout><p>Loading profile...</p></MainLayout>;
+  }
 
   return (
     <MainLayout>
-      <div style={{ width: "70%", margin: "0 auto", paddingTop: 40 }}>
-        {/* ...your JSX remains exactly the same... */}
-      </div>
+      <pre>{JSON.stringify(profile, null, 2)}</pre>
     </MainLayout>
   );
 };
