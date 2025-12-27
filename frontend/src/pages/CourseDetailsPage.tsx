@@ -27,7 +27,6 @@ export const CourseDetailsPage: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchCourse();
   }, [id]);
 
@@ -51,14 +50,12 @@ export const CourseDetailsPage: React.FC = () => {
     const params = new URLSearchParams();
     if (id) params.set("courseId", id);
     if (course && course.price) params.set("price", String(course.price));
-
     const path = `/payment?${params.toString()}`;
 
     if (!user) {
       navigate(`/login?redirect=${encodeURIComponent(path)}`);
       return;
     }
-
     navigate(path);
   };
 
@@ -76,15 +73,13 @@ export const CourseDetailsPage: React.FC = () => {
       </MainLayout>
     );
 
-  // --- NEW: derive values from backend shape ---
-
+  // --- Derived values ---
   const instructorName =
     course.instructor?.length > 0 ? course.instructor[0].userName : "Instructor";
 
   const avgRating =
     course.reviews && course.reviews.length > 0
-      ? course.reviews.reduce((s: number, r: any) => s + r.rating, 0) /
-        course.reviews.length
+      ? course.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / course.reviews.length
       : 0;
 
   const mappedReviews =
@@ -98,6 +93,7 @@ export const CourseDetailsPage: React.FC = () => {
 
   return (
     <MainLayout>
+      {/* --- Hero Section --- */}
       <CourseHero
         title={course.title}
         description={course.description}
@@ -107,6 +103,7 @@ export const CourseDetailsPage: React.FC = () => {
         onEnroll={handleEnroll}
       />
 
+      {/* --- Buy / Enroll Buttons --- */}
       <div style={{ padding: "16px 0", display: "flex", gap: 12 }}>
         {course.price ? (
           <button
@@ -140,6 +137,69 @@ export const CourseDetailsPage: React.FC = () => {
         </button>
       </div>
 
+      {/* --- Course Info --- */}
+      <div style={{ marginTop: 20, display: "flex", flexWrap: "wrap", gap: 20 }}>
+        <div><strong>Category:</strong> {course.category}</div>
+        <div><strong>Level:</strong> {course.difficultyLevel}</div>
+        <div><strong>Language:</strong> {course.language}</div>
+        <div><strong>Status:</strong> {course.status}</div>
+        <div><strong>Created:</strong> {new Date(course.createdAt).toLocaleDateString()}</div>
+      </div>
+
+      {/* --- Objectives --- */}
+      {course.objectives?.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <h3>What you'll learn</h3>
+          <ul>
+            {course.objectives.map((o: string, i: number) => (
+              <li key={i}>{o}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* --- Requirements --- */}
+      {course.requirements?.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <h3>Requirements</h3>
+          <ul>
+            {course.requirements.map((r: string, i: number) => (
+              <li key={i}>{r}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* --- Target Audience --- */}
+      {course.targetAudience?.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <h3>Who this course is for</h3>
+          <ul>
+            {course.targetAudience.map((t: string, i: number) => (
+              <li key={i}>{t}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* --- Sections & Lessons --- */}
+      {course.sections?.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <h3>Course Content</h3>
+          {course.sections.map((s: any) => (
+            <div key={s.sectionId} style={{ marginBottom: 12 }}>
+              <strong>{s.title}</strong>
+              <ul>
+                {s.lessons.map((l: any) => (
+                  <li key={l.lessonId}>{l.title}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* --- Reviews --- */}
       <ReviewList reviews={mappedReviews} />
     </MainLayout>
   );
