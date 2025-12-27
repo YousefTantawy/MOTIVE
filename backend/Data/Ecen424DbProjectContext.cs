@@ -686,7 +686,7 @@ public partial class Ecen424DbProjectContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("last_name");
             entity.Property(e => e.ProfilePictureUrl)
-                .HasMaxLength(255)
+                .HasColumnType("text")
                 .HasColumnName("profile_picture_url");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
 
