@@ -3,10 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 
 interface User {
+  userId?: number;
   name?: string;
   email?: string;
   roleId?: number; // 1=admin, 2=instructor, 3=student
-  userId?: number;
 }
 
 export const Navbar: React.FC = () => {
@@ -21,20 +21,17 @@ export const Navbar: React.FC = () => {
       if (!currentUser) return setUser(null);
 
       try {
-        // FIX: fetchProfile should return the actual profile object
-        const profile = await authService.fetchProfile(currentUser.userId);
+        const profile = await authService.fetchProfile(currentUser.userId!);
+
         console.log("Profile fetched:", profile);
 
         setUser({
           ...currentUser,
-          roleId: profile?.roleId ?? 3, // fallback to student if missing
+          roleId: profile?.roleId ?? currentUser.roleId ?? 3,
         });
       } catch (err) {
         console.error("Failed to fetch profile:", err);
-        setUser({
-          ...currentUser,
-          roleId: currentUser.roleId ?? 3,
-        });
+        setUser(currentUser); // fallback to localStorage user
       }
     };
 
@@ -84,6 +81,7 @@ export const Navbar: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
+      {/* LEFT: Logo + links */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <Link
           to="/"
@@ -102,12 +100,14 @@ export const Navbar: React.FC = () => {
               My Learning
             </Link>
 
+            {/* Instructor Studio only for roleId 2 */}
             {user.roleId === 2 && (
               <Link to="/instructor" style={linkStyle("/instructor")}>
                 Studio
               </Link>
             )}
 
+            {/* Admin Dashboard only for roleId 1 */}
             {user.roleId === 1 && (
               <Link to="/admin" style={linkStyle("/admin")}>
                 Admin Dashboard
@@ -129,6 +129,7 @@ export const Navbar: React.FC = () => {
         )}
       </div>
 
+      {/* MIDDLE: Search bar */}
       <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
         <input
           type="text"
@@ -145,6 +146,7 @@ export const Navbar: React.FC = () => {
         />
       </form>
 
+      {/* RIGHT: Login/Logout */}
       <div>
         {!user ? (
           <Link
