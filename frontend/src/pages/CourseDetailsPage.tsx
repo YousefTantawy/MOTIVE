@@ -149,6 +149,8 @@ export const CourseDetailsPage: React.FC = () => {
       <div style={{ marginTop: 20, display: "flex", flexWrap: "wrap", gap: 20 }}>
         <div>
           <strong>Category:</strong> {course.categories?.join(", ") ?? "N/A"}
+          console.log(course);
+
         </div>
         <div><strong>Language:</strong> {course.language}</div>
         <div><strong>Status:</strong> {course.status}</div>
