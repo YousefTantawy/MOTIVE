@@ -10,7 +10,6 @@ export const authService = {
   // --- LOGIN ---
   login: async (email: string, password: string): Promise<User> => {
     try {
-      // Call backend
       const response = await axiosInstance.post<{ message: string; userId: number; roleId: number }>(
         "/Auth/login",
         { email, password }
@@ -23,7 +22,6 @@ export const authService = {
       const { userId, roleId } = response;
       const user: User = { userId, email, roleId };
 
-      // Store locally for auth persistence
       localStorage.setItem("authToken", "mock_token_" + Date.now());
       localStorage.setItem("user", JSON.stringify(user));
       window.dispatchEvent(new Event("authChanged"));
@@ -90,11 +88,10 @@ export const authService = {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   },
-},
 
-fetchCurrentUser: async (userId: number) => {
+  // --- FETCH FULL USER INFO ---
+  fetchCurrentUser: async (userId: number) => {
     try {
-      // This should match your backend endpoint returning full user info
       const user = await axiosInstance.get<{
         userId: number;
         email: string;
@@ -111,6 +108,5 @@ fetchCurrentUser: async (userId: number) => {
       console.error("Failed to fetch full user info:", err);
       throw err;
     }
-  },
-};
-;
+  }
+}; // <-- close object, no trailing comma
