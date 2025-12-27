@@ -147,7 +147,9 @@ export const CourseDetailsPage: React.FC = () => {
 
       {/* --- Course Info --- */}
       <div style={{ marginTop: 20, display: "flex", flexWrap: "wrap", gap: 20 }}>
-        <div><strong>Category:</strong> {course.category}</div>
+        <div>
+          <strong>Category:</strong> {course.categories?.join(", ") ?? "N/A"}
+        </div>
         <div><strong>Language:</strong> {course.language}</div>
         <div><strong>Status:</strong> {course.status}</div>
         <div><strong>Created:</strong> {new Date(course.createdAt).toLocaleDateString()}</div>
