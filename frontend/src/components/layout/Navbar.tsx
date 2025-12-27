@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 
 interface User {
+  userId: number;
   name?: string;
   email?: string;
   roleId?: number; // 1=admin, 2=instructor, 3=student
@@ -16,50 +17,68 @@ export const Navbar: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-useEffect(() => {
-  const fetchUserProfile = async () => {
-    const currentUser = authService.getCurrentUser();
-    if (!currentUser) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    let isMounted = true; // to prevent state update after unmount
 
-    try {
-      const profile = await authService.fetchProfile(currentUser.userId);
-      
-      if (!profile) {
-        console.log("Profile is null or undefined");
-        setUser(currentUser);
+    const fetchUser = async () => {
+      setLoading(true);
+
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        if (isMounted) {
+          setUser(null);
+          setLoading(false);
+        }
         return;
       }
 
-      console.log("Profile fetched:", profile);
+      try {
+        const profile = await authService.fetchProfile(currentUser.userId);
 
-      setUser({
-        userId: profile.userId,
-        email: profile.email,
-        roleId: profile.roleId ?? 3,
-        name: profile.firstName ? `${profile.firstName} ${profile.lastName}` : undefined,
-      });
-    } catch (err) {
-      console.error("Failed to fetch profile:", err);
-      setUser({
-        userId: currentUser.userId,
-        email: currentUser.email,
-        roleId: currentUser.roleId ?? 3,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (!profile) {
+          if (isMounted) {
+            setUser({
+              userId: currentUser.userId,
+              email: currentUser.email,
+              roleId: currentUser.roleId ?? 3,
+            });
+            setLoading(false);
+          }
+          return;
+        }
 
-  fetchUserProfile();
-  const onAuthChange = () => fetchUserProfile();
-  window.addEventListener("authChanged", onAuthChange);
-  return () => window.removeEventListener("authChanged", onAuthChange);
-}, []);
+        if (isMounted) {
+          setUser({
+            userId: profile.userId,
+            email: profile.email,
+            roleId: profile.roleId ?? 3,
+            name: profile.firstName ? `${profile.firstName} ${profile.lastName}` : undefined,
+          });
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+        if (isMounted) {
+          setUser({
+            userId: currentUser.userId,
+            email: currentUser.email,
+            roleId: currentUser.roleId ?? 3,
+          });
+          setLoading(false);
+        }
+      }
+    };
 
+    fetchUser();
+
+    const onAuthChange = () => fetchUser();
+    window.addEventListener("authChanged", onAuthChange);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener("authChanged", onAuthChange);
+    };
+  }, []);
 
   const handleLogout = () => {
     authService.logout();
@@ -81,7 +100,6 @@ useEffect(() => {
     whiteSpace: "nowrap" as const,
   });
 
-  // Delay rendering until user is loaded
   if (loading) {
     return (
       <nav
@@ -116,41 +134,22 @@ useEffect(() => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
-      {/* LEFT: Logo + links */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <Link
           to="/"
-          style={{
-            color: "#fff",
-            fontWeight: "bold",
-            fontSize: 20,
-            textDecoration: "none",
-          }}
+          style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}
         >
           CoursePlatform
         </Link>
 
-        <Link to="/" style={linkStyle("/")}>
-          Home
-        </Link>
+        <Link to="/" style={linkStyle("/")}>Home</Link>
 
         {user && (
           <>
-            <Link to="/my-courses" style={linkStyle("/my-courses")}>
-              My Learning
-            </Link>
+            <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
 
-            {user.roleId === 2 && (
-              <Link to="/instructor" style={linkStyle("/instructor")}>
-                Studio
-              </Link>
-            )}
-
-            {user.roleId === 1 && (
-              <Link to="/admin" style={linkStyle("/admin")}>
-                Admin Dashboard
-              </Link>
-            )}
+            {user.roleId === 2 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
+            {user.roleId === 1 && <Link to="/admin" style={linkStyle("/admin")}>Admin Dashboard</Link>}
 
             <Link
               to="/profile"
@@ -167,11 +166,7 @@ useEffect(() => {
         )}
       </div>
 
-      {/* MIDDLE: Search bar */}
-      <form
-        onSubmit={handleSearch}
-        style={{ flex: 1, display: "flex", justifyContent: "center" }}
-      >
+      <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
         <input
           type="text"
           value={searchQuery}
@@ -187,7 +182,6 @@ useEffect(() => {
         />
       </form>
 
-      {/* RIGHT: Login/Logout */}
       <div>
         {!user ? (
           <Link
