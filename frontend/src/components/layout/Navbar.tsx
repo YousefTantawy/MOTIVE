@@ -2,25 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 
+interface User {
+  name?: string;
+  email?: string;
+  roleId?: number; // 0=admin, 1=instructor, 2=student
+}
+
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [user, setUser] = useState<{ name?: string; email?: string; role?: string } | null>(
-    authService.getCurrentUser()
-  );
+  const [user, setUser] = useState<User | null>(authService.getCurrentUser());
   const [searchQuery, setSearchQuery] = useState("");
 
-  const linkStyle = (path: string) => ({
-    marginRight: "20px",
-    textDecoration: "none",
-    color: location.pathname === path ? "#646cff" : "#fff",
-    fontWeight: location.pathname === path ? "bold" : "normal",
-  });
-
   useEffect(() => {
-    const onAuth = () => setUser(authService.getCurrentUser());
-    window.addEventListener("authChanged", onAuth);
-    return () => window.removeEventListener("authChanged", onAuth);
+    const onAuthChange = () => setUser(authService.getCurrentUser());
+    window.addEventListener("authChanged", onAuthChange);
+    return () => window.removeEventListener("authChanged", onAuthChange);
   }, []);
 
   const handleLogout = () => {
@@ -35,9 +32,16 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const linkStyle = (path: string) => ({
+    marginRight: 20,
+    textDecoration: "none",
+    color: location.pathname === path ? "#646cff" : "#fff",
+    fontWeight: location.pathname === path ? "bold" : "normal",
+    whiteSpace: "nowrap" as const,
+  });
+
   return (
     <nav
-      role="navigation"
       style={{
         display: "flex",
         alignItems: "center",
@@ -53,38 +57,20 @@ export const Navbar: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}
     >
-      {/* LEFT: logo + links */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-        <Link
-          to="/"
-          style={{
-            color: "#fff",
-            fontWeight: "bold",
-            fontSize: "20px",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-          }}
-        >
+      {/* LEFT: Logo + links */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <Link to="/" style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}>
           CoursePlatform
         </Link>
-        <Link to="/" style={{ ...linkStyle("/"), whiteSpace: "nowrap" }}>
-          Home
-        </Link>
+        <Link to="/" style={linkStyle("/")}>Home</Link>
         {user && (
           <>
-            <Link to="/my-courses" style={{ ...linkStyle("/my-courses"), whiteSpace: "nowrap" }}>
-              My Learning
-            </Link>
-            {user.role === "instructor" && (
-              <Link to="/instructor" style={{ ...linkStyle("/instructor"), whiteSpace: "nowrap" }}>
-                Studio
-              </Link>
-            )}
+            <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
+            {user.roleId === 1 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
             <Link
               to="/profile"
               style={{
                 ...linkStyle("/profile"),
-                whiteSpace: "nowrap",
                 padding: "6px 10px",
                 border: "1px solid #646cff",
                 borderRadius: 6,
@@ -96,7 +82,7 @@ export const Navbar: React.FC = () => {
         )}
       </div>
 
-      {/* MIDDLE: search bar */}
+      {/* MIDDLE: Search bar */}
       <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
         <input
           type="text"
@@ -113,23 +99,20 @@ export const Navbar: React.FC = () => {
         />
       </form>
 
-      {/* RIGHT: login/logout */}
-      <div style={{ flexShrink: 0 }}>
+      {/* RIGHT: Login/Logout */}
+      <div>
         {!user ? (
           <Link
             to="/login"
-            aria-label="Login"
             style={{
               display: "inline-block",
               padding: "8px 12px",
               backgroundColor: "#646cff",
               color: "#fff",
               borderRadius: 8,
-              textDecoration: "none",
               fontWeight: 600,
               boxShadow: "0 2px 6px rgba(100,108,255,0.25)",
-              border: "1px solid rgba(0,0,0,0.08)",
-              whiteSpace: "nowrap",
+              textDecoration: "none",
             }}
           >
             Login
