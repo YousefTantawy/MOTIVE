@@ -1,4 +1,3 @@
-// CourseCard.tsx
 import React from "react";
 import { Card } from "./ui/Card";
 import { Button } from "./ui/Button";
@@ -9,7 +8,7 @@ export interface CourseCardProps {
   courseId: number;
   title: string;
   description: string;
-  reviews?: string[];
+  reviews?: number[]; // fractions for stars, 0 to 1 per star
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({
@@ -21,7 +20,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   const navigate = useNavigate();
 
   return (
-    <Card>
+    <Card style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <h3>{title}</h3>
 
       <p
@@ -29,7 +28,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
         dangerouslySetInnerHTML={{ __html: description }}
       />
 
-      {reviews.length > 0 && <RatingStars rating={reviews.length} />}
+      {reviews.length > 0 && <RatingStars fractions={reviews} />}
 
       <div
         style={{

@@ -7,7 +7,7 @@ export interface SimpleCourse {
   title: string;
   price: number;
   createdAt: string;
-  avgRating?: number | null;
+  avgRating: number | null;
 }
 
 export const HomePage: React.FC = () => {
@@ -27,7 +27,6 @@ export const HomePage: React.FC = () => {
       const data = await axiosInstance.get<SimpleCourse[]>(url);
       setter(data);
     } catch (err: any) {
-      console.error(`Failed to fetch ${url}:`, err);
       setError(err.message);
     }
   }
@@ -40,18 +39,15 @@ export const HomePage: React.FC = () => {
       fetchSection("/Courses/trending", setTrending),
       fetchSection("/Courses/recent", setRecent),
       fetchSection("/Courses/bestsellers", setBestSellers),
-      fetchSection("/Courses/toprated", setTopRated)
-    ])
-      .finally(() => setLoading(false));
+      fetchSection("/Courses/toprated", setTopRated),
+    ]).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p style={{ textAlign: "center" }}>Loading…</p>;
-  if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
-
   const renderCourseCard = (c: SimpleCourse) => {
-    const rating = c.avgRating ?? 0; // default 0 if undefined
-    const ratingText = `${rating.toFixed(1)} / 5.0`;
-    const ratingPercentage = Math.min(Math.max((rating / 5) * 100, 0), 100); // 0-100%
+    const ratingText =
+      c.avgRating !== undefined && c.avgRating !== null
+        ? `${c.avgRating.toFixed(1)} / 5.0`
+        : "N/A";
 
     return (
       <CourseCard
@@ -59,10 +55,20 @@ export const HomePage: React.FC = () => {
         courseId={c.courseId}
         title={c.title}
         description={`<strong>Price:</strong> $${c.price}<br/><strong>Rating:</strong> ${ratingText}`}
-        ratingPercentage={ratingPercentage} // pass percentage to CourseCard
+        reviews={
+          c.avgRating !== null && c.avgRating !== undefined
+            ? Array.from({ length: 5 }, (_, i) => {
+                const percentage = Math.min(Math.max(c.avgRating - i, 0), 1);
+                return percentage; // store fraction of star
+              })
+            : []
+        }
       />
     );
   };
+
+  if (loading) return <p style={{ textAlign: "center" }}>Loading…</p>;
+  if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
 
   return (
     <div style={{ padding: 20, maxWidth: 1100, margin: "0 auto" }}>
@@ -78,7 +84,7 @@ export const HomePage: React.FC = () => {
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
-  children
+  children,
 }) => (
   <div style={{ marginTop: 25 }}>
     <h2>{title}</h2>
@@ -86,7 +92,7 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
       style={{
         display: "grid",
         gap: 16,
-        gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))"
+        gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
       }}
     >
       {children}
