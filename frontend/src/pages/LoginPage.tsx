@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import { LoginForm } from "../features/auth/LoginForm";
 import { authService } from "../services/authService";
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -13,41 +14,16 @@ export const LoginPage: React.FC = () => {
     try {
       setIsLoading(true);
       setError("");
-      // Support two demo accounts:
-      // - Admin1 / password => instructor
-      // - Admin2 / password => student
-      // Demo test accounts
-      if (email === "student@gmail.com" && password === "student") {
-        const user = { name: "Student", email, role: "student" };
-        localStorage.setItem("authToken", "mock_token_" + Date.now());
-        localStorage.setItem("user", JSON.stringify(user));
-        window.dispatchEvent(new Event("authChanged"));
-        const params = new URLSearchParams(location.search);
-        const redirect = params.get("redirect") || "/my-courses";
-        navigate(redirect);
-        return;
-      }
 
-      if (email === "teacher@gmail.com" && password === "teacher") {
-        const user = { name: "Teacher", email, role: "instructor" };
-        localStorage.setItem("authToken", "mock_token_" + Date.now());
-        localStorage.setItem("user", JSON.stringify(user));
-        window.dispatchEvent(new Event("authChanged"));
-        const params = new URLSearchParams(location.search);
-        const redirect = params.get("redirect") || "/my-courses";
-        navigate(redirect);
-        return;
-      }
+      // Use real backend login
+      const { user } = await authService.login(email, password);
 
-      // Default mock login: accept any credentials as student
-      localStorage.setItem("authToken", "mock_token_" + Date.now());
-      localStorage.setItem("user", JSON.stringify({ email, role: "student" }));
-      window.dispatchEvent(new Event("authChanged"));
+      // Redirect after login
       const params = new URLSearchParams(location.search);
       const redirect = params.get("redirect") || "/my-courses";
       navigate(redirect);
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      setError(err?.response?.data?.message || err.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -66,4 +42,3 @@ export const LoginPage: React.FC = () => {
     </MainLayout>
   );
 };
-
