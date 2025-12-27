@@ -22,7 +22,6 @@ export const authService = {
       return user;
 
     } catch (error: any) {
-      // Map HTTP status codes to custom messages
       let message = error.message || "Unknown error";
       if (message.includes("status: 401")) message = "Unauthorized access";
       else if (message.includes("status: 403")) message = "Forbidden access";
@@ -35,35 +34,35 @@ export const authService = {
     }
   },
 
-register: async (firstName: string, lastName: string, email: string, password: string, roleId: number) => {
-  try {
-    const response = await axiosInstance.post<{ message: string; userId: number; role: string }>(
-      "/Auth/register",
-      { firstName, lastName, email, password, roleId }
-    );
+  register: async (firstName: string, lastName: string, email: string, password: string, roleId: number) => {
+    try {
+      const response = await axiosInstance.post<{ message: string; userId: number; role: string }>(
+        "/Auth/register",
+        { firstName, lastName, email, password, roleId }
+      );
 
-    if (!response || typeof response.userId === "undefined") {
-      throw new Error("Register failed: invalid response from server");
+      if (!response || typeof response.userId === "undefined") {
+        throw new Error("Register failed: invalid response from server");
+      }
+
+      const { userId, role } = response;
+      const user = { userId, role, email };
+
+      localStorage.setItem("authToken", "mock_token_" + Date.now());
+      localStorage.setItem("user", JSON.stringify(user));
+      window.dispatchEvent(new Event("authChanged"));
+
+      return user;
+    } catch (error: any) {
+      let message = error.message || "Unknown error";
+      if (message.includes("status: 400")) message = "Bad request, check your input";
+      else if (message.includes("status: 409")) message = "Email already exists";
+      else if (message.includes("status: 500")) message = "Server error, please try again later";
+
+      console.error("Register error:", message);
+      throw new Error(message);
     }
-
-    const { userId, role } = response;
-    const user = { userId, role, email };
-
-    localStorage.setItem("authToken", "mock_token_" + Date.now());
-    localStorage.setItem("user", JSON.stringify(user));
-    window.dispatchEvent(new Event("authChanged"));
-
-    return user;
-  } catch (error: any) {
-    let message = error.message || "Unknown error";
-    if (message.includes("status: 400")) message = "Bad request, check your input";
-    else if (message.includes("status: 409")) message = "Email already exists";
-    else if (message.includes("status: 500")) message = "Server error, please try again later";
-
-    console.error("Register error:", message);
-    throw new Error(message);
-  }
-};
+  },
 
   logout: () => {
     localStorage.removeItem("authToken");
@@ -74,5 +73,5 @@ register: async (firstName: string, lastName: string, email: string, password: s
   getCurrentUser: () => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
-  },
-};
+  }
+}; // <-- no semicolon needed here if this is the end
