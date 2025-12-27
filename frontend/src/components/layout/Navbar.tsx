@@ -16,24 +16,34 @@ export const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      const currentUser = authService.getCurrentUser();
-      if (!currentUser) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
+  const fetchUserProfile = async () => {
+  const currentUser = authService.getCurrentUser();
+  if (!currentUser) {
+    setUser(null);
+    setLoading(false);
+    return;
+  }
 
-      try {
-        const profile = await authService.fetchProfile(currentUser.userId);
-        setUser({ ...currentUser, roleId: profile.roleId });
-      } catch (err) {
-        console.error("Failed to fetch profile:", err);
-        setUser(currentUser); // fallback
-      } finally {
-        setLoading(false);
-      }
-    };
+  try {
+    const profile = await authService.fetchProfile(currentUser.userId);
+
+    // Make sure profile exists before using roleId
+    setUser({
+      ...currentUser,
+      roleId: profile?.roleId ?? currentUser.roleId ?? 3, // fallback to 3 if undefined
+    });
+
+    console.log("Profile fetched:", profile);
+  } catch (err) {
+    console.error("Failed to fetch profile:", err);
+    setUser({
+      ...currentUser,
+      roleId: currentUser.roleId ?? 3, // fallback if API fails
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchUserProfile();
     const onAuthChange = () => fetchUserProfile();
