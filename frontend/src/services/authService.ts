@@ -99,7 +99,7 @@ export const authService = {
     },
 },
 // --- NEW FUNCTION: GET USER WITH ROLE ---
-getUserWithRole: async (): Promise<User | null> => {
+async getUserWithRole(): Promise<User | null> {
     const currentUser = authService.getCurrentUser();
     if (!currentUser) return null;
 
@@ -115,4 +115,5 @@ getUserWithRole: async (): Promise<User | null> => {
         return currentUser; // fallback if profile fetch fails
     }
 }
+
 ;
