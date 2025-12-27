@@ -1,84 +1,124 @@
 import React, { useEffect, useState } from "react";
+import { CourseCard } from "../components/CourseCard";
 
-type Course = {
+export interface SimpleCourse {
   courseId: number;
   title: string;
   price: number;
   createdAt: string;
   avgRating: number;
-};
+}
 
-const HomePage: React.FC = () => {
-  const [trending, setTrending] = useState<Course[]>([]);
-  const [recent, setRecent] = useState<Course[]>([]);
-  const [bestSellers, setBestSellers] = useState<Course[]>([]);
-  const [topRated, setTopRated] = useState<Course[]>([]);
+export const HomePage: React.FC = () => {
+  const [trending, setTrending] = useState<SimpleCourse[]>([]);
+  const [recent, setRecent] = useState<SimpleCourse[]>([]);
+  const [bestSellers, setBestSellers] = useState<SimpleCourse[]>([]);
+  const [topRated, setTopRated] = useState<SimpleCourse[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = "https://your-backend-domain.com/api/Courses";
+  async function fetchSection(
+    url: string,
+    setState: React.Dispatch<React.SetStateAction<SimpleCourse[]>>
+  ) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${url} failed`);
+    const data = await res.json();
+    setState(data);
+  }
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [trendRes, recentRes, bestRes, topRes] = await Promise.all([
-          fetch(`${API_BASE}/trending`),
-          fetch(`${API_BASE}/recent`),
-          fetch(`${API_BASE}/bestsellers`),
-          fetch(`${API_BASE}/toprated`)
-        ]);
+    setLoading(true);
+    setError(null);
 
-        if (!trendRes.ok || !recentRes.ok || !bestRes.ok || !topRes.ok) {
-          throw new Error("One or more API calls failed");
-        }
-
-        const trendingData = await trendRes.json();
-        const recentData = await recentRes.json();
-        const bestSellerData = await bestRes.json();
-        const topRatedData = await topRes.json();
-
-        setTrending(trendingData);
-        setRecent(recentData);
-        setBestSellers(bestSellerData);
-        setTopRated(topRatedData);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
+    Promise.all([
+      fetchSection("/api/Courses/trending", setTrending),
+      fetchSection("/api/Courses/recent", setRecent),
+      fetchSection("/api/Courses/bestsellers", setBestSellers),
+      fetchSection("/api/Courses/toprated", setTopRated)
+    ])
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p>Loading home page...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-
-  const renderCourses = (list: Course[]) =>
-    list.map(c => (
-      <li key={c.courseId}>
-        <strong>{c.title}</strong> — ${c.price} — ⭐ {c.avgRating}
-      </li>
-    ));
+  if (loading) return <p style={{ textAlign: "center" }}>Loading…</p>;
+  if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
 
   return (
-    <div>
-      <h1>Home Page</h1>
+    <div style={{ padding: "20px", maxWidth: "1100px", margin: "0 auto" }}>
+      <h1>Welcome to Motive</h1>
 
-      <h2>🔥 Trending</h2>
-      <ul>{renderCourses(trending)}</ul>
+      {/* Trending */}
+      <Section title="Trending">
+        {trending.map(c => (
+          <CourseCard
+            key={c.courseId}
+            courseId={c.courseId}
+            title={c.title}
+            description={`<strong>Price:</strong> $${c.price}`}
+            reviews={Array(c.avgRating).fill("⭐")}
+          />
+        ))}
+      </Section>
 
-      <h2>⭐ Top Rated</h2>
-      <ul>{renderCourses(topRated)}</ul>
+      {/* Recent */}
+      <Section title="Recently Added">
+        {recent.map(c => (
+          <CourseCard
+            key={c.courseId}
+            courseId={c.courseId}
+            title={c.title}
+            description={`<strong>Price:</strong> $${c.price}`}
+            reviews={Array(c.avgRating).fill("⭐")}
+          />
+        ))}
+      </Section>
 
-      <h2>🆕 Recently Added</h2>
-      <ul>{renderCourses(recent)}</ul>
+      {/* Best Sellers */}
+      <Section title="Best Sellers">
+        {bestSellers.map(c => (
+          <CourseCard
+            key={c.courseId}
+            courseId={c.courseId}
+            title={c.title}
+            description={`<strong>Price:</strong> $${c.price}`}
+            reviews={Array(c.avgRating).fill("⭐")}
+          />
+        ))}
+      </Section>
 
-      <h2>🏆 Best Sellers</h2>
-      <ul>{renderCourses(bestSellers)}</ul>
+      {/* Top Rated */}
+      <Section title="Top Rated">
+        {topRated.map(c => (
+          <CourseCard
+            key={c.courseId}
+            courseId={c.courseId}
+            title={c.title}
+            description={`<strong>Price:</strong> $${c.price}`}
+            reviews={Array(c.avgRating).fill("⭐")}
+          />
+        ))}
+      </Section>
     </div>
   );
 };
 
-export default HomePage;
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
+  title,
+  children
+}) => (
+  <div style={{ marginTop: "25px" }}>
+    <h2>{title}</h2>
+
+    <div
+      style={{
+        display: "grid",
+        gap: "16px",
+        gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))"
+      }}
+    >
+      {children}
+    </div>
+  </div>
+);
