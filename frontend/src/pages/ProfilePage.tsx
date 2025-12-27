@@ -1,21 +1,22 @@
-// ProfilePage.tsx
 import React, { useState } from "react";
 import { MainLayout } from "../layouts/MainLayout";
 import { authService } from "../services/authService";
-import axios from "axios";
+import api from "../lib/axiosInstance";
 
 export const ProfilePage: React.FC = () => {
   const user = authService.getCurrentUser();
   const userId = user?.userId;
 
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [headline, setHeadline] = useState(user?.headline || "");
-  const [biography, setBiography] = useState(user?.biography || "");
+  const [firstName, setFirstName] = useState((user as any)?.firstName || "");
+  const [lastName, setLastName] = useState((user as any)?.lastName || "");
+  const [headline, setHeadline] = useState((user as any)?.headline || "");
+  const [biography, setBiography] = useState((user as any)?.biography || "");
   const [email, setEmail] = useState(user?.email || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [profilePictureUrl, setProfilePictureUrl] = useState(user?.profilePictureUrl || "");
+  const [profilePictureUrl, setProfilePictureUrl] = useState(
+    (user as any)?.profilePictureUrl || ""
+  );
 
   if (!user || !userId) {
     return (
@@ -27,7 +28,12 @@ export const ProfilePage: React.FC = () => {
 
   const handleUpdateDetails = async () => {
     try {
-      await axios.put(`/api/Auth/update-details/${userId}`, { firstName, lastName, headline, biography });
+      await api.put(`/Auth/update-details/${userId}`, {
+        firstName,
+        lastName,
+        headline,
+        biography,
+      });
       alert("Details updated successfully");
     } catch (err) {
       console.error(err);
@@ -37,7 +43,9 @@ export const ProfilePage: React.FC = () => {
 
   const handleChangeEmail = async () => {
     try {
-      await axios.put(`/api/Auth/change-email/${userId}`, { newEmail: email });
+      await api.put(`/Auth/change-email/${userId}`, {
+        newEmail: email,
+      });
       alert("Email updated successfully");
     } catch (err) {
       console.error(err);
@@ -47,7 +55,10 @@ export const ProfilePage: React.FC = () => {
 
   const handleChangePassword = async () => {
     try {
-      await axios.put(`/api/Auth/change-password/${userId}`, { currentPassword, newPassword });
+      await api.put(`/Auth/change-password/${userId}`, {
+        currentPassword,
+        newPassword,
+      });
       alert("Password changed successfully");
       setCurrentPassword("");
       setNewPassword("");
@@ -59,7 +70,9 @@ export const ProfilePage: React.FC = () => {
 
   const handleUpdatePicture = async () => {
     try {
-      await axios.put(`/api/Auth/update-picture/${userId}`, { profilePictureUrl });
+      await api.put(`/Auth/update-picture/${userId}`, {
+        profilePictureUrl,
+      });
       alert("Profile picture updated successfully");
     } catch (err) {
       console.error(err);
@@ -75,12 +88,20 @@ export const ProfilePage: React.FC = () => {
           <img
             src={profilePictureUrl || "https://via.placeholder.com/120"}
             alt="Profile"
-            style={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", border: "2px solid #ddd" }}
+            style={{
+              width: 120,
+              height: 120,
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "2px solid #ddd",
+            }}
           />
           <div>
             <h1>{firstName} {lastName}</h1>
             <p style={{ fontSize: 16, color: "#666" }}>{headline || "Your headline here"}</p>
-            <p style={{ maxWidth: 500, color: "#444" }}>{biography || "Your biography goes here."}</p>
+            <p style={{ maxWidth: 500, color: "#444" }}>
+              {biography || "Your biography goes here."}
+            </p>
           </div>
         </div>
 
@@ -94,7 +115,9 @@ export const ProfilePage: React.FC = () => {
             onChange={(e) => setProfilePictureUrl(e.target.value)}
             style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
           />
-          <button onClick={handleUpdatePicture} style={{ padding: "8px 16px" }}>Update Picture</button>
+          <button onClick={handleUpdatePicture} style={{ padding: "8px 16px" }}>
+            Update Picture
+          </button>
         </section>
 
         {/* Personal Info */}
@@ -127,7 +150,9 @@ export const ProfilePage: React.FC = () => {
             onChange={(e) => setBiography(e.target.value)}
             style={{ display: "block", marginBottom: 10, padding: 8, width: "70%", minHeight: 100 }}
           />
-          <button onClick={handleUpdateDetails} style={{ padding: "8px 16px" }}>Update Details</button>
+          <button onClick={handleUpdateDetails} style={{ padding: "8px 16px" }}>
+            Update Details
+          </button>
         </section>
 
         {/* Email */}
@@ -140,7 +165,9 @@ export const ProfilePage: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
           />
-          <button onClick={handleChangeEmail} style={{ padding: "8px 16px" }}>Update Email</button>
+          <button onClick={handleChangeEmail} style={{ padding: "8px 16px" }}>
+            Update Email
+          </button>
         </section>
 
         {/* Password */}
@@ -160,7 +187,9 @@ export const ProfilePage: React.FC = () => {
             onChange={(e) => setNewPassword(e.target.value)}
             style={{ display: "block", marginBottom: 10, padding: 8, width: "50%" }}
           />
-          <button onClick={handleChangePassword} style={{ padding: "8px 16px" }}>Change Password</button>
+          <button onClick={handleChangePassword} style={{ padding: "8px 16px" }}>
+            Change Password
+          </button>
         </section>
       </div>
     </MainLayout>
