@@ -15,15 +15,21 @@ export const LoginPage: React.FC = () => {
       setIsLoading(true);
       setError("");
 
-      // Use real backend login
+      // Call backend login
       const { user } = await authService.login(email, password);
 
-      // Redirect after login
+      // Redirect only if login succeeds
       const params = new URLSearchParams(location.search);
       const redirect = params.get("redirect") || "/my-courses";
       navigate(redirect);
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || "Login failed");
+      // Handle backend errors
+      if (err?.response?.status === 401) {
+        setError("Invalid email or password.");
+      } else {
+        setError(err?.response?.data?.message || err.message || "Login failed");
+      }
+      // Do NOT navigate
     } finally {
       setIsLoading(false);
     }
