@@ -4,7 +4,10 @@ namespace MotiveBackend.Models.DTOs
 {
 	public class RegisterDto
 	{
-		[Required]
+        [Required]
+        public ulong RoleId { get; set; }
+
+        [Required]
 		public string FirstName { get; set; }
 
 		[Required]

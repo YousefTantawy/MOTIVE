@@ -26,6 +26,11 @@ namespace MotiveBackend.Controllers
                 return BadRequest("Email is already registered.");
             }
 
+            if (request.RoleId != 2 && request.RoleId != 3)
+            {
+                return BadRequest("Invalid Role selected. Only Student (3) or Instructor (2) allowed.");
+            }
+
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             var newUser = new User
@@ -33,7 +38,7 @@ namespace MotiveBackend.Controllers
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,
-                RoleId = 1,
+                RoleId = request.RoleId,
                 CreatedAt = DateTime.Now
             };
 
@@ -75,7 +80,7 @@ namespace MotiveBackend.Controllers
             {
                 message = "Login successful",
                 userId = authRecord.UserId,
-                role = authRecord.User.Role.Name
+                role = authRecord.User.Role.RoleId
             });
         }
     }
