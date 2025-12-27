@@ -128,22 +128,23 @@ export const RegisterPage: React.FC = () => {
           }}
         />
 
-        <button
-          onClick={handleRegisterClick}
-          disabled={isLoading}
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            background: "#646cff",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-            boxSizing: "border-box",
-          }}
-        >
-          {isLoading ? "Registering..." : "Register"}
-        </button>
+            <button
+      onClick={handleRegister}  // ← use the correct function name
+      disabled={isLoading}
+      style={{
+        width: "100%",
+        padding: "10px 12px",
+        background: "#646cff",
+        color: "#fff",
+        border: "none",
+        borderRadius: 8,
+        cursor: "pointer",
+        boxSizing: "border-box",
+      }}
+    >
+      {isLoading ? "Registering..." : "Register"}
+    </button>
+
         <p style={{ marginTop: 16, textAlign: "center" }}>
           Already have an account? <Link to="/login">Login here</Link>
         </p>
