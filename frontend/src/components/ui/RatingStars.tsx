@@ -1,42 +1,30 @@
+// RatingStars.tsx
 import React from "react";
 
-interface RatingStarsProps {
-  rating: number; // average rating, e.g., 4.2
-  max?: number; // default 5
-  size?: number; // px
+interface Props {
+  fractions: number[]; // [1, 1, 0.5, 0, 0]
+  size?: number;
 }
 
-export const RatingStars: React.FC<RatingStarsProps> = ({
-  rating,
-  max = 5,
-  size = 16,
-}) => {
-  const percentage = (rating / max) * 100;
-
+export const RatingStars: React.FC<Props> = ({ fractions, size = 20 }) => {
   return (
-    <div
-      style={{
-        display: "inline-block",
-        position: "relative",
-        fontSize: size,
-        lineHeight: 1,
-        color: "#ddd", // empty stars
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          overflow: "hidden",
-          width: `${percentage}%`,
-          whiteSpace: "nowrap",
-          color: "#FFD700", // filled stars color
-        }}
-      >
-        {"★★★★★"}
-      </div>
-      <div>{"★★★★★"}</div>
+    <div style={{ display: "flex", gap: 2 }}>
+      {fractions.map((f, i) => (
+        <div
+          key={i}
+          style={{
+            width: size,
+            height: size,
+            background: `linear-gradient(to right, gold ${f * 100}%, #ddd ${f * 100}%)`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            fontSize: size,
+            lineHeight: 1,
+          }}
+        >
+          ★
+        </div>
+      ))}
     </div>
   );
 };

@@ -9,10 +9,9 @@ export interface CourseCardProps {
   courseId: number;
   title: string;
   description: string;
-  reviews?: number[];
+  reviews?: number[]; // fractions array from 0 to 1
 }
 
-// **Named export**
 export const CourseCard: React.FC<CourseCardProps> = ({
   courseId,
   title,
@@ -30,7 +29,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         dangerouslySetInnerHTML={{ __html: description }}
       />
 
-      {reviews.length > 0 && <RatingStars rating={reviews[0]} />}
+      {reviews.length > 0 && <RatingStars fractions={reviews} />}
 
       <div
         style={{
