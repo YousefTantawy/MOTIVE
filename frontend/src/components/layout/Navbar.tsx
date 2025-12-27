@@ -15,35 +15,38 @@ export const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch live profile on mount and on auth change
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      const currentUser = authService.getCurrentUser();
+// Fetch live profile on mount and on auth change
+useEffect(() => {
+  const fetchUserProfile = async () => {
+    const currentUser = authService.getCurrentUser();
 
+    if (currentUser) {
+      try {
+        const profile = await authService.fetchProfile(currentUser.userId);
 
-      if (currentUser) {
-        try {
-          const profile = await authService.fetchProfile(currentUser.userId);
-          setUser({
-            ...currentUser,
-            roleId: Number(profile.roleId), // Ensure number
-                  console.log("CurrentUser:", currentUser);
-                  console.log("Profile fetched:", profile);
-          });
-        } catch (error) {
-          console.error("Failed to fetch profile:", error);
-          setUser(currentUser); // fallback to localStorage user
-        }
-      } else {
-        setUser(null);
+        // Logging must be outside the object literal
+        console.log("CurrentUser:", currentUser);
+        console.log("Profile fetched:", profile);
+
+        setUser({
+          ...currentUser,
+          roleId: Number(profile.roleId), // Ensure number
+        });
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+        setUser(currentUser); // fallback to localStorage user
       }
-    };
+    } else {
+      setUser(null);
+    }
+  };
 
-    fetchUserProfile();
+  fetchUserProfile();
 
-    const onAuthChange = () => fetchUserProfile();
-    window.addEventListener("authChanged", onAuthChange);
-    return () => window.removeEventListener("authChanged", onAuthChange);
-  }, []);
+  const onAuthChange = () => fetchUserProfile();
+  window.addEventListener("authChanged", onAuthChange);
+  return () => window.removeEventListener("authChanged", onAuthChange);
+}, []);
 
   const handleLogout = () => {
     authService.logout();
