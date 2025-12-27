@@ -20,37 +20,36 @@ namespace MotiveBackend.Controllers
         // Scaffold-DbContext "Server=motivedatabase.mysql.database.azure.com;Database=myshop;User ID=ousefTantawy;Password=el7amamsyel7amamsy!!;SslMode=Required;" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -ContextDir Data -Force
         // Editable depending on the database
 
-        [HttpGet]
-        public async Task<IActionResult> GetCoursesHomePage()
+        // 1. Trending -> api/Courses/trending
+        [HttpGet("trending")]
+        public async Task<IActionResult> GetMostTrendings()
         {
-            // 1. Trending (Wait for it to finish)
-            var trending = await _context.ViewMostTrendings
-                                         .Take(10)
-                                         .ToListAsync();
+            var trending = await _context.ViewMostTrendings.Take(10).ToListAsync();
+            return Ok(trending);
+        }
 
-            // 2. Top Rated (Wait for it to finish)
-            var topRated = await _context.ViewTopRateds
-                                         .Take(10)
-                                         .ToListAsync();
+        // 2. Recent -> api/Courses/recent
+        [HttpGet("recent")]
+        public async Task<IActionResult> GetMostRecent()
+        {
+            var newest = await _context.ViewMostRecents.Take(10).ToListAsync();
+            return Ok(newest);
+        }
 
-            // 3. Newest (Wait for it to finish)
-            var newest = await _context.ViewMostRecents
-                                       .Take(10)
-                                       .ToListAsync();
+        // 3. Best Sellers -> api/Courses/bestsellers
+        [HttpGet("bestsellers")]
+        public async Task<IActionResult> ViewBestSellers()
+        {
+            var bestSellers = await _context.ViewMostEnrolleds.Take(10).ToListAsync();
+            return Ok(bestSellers);
+        }
 
-            // 4. Best Sellers (Wait for it to finish)
-            var bestSellers = await _context.ViewMostEnrolleds
-                                            .Take(10)
-                                            .ToListAsync();
-
-            // 5. Return everything
-            return Ok(new
-            {
-                Trending = trending,
-                TopRated = topRated,
-                Newest = newest,
-                BestSellers = bestSellers
-            });
+        // 4. Top Rated -> api/Courses/toprated
+        [HttpGet("toprated")]
+        public async Task<IActionResult> ViewTopRated()
+        {
+            var topRated = await _context.ViewTopRateds.Take(10).ToListAsync();
+            return Ok(topRated);
         }
 
         [HttpGet("{id}")]
