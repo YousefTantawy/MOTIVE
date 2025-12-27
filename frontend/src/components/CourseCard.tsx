@@ -1,3 +1,4 @@
+// CourseCard.tsx
 import React from "react";
 import { Card } from "./ui/Card";
 import { Button } from "./ui/Button";
@@ -8,10 +9,11 @@ export interface CourseCardProps {
   courseId: number;
   title: string;
   description: string;
-  reviews?: number[]; // fractions for stars, 0 to 1 per star
+  reviews?: number[];
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({
+// **Named export**
+export const CourseCard: React.FC<CourseCardProps> = ({
   courseId,
   title,
   description,
@@ -42,5 +44,3 @@ const CourseCard: React.FC<CourseCardProps> = ({
     </Card>
   );
 };
-
-export default CourseCard;
