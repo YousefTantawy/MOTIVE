@@ -31,33 +31,27 @@ const ProfilePage: React.FC = () => {
     if (!userId) return;
 
     const loadProfile = async () => {
-      try {
-        const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-        const data = response.data || response;
+  try {
+    const response = await axiosInstance.get(`/Auth/profile/${userId}`);
+    const data = response.data || response;
 
-        setProfile(data);
-        setFirstName(data.firstName ?? "");
-        setLastName(data.lastName ?? "");
-        setHeadline(data.headline ?? "");
-        setBiography(data.biography ?? "");
-        setEmail(data.email ?? "");
-        setProfilePictureUrl(data.profilePictureUrl ?? "");
-        setLinks(data.links ?? []);
+    setProfile(data);
+    setFirstName(data.firstName ?? "");
+    setLastName(data.lastName ?? "");
+    setHeadline(data.headline ?? "");
+    setBiography(data.biography ?? "");
+    setEmail(data.email ?? "");
+    setProfilePictureUrl(data.profilePictureUrl ?? "");
+    setPhoneNumbers(data.phoneNumbers ?? []); // directly from profile
+    setLinks(data.links?.map((l: any) => ({ type: l.type || "", url: l.url || "" })) ?? []); // properly formatted
+  } catch (err) {
+    console.error("Failed to load profile:", err);
+    alert("Failed to load profile");
+  } finally {
+    setLoading(false);
+  }
+};
 
-        // Fetch phone numbers
-        try {
-          const phoneResp = await axiosInstance.get(`/Auth/${userId}/phones`);
-          setPhoneNumbers(phoneResp.data?.phoneNumbers ?? []);
-        } catch (err: any) {
-          if (err.response?.status !== 405) console.error(err);
-        }
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-        alert("Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    };
 
     loadProfile();
   }, [userId]);
