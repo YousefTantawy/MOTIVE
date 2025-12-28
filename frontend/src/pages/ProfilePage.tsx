@@ -20,7 +20,7 @@ const ProfilePage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [profilePictureUrl, setProfilePictureUrl] = useState("");
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
-  const [links, setLinks] = useState<{ type: string; url: string }[]>([]);
+  const [links, setLinks] = useState<{ PlatformName: string; Url: string }[]>([]);
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -31,27 +31,40 @@ const ProfilePage: React.FC = () => {
     if (!userId) return;
 
     const loadProfile = async () => {
-  try {
-    const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-    const data = response.data || response;
+      try {
+        const response = await axiosInstance.get(`/Auth/profile/${userId}`);
+        const data = response.data || response;
 
-    setProfile(data);
-    setFirstName(data.firstName ?? "");
-    setLastName(data.lastName ?? "");
-    setHeadline(data.headline ?? "");
-    setBiography(data.biography ?? "");
-    setEmail(data.email ?? "");
-    setProfilePictureUrl(data.profilePictureUrl ?? "");
-    setPhoneNumbers(data.phoneNumbers ?? []); // directly from profile
-    setLinks(data.links?.map((l: any) => ({ type: l.type || "", url: l.url || "" })) ?? []); // properly formatted
-  } catch (err) {
-    console.error("Failed to load profile:", err);
-    alert("Failed to load profile");
-  } finally {
-    setLoading(false);
-  }
-};
+        setProfile(data);
+        setFirstName(data.firstName ?? "");
+        setLastName(data.lastName ?? "");
+        setHeadline(data.headline ?? "");
+        setBiography(data.biography ?? "");
+        setEmail(data.email ?? "");
+        setProfilePictureUrl(data.profilePictureUrl ?? "");
 
+        // Map links from API
+        setLinks(
+          data.links?.map((l: any) => ({
+            PlatformName: l.PlatformName || "",
+            Url: l.Url || "",
+          })) ?? []
+        );
+
+        // Fetch phone numbers
+        try {
+          const phoneResp = await axiosInstance.get(`/Auth/${userId}/phones`);
+          setPhoneNumbers(phoneResp.data?.phoneNumbers ?? []);
+        } catch (err: any) {
+          if (err.response?.status !== 405) console.error(err);
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+        alert("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     loadProfile();
   }, [userId]);
@@ -282,11 +295,11 @@ const ProfilePage: React.FC = () => {
                   <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
                     <input
                       type="text"
-                      placeholder="Type (e.g., LinkedIn)"
-                      value={link.type}
+                      placeholder="Platform Name"
+                      value={link.PlatformName}
                       onChange={(e) => {
                         const newLinks = [...links];
-                        newLinks[idx].type = e.target.value;
+                        newLinks[idx].PlatformName = e.target.value;
                         setLinks(newLinks);
                       }}
                       style={{ flex: 1 }}
@@ -294,10 +307,10 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="text"
                       placeholder="URL"
-                      value={link.url}
+                      value={link.Url}
                       onChange={(e) => {
                         const newLinks = [...links];
-                        newLinks[idx].url = e.target.value;
+                        newLinks[idx].Url = e.target.value;
                         setLinks(newLinks);
                       }}
                       style={{ flex: 2 }}
@@ -313,7 +326,7 @@ const ProfilePage: React.FC = () => {
                     </button>
                   </div>
                 ))}
-                <button onClick={() => setLinks([...links, { type: "", url: "" }])} style={{ marginBottom: 5 }}>
+                <button onClick={() => setLinks([...links, { PlatformName: "", Url: "" }])} style={{ marginBottom: 5 }}>
                   + Add Link
                 </button>
                 <button onClick={() => handleSave("links")}>Save</button>
@@ -324,8 +337,8 @@ const ProfilePage: React.FC = () => {
                   <ul>
                     {links.map((link, idx) => (
                       <li key={idx}>
-                        <a href={link.url} target="_blank" rel="noopener noreferrer">
-                          {link.type}: {link.url}
+                        <a href={link.Url} target="_blank" rel="noopener noreferrer">
+                          {link.PlatformName}: {link.Url}
                         </a>
                       </li>
                     ))}
@@ -418,7 +431,6 @@ const ProfilePage: React.FC = () => {
 
         {/* Danger Zone */}
         <section style={{ marginTop: 50, borderTop: "1px solid #ddd", paddingTop: 20 }}>
-          <h2 style={{ color: "red" }}> </h2>
           {!showDeleteConfirm ? (
             <button
               onClick={() => setShowDeleteConfirm(true)}
