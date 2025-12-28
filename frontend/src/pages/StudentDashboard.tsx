@@ -90,15 +90,16 @@ export const StudentDashboard: React.FC = () => {
           >
             {enrollments.map((course) => (
               <Link
-                key={enrollment.courseId}
-                to={`/course/${enrollment.courseId}/video`} // updated path
+                key={course.courseId}
+                to={`/course/${course.courseId}/video`} // navigate to CoursePage/video
                 style={{ textDecoration: "none" }}
               >
                 <Card>
-                  <h3>{enrollment.title}</h3>
+                  <h3>{course.title}</h3>
                 </Card>
               </Link>
             ))}
+
           </div>
         )}
       </div>
