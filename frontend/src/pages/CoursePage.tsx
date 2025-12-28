@@ -41,6 +41,7 @@ export const CoursePage: React.FC = () => {
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
 
+  // Fetch course data
   useEffect(() => {
     const fetchCourse = async () => {
       setLoading(true);
@@ -62,6 +63,7 @@ export const CoursePage: React.FC = () => {
     fetchCourse();
   }, [courseId, userId]);
 
+  // Update video watch time
   const handleTimeUpdate = async (seconds: number) => {
     if (!currentLesson) return;
     try {
@@ -76,33 +78,33 @@ export const CoursePage: React.FC = () => {
     }
   };
 
-  const handleCompleteLesson = async () => {
-    if (!currentLesson) return;
+  // Toggle lesson complete / uncomplete
+  const toggleLessonComplete = async (lesson: Lesson) => {
+    const isDone = lesson.isCompleted || false;
     try {
       await axiosInstance.post("/Dashboard/completeLessonCheck", {
         userId,
         courseId: Number(courseId),
-        lessonId: currentLesson.lessonId,
-        isCompleted: true,
+        lessonId: lesson.lessonId,
+        isCompleted: !isDone,
       });
-      // Update local state
+
       setCourse((prev) => {
         if (!prev) return prev;
-        const updatedSections = prev.sections.map((section) => ({
-          ...section,
-          lessons: section.lessons.map((lesson) =>
-            lesson.lessonId === currentLesson.lessonId
-              ? { ...lesson, isCompleted: true }
-              : lesson
+        const updatedSections = prev.sections.map((sec) => ({
+          ...sec,
+          lessons: sec.lessons.map((l) =>
+            l.lessonId === lesson.lessonId ? { ...l, isCompleted: !isDone } : l
           ),
         }));
         return { ...prev, sections: updatedSections };
       });
     } catch (err) {
-      console.error("Failed to mark lesson complete:", err);
+      console.error("Failed to toggle lesson completion:", err);
     }
   };
 
+  // Submit review
   const handleSubmitReview = async () => {
     try {
       await axiosInstance.post("/Dashboard/review", {
@@ -124,136 +126,107 @@ export const CoursePage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, flexWrap: "wrap", position: "relative" }}>
+      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, position: "relative" }}>
         
+        {/* Sidebar */}
+        <div
+          style={{
+            position: "fixed",
+            top: 64,
+            left: 0,
+            height: `calc(100vh - 64px)`,
+            width: sidebarOpen ? 300 : 0,
+            borderRight: sidebarOpen ? "1px solid #ddd" : "none",
+            padding: sidebarOpen ? "20px 10px" : 0,
+            overflowY: "auto",
+            transition: "width 0.3s ease",
+            backgroundColor: "#fff",
+            zIndex: 999,
+          }}
+        >
+          {sidebarOpen && (
+            <div>
+              <h2 style={{ marginTop: 0 }}>{course?.courseTitle}</h2>
+              {course?.sections.map((section) => (
+                <div key={section.sectionId} style={{ marginBottom: 20 }}>
+                  <h3>{section.title}</h3>
+                  <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+                    {section.lessons.map((lesson) => {
+                      const isDone = lesson.isCompleted || false;
+                      return (
+                        <li
+                          key={lesson.lessonId}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "6px 10px",
+                            marginBottom: 4,
+                            borderRadius: 6,
+                            backgroundColor:
+                              currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <span onClick={() => setCurrentLesson(lesson)}>
+                            {lesson.title}{" "}
+                            {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
+                          </span>
 
-
-{/* Sidebar */}
-<div
-  style={{
-    position: "fixed",
-    top: 64,
-    left: 0,
-    height: `calc(100vh - 64px)`,
-    width: sidebarOpen ? 300 : 0,
-    borderRight: sidebarOpen ? "1px solid #ddd" : "none",
-    padding: sidebarOpen ? "20px 10px" : 0,
-    overflowY: "auto",
-    transition: "width 0.3s ease",
-    backgroundColor: "#fff",
-    zIndex: 999,
-  }}
->
-{sidebarOpen && (
-  <>
-    <h2 style={{ marginTop: 0 }}>{course?.courseTitle}</h2>
-   {course?.sections.map((section) => (
-  <div key={section.sectionId} style={{ marginBottom: 20 }}>
-    <h3>{section.title}</h3>
-    <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-      {section.lessons.map((lesson) => {
-        const isDone = lesson.isCompleted || false;
-
-        const toggleComplete = async () => {
-          try {
-            await axiosInstance.post("/Dashboard/completeLessonCheck", {
-              userId,
-              courseId: Number(courseId),
-              lessonId: lesson.lessonId,
-              isCompleted: !isDone,
-            });
-
-            // Update local state
-            setCourse((prev) => {
-              if (!prev) return prev;
-              const updatedSections = prev.sections.map((sec) => ({
-                ...sec,
-                lessons: sec.lessons.map((l) =>
-                  l.lessonId === lesson.lessonId ? { ...l, isCompleted: !isDone } : l
-                ),
-              }));
-              return { ...prev, sections: updatedSections };
-            });
-          } catch (err) {
-            console.error("Failed to toggle lesson completion:", err);
-          }
-        };
-
-        return (
-          <li
-            key={lesson.lessonId}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "6px 10px",
-              marginBottom: 4,
-              borderRadius: 6,
-              backgroundColor:
-                currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
-              cursor: "pointer",
-            }}
-          >
-            <span onClick={() => setCurrentLesson(lesson)}>
-              {lesson.title}{" "}
-              {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
-            </span>
-            
-            {/* Custom checkbox */}
-            <div
-              onClick={(e) => { e.stopPropagation(); toggleComplete(); }}
-              style={{
-                width: 20,
-                height: 20,
-                border: "2px solid #646cff",
-                borderRadius: 4,
-                backgroundColor: isDone ? "#646cff" : "transparent",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-            >
-              {isDone && <span style={{ color: "#fff", fontSize: 14 }}>✔</span>}
+                          {/* Custom checkbox */}
+                          <div
+                            onClick={(e) => { e.stopPropagation(); toggleLessonComplete(lesson); }}
+                            style={{
+                              width: 20,
+                              height: 20,
+                              border: "2px solid #646cff",
+                              borderRadius: 4,
+                              backgroundColor: isDone ? "#646cff" : "transparent",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            {isDone && <span style={{ color: "#fff", fontSize: 14 }}>✔</span>}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
             </div>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-))}
+          )}
+        </div>
 
+        {/* Sidebar Toggle Button */}
+        <div
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          style={{
+            position: "fixed",
+            left: sidebarOpen ? 300 : 0,
+            top: 64 + 100,
+            width: 40,
+            height: 40,
+            backgroundColor: "#646cff",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            borderRadius: 6,
+            transition: "left 0.3s ease",
+            fontWeight: "bold",
+            zIndex: 1000,
+          }}
+        >
+          {sidebarOpen ? "<" : ">"}
+        </div>
 
-
-{/* Sidebar Toggle Button */}
-<div
-  onClick={() => setSidebarOpen(!sidebarOpen)}
-  style={{
-    position: "fixed",
-    left: sidebarOpen ? 300 : 0,
-    top: 64 + 100, // adjust vertical position
-    width: 40,
-    height: 40,
-    backgroundColor: "#646cff",
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    borderRadius: 6,
-    transition: "left 0.3s ease",
-    fontWeight: "bold",
-    zIndex: 1000,
-  }}
->
-  {sidebarOpen ? "<" : ">"}
-</div>
-
-
-
-        {/* Video + Review + Details */}
-        <div style={{ flex: 1, minWidth: 400, display: "flex", flexDirection: "column", gap: 20 }}>
+        {/* Video + Details + Review */}
+        <div style={{ flex: 1, minWidth: 400, marginLeft: sidebarOpen ? 300 : 0, transition: "margin-left 0.3s ease", display: "flex", flexDirection: "column", gap: 20 }}>
           
           {/* Video */}
           {currentLesson ? (
