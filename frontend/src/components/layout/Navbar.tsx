@@ -139,7 +139,7 @@ export const Navbar: React.FC = () => {
           to="/"
           style={{ color: "#fff", fontWeight: "bold", fontSize: 20, textDecoration: "none" }}
         >
-          CoursePlatform
+          Motive
         </Link>
 
         <Link to="/" style={linkStyle("/")}>Home</Link>

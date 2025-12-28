@@ -66,8 +66,6 @@ export const HomePage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: 30 }}>Motive</h1>
-
       <CarouselSection title="Trending" courses={trending} />
       <CarouselSection title="Recently Added" courses={recent} />
       <CarouselSection title="Best Sellers" courses={bestSellers} />
