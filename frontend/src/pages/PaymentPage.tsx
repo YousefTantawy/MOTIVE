@@ -29,20 +29,21 @@ export const PaymentPage: React.FC = () => {
   const [cvv, setCvv] = useState("");
   const [processing, setProcessing] = useState(false);
   const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [courseTitle, setCourseTitle] = useState<string>(""); // store course name
+  const [courseTitle, setCourseTitle] = useState<string>("");
 
-  // Fetch course info on mount
+  // Fetch course info
   useEffect(() => {
     const fetchCourse = async () => {
+      if (!courseId) return;
       try {
-        const res = await axiosInstance.get(`/api/Courses/${courseId}`);
+        const res = await axiosInstance.get(`/Courses/${courseId}`);
         setCourseTitle(res.data?.title || `Course ${courseId}`);
       } catch (err) {
         console.log("Failed to fetch course info:", err);
         setCourseTitle(`Course ${courseId}`);
       }
     };
-    if (courseId) fetchCourse();
+    fetchCourse();
   }, [courseId]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -54,39 +55,25 @@ export const PaymentPage: React.FC = () => {
     if (!validateCvv(cvv)) return setPopup({ type: "error", message: "Invalid CVV." });
 
     setProcessing(true);
-    console.log("Sending payment payload:", { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" });
 
     try {
       const response = await axiosInstance.post(
         "/Payments/checkout",
         { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" },
-        { responseType: "text" }
+        { headers: { "Content-Type": "application/json" }, responseType: "text" }
       );
 
-      console.log("Payment response:", response.data);
+      const message = response.data === "success" 
+        ? `Payment completed for ${courseTitle}`
+        : response.data;
 
-      if (response.data === "success") {
-        setPopup({ type: "success", message: `Payment completed for course ${courseTitle}` });
-        setTimeout(() => navigate("/my-courses"), 2000);
-      } else {
-        setPopup({ type: "error", message: response.data || "Payment failed. Please try again." });
-      }
+      setPopup({ type: "success", message });
     } catch (err: any) {
-      console.log("Payment request error:", err);
-
-      let serverMessage = "Payment failed. Please try again.";
-      if (err.response?.data) {
-        try {
-          const data = typeof err.response.data === "string" ? JSON.parse(err.response.data) : err.response.data;
-          serverMessage = data.message || data || serverMessage;
-        } catch {
-          serverMessage = err.response.data;
-        }
-      } else if (err.message) {
-        serverMessage = err.message;
-      }
-
-      setPopup({ type: "error", message: serverMessage });
+      const backendMessage = err.response?.data;
+      setPopup({
+        type: "error",
+        message: backendMessage || "Payment failed. Please try again."
+      });
     } finally {
       setProcessing(false);
     }
