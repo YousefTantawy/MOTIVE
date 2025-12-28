@@ -14,6 +14,8 @@ import { InstructorDashboard } from "./pages/InstructorDashboard";
 import { CourseDetailsPage } from "./pages/CourseDetailsPage";
 import { PaymentPage } from "./pages/PaymentPage";
 import  ProfilePage  from "./pages/ProfilePage";
+import { CoursePage } from "./pages/CoursePage";
+
 
 export default function App() {
   return (
@@ -39,6 +41,7 @@ export default function App() {
             <Route path="/my-courses" element={<StudentDashboard />} />
             <Route path="/instructor" element={<InstructorDashboard />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/course/:courseId" element={<CoursePage />} />
           </Routes>
         </div>
 
