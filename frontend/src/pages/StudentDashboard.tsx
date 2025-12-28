@@ -72,7 +72,7 @@ export const StudentDashboard: React.FC = () => {
   return (
     <MainLayout>
       <div style={{ maxWidth: 1100, margin: "24px auto", padding: 20 }}>
-        <h1 style={{ textAlign: "center", marginBottom: 40 }}>Welcome to Motive</h1>
+        <h1 style={{ textAlign: "center", marginBottom: 40 }}>Your Courses</h1>
 
         {loading ? (
           <div style={{ textAlign: "center" }}>Loading your courses...</div>
