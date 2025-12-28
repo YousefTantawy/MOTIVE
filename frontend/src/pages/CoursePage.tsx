@@ -35,6 +35,9 @@ export const CoursePage: React.FC = () => {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [rating, setRating] = useState<number>(0);
+  const [comment, setComment] = useState<string>("");
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -86,48 +89,82 @@ export const CoursePage: React.FC = () => {
     }
   };
 
+  const handleSubmitReview = async () => {
+    try {
+      await axiosInstance.post("/Dashboard/review", {
+        userId,
+        courseId: Number(courseId),
+        rating,
+        comment,
+      });
+      alert("Review submitted!");
+      setRating(0);
+      setComment("");
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+    }
+  };
+
   if (loading) return <MainLayout><p>Loading course...</p></MainLayout>;
   if (error) return <MainLayout><p style={{ color: "red" }}>{error}</p></MainLayout>;
 
   return (
     <MainLayout>
-      <div style={{
-        display: "flex",
-        gap: 20,
-        maxWidth: 1100,
-        margin: "0 auto",
-        padding: 20,
-        flexWrap: "wrap"
-      }}>
-        {/* Lessons Sidebar */}
-        <div style={{ width: 300, flexShrink: 0 }}>
-          <h2>{course?.courseTitle}</h2>
-          {course?.sections.map((section) => (
-            <div key={section.sectionId} style={{ marginBottom: 20 }}>
-              <h3>{section.title}</h3>
-              <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-                {section.lessons.map((lesson) => (
-                  <li
-                    key={lesson.lessonId}
-                    style={{
-                      padding: "8px 12px",
-                      marginBottom: 4,
-                      cursor: "pointer",
-                      backgroundColor: currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
-                      borderRadius: 4,
-                    }}
-                    onClick={() => setCurrentLesson(lesson)}
-                  >
-                    {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, flexWrap: "wrap" }}>
+        
+        {/* Sidebar */}
+        {sidebarOpen && (
+          <div style={{ width: 300, flexShrink: 0, borderRight: "1px solid #ddd", paddingRight: 10 }}>
+            <h2>{course?.courseTitle}</h2>
+            {course?.sections.map((section) => (
+              <div key={section.sectionId} style={{ marginBottom: 20 }}>
+                <h3>{section.title}</h3>
+                <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+                  {section.lessons.map((lesson) => (
+                    <li
+                      key={lesson.lessonId}
+                      style={{
+                        padding: "8px 12px",
+                        marginBottom: 4,
+                        cursor: "pointer",
+                        backgroundColor: currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
+                        borderRadius: 4,
+                      }}
+                      onClick={() => setCurrentLesson(lesson)}
+                    >
+                      {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* Video Player */}
-        <div style={{ flex: 1, minWidth: 400 }}>
+        {/* Toggle Sidebar Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          style={{
+            position: "absolute",
+            left: sidebarOpen ? 300 : 0,
+            top: 100,
+            zIndex: 100,
+            backgroundColor: "#646cff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "50%",
+            width: 30,
+            height: 30,
+            cursor: "pointer",
+          }}
+        >
+          {sidebarOpen ? "<" : ">"}
+        </button>
+
+        {/* Video + Review */}
+        <div style={{ flex: 1, minWidth: 400, display: "flex", flexDirection: "column", gap: 20 }}>
+          
+          {/* Video */}
           {currentLesson ? (
             <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: 8, overflow: "hidden", backgroundColor: "#000" }}>
               <video
@@ -135,22 +172,51 @@ export const CoursePage: React.FC = () => {
                 src={currentLesson.videoUrl || undefined}
                 controls
                 autoPlay
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                }}
-                onTimeUpdate={(e) =>
-                  handleTimeUpdate(Math.floor((e.target as HTMLVideoElement).currentTime))
-                }
+                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+                onTimeUpdate={(e) => handleTimeUpdate(Math.floor((e.target as HTMLVideoElement).currentTime))}
                 onEnded={handleCompleteLesson}
               />
             </div>
           ) : (
             <p>Select a lesson to start learning.</p>
           )}
+
+          {/* Review Section */}
+          <div style={{ marginTop: 20, padding: 20, backgroundColor: "#f0f0f5", borderRadius: 8 }}>
+            <h3>Leave a Review</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              {[1,2,3,4,5].map((star) => (
+                <span
+                  key={star}
+                  onClick={() => setRating(star)}
+                  style={{ cursor: "pointer", fontSize: 24, color: star <= rating ? "#ffc107" : "#ccc" }}
+                >
+                  ★
+                </span>
+              ))}
+              <span>{rating} / 5</span>
+            </div>
+            <textarea
+              placeholder="Write your comment..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              style={{ width: "100%", minHeight: 80, padding: 10, borderRadius: 6, border: "1px solid #ccc", marginBottom: 10 }}
+            />
+            <button
+              onClick={handleSubmitReview}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: "#646cff",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                cursor: "pointer",
+              }}
+            >
+              Submit Review
+            </button>
+          </div>
+
         </div>
       </div>
     </MainLayout>
