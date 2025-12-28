@@ -46,31 +46,31 @@ export const PaymentPage: React.FC = () => {
     fetchCourse();
   }, [courseId]);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+ const handleSubmit = async (e?: React.FormEvent) => {
   e?.preventDefault();
-
-  if (!cardName.trim()) return setPopup({ type: "error", message: "Please enter the cardholder name." });
-  if (!validateCardNumber(cardNumber)) return setPopup({ type: "error", message: "Invalid card number." });
-  if (!validateExpiry(expiry)) return setPopup({ type: "error", message: "Invalid or expired expiry date (MM/YY)." });
-  if (!validateCvv(cvv)) return setPopup({ type: "error", message: "Invalid CVV." });
-
   setProcessing(true);
+  setPopup(null);
 
   try {
     const response = await axiosInstance.post(
       "/Payments/checkout",
       { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" },
-      { headers: { "Content-Type": "application/json" }, responseType: "text" }
+      {
+        headers: { "Content-Type": "application/json" },
+        responseType: "text",
+        validateStatus: () => true, // <-- ignore HTTP status, accept all
+      }
     );
 
-    setPopup({ type: "success", message: response.data }); // <-- just show backend text
-  } catch (err: any) {
-    setPopup({ type: "error", message: err.response?.data || err.message }); // <-- just show backend text
+    // wait 3 seconds before showing the message
+    await new Promise((res) => setTimeout(res, 3000));
+
+    // show whatever text the backend returned
+    setPopup({ type: response.status === 200 ? "success" : "error", message: response.data });
   } finally {
     setProcessing(false);
   }
 };
-
 
   return (
     <MainLayout>
