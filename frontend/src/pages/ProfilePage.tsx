@@ -26,47 +26,6 @@ const ProfilePage: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
-  // Styles
-  const cardStyle: React.CSSProperties = {
-    backgroundColor: "#f8f9fa",
-    padding: 20,
-    borderRadius: 12,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    marginBottom: 30,
-  };
-
-  const fieldStyle: React.CSSProperties = {
-    marginBottom: 20,
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: 8,
-    borderRadius: 6,
-    border: "1px solid #ccc",
-    marginTop: 5,
-  };
-
-  const btnStyle: React.CSSProperties = {
-    padding: "6px 12px",
-    borderRadius: 6,
-    border: "none",
-    backgroundColor: "#646cff",
-    color: "#fff",
-    cursor: "pointer",
-    marginLeft: 10,
-  };
-
-  const saveBtn: React.CSSProperties = {
-    padding: "6px 12px",
-    borderRadius: 6,
-    border: "none",
-    backgroundColor: "#28a745",
-    color: "#fff",
-    cursor: "pointer",
-    marginTop: 5,
-  };
-
   // Load profile
   useEffect(() => {
     if (!userId) return;
@@ -193,21 +152,52 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  // --- Styling helpers ---
+  const cardStyle: React.CSSProperties = {
+    background: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+  };
+
+  const inputStyle: React.CSSProperties = {
+    padding: 8,
+    borderRadius: 6,
+    border: "1px solid #ccc",
+    width: "100%",
+    marginBottom: 8,
+  };
+
+  const btnStyle: React.CSSProperties = {
+    padding: "8px 16px",
+    borderRadius: 6,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 600,
+  };
+
+  const dangerBtn: React.CSSProperties = {
+    ...btnStyle,
+    backgroundColor: "red",
+    color: "#fff",
+  };
+
+  const saveBtn: React.CSSProperties = {
+    ...btnStyle,
+    backgroundColor: "#646cff",
+    color: "#fff",
+    marginLeft: 8,
+  };
+
   return (
     <MainLayout>
       <div style={{ width: "70%", margin: "0 auto", paddingTop: 40 }}>
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 20,
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <h1>Profile</h1>
           {profile?.roleId === 2 && (
-            <button onClick={() => navigate("/instructor")} style={btnStyle}>
+            <button style={{ ...btnStyle, backgroundColor: "#646cff", color: "#fff" }} onClick={() => navigate("/instructor")}>
               Instructor Stats
             </button>
           )}
@@ -247,7 +237,7 @@ const ProfilePage: React.FC = () => {
         <section style={cardStyle}>
           <h2>Personal Info</h2>
           {["firstName", "lastName"].map((field) => (
-            <div key={field} style={fieldStyle}>
+            <div key={field}>
               <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
               {editField === field ? (
                 <>
@@ -264,23 +254,25 @@ const ProfilePage: React.FC = () => {
                   </button>
                 </>
               ) : (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>{field === "firstName" ? firstName : lastName}</span>
-                  <button style={btnStyle} onClick={() => setEditField(field)}>
-                    Change
-                  </button>
-                </div>
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span>{field === "firstName" ? firstName : lastName}</span>
+                    <button style={btnStyle} onClick={() => setEditField(field)}>
+                      Change
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           ))}
 
           {/* Phone Numbers */}
-          <div style={fieldStyle}>
+          <div style={{ marginTop: 15 }}>
             <label>Phone Numbers</label>
             {editField === "phoneNumbers" ? (
               <>
                 {phoneNumbers.map((num, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
                     <input
                       type="text"
                       value={num}
@@ -289,17 +281,17 @@ const ProfilePage: React.FC = () => {
                         newNums[idx] = e.target.value;
                         setPhoneNumbers(newNums);
                       }}
-                      style={inputStyle}
+                      style={{ ...inputStyle, flex: 1 }}
                     />
                     <button
                       onClick={() => setPhoneNumbers(phoneNumbers.filter((_, i) => i !== idx))}
-                      style={{ ...btnStyle, backgroundColor: "#ff4d4f" }}
+                      style={{ backgroundColor: "#ff4d4f", color: "#fff", border: "none", borderRadius: 6 }}
                     >
                       X
                     </button>
                   </div>
                 ))}
-                <button style={btnStyle} onClick={() => setPhoneNumbers([...phoneNumbers, ""])}>
+                <button onClick={() => setPhoneNumbers([...phoneNumbers, ""])} style={{ ...saveBtn, marginTop: 5 }}>
                   + Add Number
                 </button>
                 <button style={saveBtn} onClick={() => handleSave("phoneNumbers")}>
@@ -321,12 +313,12 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* Links */}
-          <div style={fieldStyle}>
+          <div style={{ marginTop: 15 }}>
             <label>Links</label>
             {editField === "links" ? (
               <>
                 {links.map((link, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
                     <input
                       type="text"
                       placeholder="Platform Name"
@@ -336,7 +328,7 @@ const ProfilePage: React.FC = () => {
                         newLinks[idx].platformName = e.target.value;
                         setLinks(newLinks);
                       }}
-                      style={inputStyle}
+                      style={{ ...inputStyle, flex: 1 }}
                     />
                     <input
                       type="text"
@@ -347,17 +339,17 @@ const ProfilePage: React.FC = () => {
                         newLinks[idx].url = e.target.value;
                         setLinks(newLinks);
                       }}
-                      style={inputStyle}
+                      style={{ ...inputStyle, flex: 2 }}
                     />
                     <button
                       onClick={() => setLinks(links.filter((_, i) => i !== idx))}
-                      style={{ ...btnStyle, backgroundColor: "#ff4d4f" }}
+                      style={{ backgroundColor: "#ff4d4f", color: "#fff", border: "none", borderRadius: 6 }}
                     >
                       X
                     </button>
                   </div>
                 ))}
-                <button style={btnStyle} onClick={() => setLinks([...links, { platformName: "", url: "" }])}>
+                <button style={{ ...saveBtn, marginTop: 5 }} onClick={() => setLinks([...links, { platformName: "", url: "" }])}>
                   + Add Link
                 </button>
                 <button style={saveBtn} onClick={() => handleSave("links")}>
@@ -385,10 +377,12 @@ const ProfilePage: React.FC = () => {
               </>
             )}
           </div>
+        </section>
 
-          {/* Headline & Biography */}
+        {/* Headline & Biography */}
+        <section style={cardStyle}>
           {["headline", "biography"].map((field) => (
-            <div key={field} style={fieldStyle}>
+            <div key={field} style={{ marginBottom: 10 }}>
               <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
               {editField === field ? (
                 <>
@@ -424,74 +418,62 @@ const ProfilePage: React.FC = () => {
 
         {/* Email */}
         <section style={cardStyle}>
-          <h2>Email</h2>
-          <div style={fieldStyle}>
-            {editField === "email" ? (
-              <>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={inputStyle}
-                />
-                <button style={saveBtn} onClick={() => handleSave("email")}>
-                  Save
-                </button>
-              </>
-            ) : (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>{email}</span>
-                <button style={btnStyle} onClick={() => setEditField("email")}>
-                  Change
-                </button>
-              </div>
-            )}
-          </div>
+          <label>Email</label>
+          {editField === "email" ? (
+            <>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
+              <button style={saveBtn} onClick={() => handleSave("email")}>
+                Save
+              </button>
+            </>
+          ) : (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span>{email}</span>
+              <button style={btnStyle} onClick={() => setEditField("email")}>
+                Change
+              </button>
+            </div>
+          )}
         </section>
 
         {/* Password */}
         <section style={cardStyle}>
-          <h2>Password</h2>
-          <div style={fieldStyle}>
-            {editField === "password" ? (
-              <>
-                <input
-                  type="password"
-                  placeholder="Current Password"
-                  value={passwords.currentPassword}
-                  onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-                  style={inputStyle}
-                />
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={passwords.newPassword}
-                  onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                  style={{ ...inputStyle, marginTop: 10 }}
-                />
-                <button style={saveBtn} onClick={() => handleSave("password")}>
-                  Save
-                </button>
-              </>
-            ) : (
-              <button style={btnStyle} onClick={() => setEditField("password")}>
-                Change Password
+          <label>Password</label>
+          {editField === "password" ? (
+            <>
+              <input
+                type="password"
+                placeholder="Current Password"
+                value={passwords.currentPassword}
+                onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                style={inputStyle}
+              />
+              <input
+                type="password"
+                placeholder="New Password"
+                value={passwords.newPassword}
+                onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                style={{ ...inputStyle, marginLeft: 0 }}
+              />
+              <button style={saveBtn} onClick={() => handleSave("password")}>
+                Save
               </button>
-            )}
-          </div>
+            </>
+          ) : (
+            <button style={btnStyle} onClick={() => setEditField("password")}>
+              Change Password
+            </button>
+          )}
         </section>
 
         {/* Danger Zone */}
         <section style={cardStyle}>
           {!showDeleteConfirm ? (
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              style={{ ...btnStyle, backgroundColor: "red" }}
-            >
+            <button style={dangerBtn} onClick={() => setShowDeleteConfirm(true)}>
               Delete My Account
             </button>
           ) : (
-            <div>
+            <div style={{ marginTop: 10 }}>
               <p>This will permanently delete your account and all related data.</p>
               <p>
                 Confirm available in: <strong>{countdown}</strong> seconds
@@ -499,17 +481,19 @@ const ProfilePage: React.FC = () => {
               <button
                 disabled={countdown > 0}
                 onClick={handleDeleteAccount}
-                style={{
-                  ...btnStyle,
-                  backgroundColor: countdown > 0 ? "#aaa" : "red",
-                  cursor: countdown > 0 ? "not-allowed" : "pointer",
-                }}
+                style={{ ...dangerBtn, backgroundColor: countdown > 0 ? "#aaa" : "red" }}
               >
                 Confirm Delete
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                style={{ ...btnStyle, backgroundColor: "#ccc", color: "#000" }}
+                style={{
+                  padding: "10px 18px",
+                  borderRadius: 6,
+                  border: "1px solid #ccc",
+                  cursor: "pointer",
+                  marginLeft: 10,
+                }}
               >
                 Cancel
               </button>
