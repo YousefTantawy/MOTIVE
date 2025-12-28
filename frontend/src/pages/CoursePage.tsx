@@ -78,33 +78,30 @@ export const CoursePage: React.FC = () => {
     }
   };
 
-  // Toggle lesson complete / uncomplete
-  // Mark current video lesson as complete when video ends
-const handleCompleteLesson = async () => {
-  if (!currentLesson) return;
-
-  try {
-    await axiosInstance.post("/Dashboard/completeLessonCheck", {
-      userId,
-      courseId: Number(courseId),
-      lessonId: currentLesson.lessonId,
-      isCompleted: true,
-    });
-
-    setCourse((prev) => {
-      if (!prev) return prev;
-      const updatedSections = prev.sections.map((sec) => ({
-        ...sec,
-        lessons: sec.lessons.map((l) =>
-          l.lessonId === currentLesson.lessonId ? { ...l, isCompleted: true } : l
-        ),
-      }));
-      return { ...prev, sections: updatedSections };
-    });
-  } catch (err) {
-    console.error("Failed to mark lesson complete:", err);
-  }
-};
+  // Mark current lesson complete
+  const handleCompleteLesson = async () => {
+    if (!currentLesson) return;
+    try {
+      await axiosInstance.post("/Dashboard/completeLessonCheck", {
+        userId,
+        courseId: Number(courseId),
+        lessonId: currentLesson.lessonId,
+        isCompleted: true,
+      });
+      setCourse((prev) => {
+        if (!prev) return prev;
+        const updatedSections = prev.sections.map((sec) => ({
+          ...sec,
+          lessons: sec.lessons.map((l) =>
+            l.lessonId === currentLesson.lessonId ? { ...l, isCompleted: true } : l
+          ),
+        }));
+        return { ...prev, sections: updatedSections };
+      });
+    } catch (err) {
+      console.error("Failed to mark lesson complete:", err);
+    }
+  };
 
   // Submit review
   const handleSubmitReview = async () => {
@@ -128,8 +125,16 @@ const handleCompleteLesson = async () => {
 
   return (
     <MainLayout>
-      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, position: "relative" }}>
-        
+      <div
+        style={{
+          display: "flex",
+          maxWidth: 1100,
+          margin: "0 auto",
+          padding: 20,
+          gap: 20,
+          position: "relative",
+        }}
+      >
         {/* Sidebar */}
         <div
           style={{
@@ -150,85 +155,82 @@ const handleCompleteLesson = async () => {
             <div>
               <h2 style={{ marginTop: 0 }}>{course?.courseTitle}</h2>
               {course?.sections.map((section) => (
-  <div key={section.sectionId} style={{ marginBottom: 20 }}>
-    <h3>{section.title}</h3>
-    <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-      {section.lessons.map((lesson) => {
-        const isDone = lesson.isCompleted || false;
+                <div key={section.sectionId} style={{ marginBottom: 20 }}>
+                  <h3>{section.title}</h3>
+                  <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+                    {section.lessons.map((lesson) => {
+                      const isDone = lesson.isCompleted || false;
 
-        // inline function for toggling completion
-        const toggleComplete = async () => {
-          try {
-            await axiosInstance.post("/Dashboard/completeLessonCheck", {
-              userId,
-              courseId: Number(courseId),
-              lessonId: lesson.lessonId,
-              isCompleted: !isDone,
-            });
+                      const toggleComplete = async () => {
+                        try {
+                          await axiosInstance.post("/Dashboard/completeLessonCheck", {
+                            userId,
+                            courseId: Number(courseId),
+                            lessonId: lesson.lessonId,
+                            isCompleted: !isDone,
+                          });
+                          setCourse((prev) => {
+                            if (!prev) return prev;
+                            const updatedSections = prev.sections.map((sec) => ({
+                              ...sec,
+                              lessons: sec.lessons.map((l) =>
+                                l.lessonId === lesson.lessonId ? { ...l, isCompleted: !isDone } : l
+                              ),
+                            }));
+                            return { ...prev, sections: updatedSections };
+                          });
+                        } catch (err) {
+                          console.error("Failed to toggle lesson completion:", err);
+                        }
+                      };
 
-            // update local state
-            setCourse((prev) => {
-              if (!prev) return prev;
-              const updatedSections = prev.sections.map((sec) => ({
-                ...sec,
-                lessons: sec.lessons.map((l) =>
-                  l.lessonId === lesson.lessonId ? { ...l, isCompleted: !isDone } : l
-                ),
-              }));
-              return { ...prev, sections: updatedSections };
-            });
-          } catch (err) {
-            console.error("Failed to toggle lesson completion:", err);
-          }
-        };
-
-        return (
-          <li
-            key={lesson.lessonId}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "6px 10px",
-              marginBottom: 4,
-              borderRadius: 6,
-              backgroundColor:
-                currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
-              cursor: "pointer",
-            }}
-          >
-            <span onClick={() => setCurrentLesson(lesson)}>
-              {lesson.title}{" "}
-              {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
-            </span>
-
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleComplete(); // use the inline function
-              }}
-              style={{
-                width: 20,
-                height: 20,
-                border: "2px solid #646cff",
-                borderRadius: 4,
-                backgroundColor: isDone ? "#646cff" : "transparent",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-            >
-              {isDone && <span style={{ color: "#fff", fontSize: 14 }}>✔</span>}
+                      return (
+                        <li
+                          key={lesson.lessonId}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "6px 10px",
+                            marginBottom: 4,
+                            borderRadius: 6,
+                            backgroundColor:
+                              currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <span onClick={() => setCurrentLesson(lesson)}>
+                            {lesson.title}{" "}
+                            {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
+                          </span>
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleComplete();
+                            }}
+                            style={{
+                              width: 20,
+                              height: 20,
+                              border: "2px solid #646cff",
+                              borderRadius: 4,
+                              backgroundColor: isDone ? "#646cff" : "transparent",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            {isDone && <span style={{ color: "#fff", fontSize: 14 }}>✔</span>}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
             </div>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-))}
-
+          )}
         </div>
 
         {/* Sidebar Toggle Button */}
@@ -237,7 +239,7 @@ const handleCompleteLesson = async () => {
           style={{
             position: "fixed",
             left: sidebarOpen ? 300 : 0,
-            top: 64 + 100,
+            top: 164,
             width: 40,
             height: 40,
             backgroundColor: "#646cff",
@@ -256,18 +258,37 @@ const handleCompleteLesson = async () => {
         </div>
 
         {/* Video + Details + Review */}
-        <div style={{ flex: 1, minWidth: 400, marginLeft: sidebarOpen ? 300 : 0, transition: "margin-left 0.3s ease", display: "flex", flexDirection: "column", gap: 20 }}>
-          
+        <div
+          style={{
+            flex: 1,
+            minWidth: 400,
+            marginLeft: sidebarOpen ? 300 : 0,
+            transition: "margin-left 0.3s ease",
+            display: "flex",
+            flexDirection: "column",
+            gap: 20,
+          }}
+        >
           {/* Video */}
           {currentLesson ? (
-            <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: 8, overflow: "hidden", backgroundColor: "#000" }}>
+            <div
+              style={{
+                position: "relative",
+                paddingTop: "56.25%",
+                borderRadius: 8,
+                overflow: "hidden",
+                backgroundColor: "#000",
+              }}
+            >
               <video
                 key={currentLesson.lessonId}
                 src={currentLesson.videoUrl || undefined}
                 controls
                 autoPlay
                 style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-                onTimeUpdate={(e) => handleTimeUpdate(Math.floor((e.target as HTMLVideoElement).currentTime))}
+                onTimeUpdate={(e) =>
+                  handleTimeUpdate(Math.floor((e.target as HTMLVideoElement).currentTime))
+                }
                 onEnded={handleCompleteLesson}
                 ref={(video) => {
                   if (video && currentLesson.lastWatchedSecond > 0) {
@@ -283,22 +304,38 @@ const handleCompleteLesson = async () => {
           {/* Course & Lesson Details */}
           <div style={{ padding: 20, backgroundColor: "#f0f0f5", borderRadius: 8 }}>
             <h3>Course Details</h3>
-            <p><strong>Course:</strong> {course?.courseTitle}</p>
-            <p><strong>Instructor:</strong> {course?.instructor}</p>
-            <p><strong>Current Lesson:</strong> {currentLesson?.title}</p>
-            <p><strong>Type:</strong> {currentLesson?.type}</p>
-            {currentLesson?.textContent && <p><strong>Notes:</strong> {currentLesson.textContent}</p>}
+            <p>
+              <strong>Course:</strong> {course?.courseTitle}
+            </p>
+            <p>
+              <strong>Instructor:</strong> {course?.instructor}
+            </p>
+            <p>
+              <strong>Current Lesson:</strong> {currentLesson?.title}
+            </p>
+            <p>
+              <strong>Type:</strong> {currentLesson?.type}
+            </p>
+            {currentLesson?.textContent && (
+              <p>
+                <strong>Notes:</strong> {currentLesson.textContent}
+              </p>
+            )}
           </div>
 
           {/* Review Section */}
           <div style={{ padding: 20, backgroundColor: "#f0f0f5", borderRadius: 8 }}>
             <h3>Leave a Review</h3>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              {[1,2,3,4,5].map((star) => (
+              {[1, 2, 3, 4, 5].map((star) => (
                 <span
                   key={star}
                   onClick={() => setRating(star)}
-                  style={{ cursor: "pointer", fontSize: 24, color: star <= rating ? "#ffc107" : "#ccc" }}
+                  style={{
+                    cursor: "pointer",
+                    fontSize: 24,
+                    color: star <= rating ? "#ffc107" : "#ccc",
+                  }}
                 >
                   ★
                 </span>
@@ -309,7 +346,14 @@ const handleCompleteLesson = async () => {
               placeholder="Write your comment..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              style={{ width: "100%", minHeight: 80, padding: 10, borderRadius: 6, border: "1px solid #ccc", marginBottom: 10 }}
+              style={{
+                width: "100%",
+                minHeight: 80,
+                padding: 10,
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                marginBottom: 10,
+              }}
             />
             <button
               onClick={handleSubmitReview}
