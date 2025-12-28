@@ -9,6 +9,8 @@ namespace MotiveBackend.Controllers
     [ApiController]
     public class DashboardController : ControllerBase
     {
+        // ---------------------------------------------------- Dashboard Page ---------------------------------------------------------------------------------- 
+
         private readonly Ecen424DbProjectContext _context;
         public DashboardController(Ecen424DbProjectContext context)
         {
@@ -35,5 +37,11 @@ namespace MotiveBackend.Controllers
 
             return Ok(enrolledCourses);
         }
-    }
+
+
+
+        // ---------------------------------------------------- This is for course details  ---------------------------------------------------------------------
+
+        
+    }    
 }

@@ -49,7 +49,8 @@ namespace MotiveBackend.Controllers
                 User = newUser,
                 Provider = "Local",
                 ProviderKey = request.Email,
-                PasswordHash = passwordHash
+                PasswordHash = passwordHash,
+                LastLogin = DateTime.Now
             };
 
             _context.Authidentities.Add(newAuth);

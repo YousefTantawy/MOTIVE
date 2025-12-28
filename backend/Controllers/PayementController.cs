@@ -63,7 +63,7 @@ namespace MotiveBackend.Controllers
             _context.Payments.Add(newPayment);
             await _context.SaveChangesAsync();
 
-            return Ok("success");
+            return Ok();
         }
 
         private (string TransactionRef, string Status) SimulateBankTransaction()
