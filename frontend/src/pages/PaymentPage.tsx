@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import axiosInstance from "../lib/axios";
+import { authService } from "../services/authService";
 
 const validateCardNumber = (num: string) =>
   /^[0-9]{13,19}$/.test(num.replace(/\s+/g, ""));
@@ -31,13 +32,18 @@ export const PaymentPage: React.FC = () => {
   const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [courseTitle, setCourseTitle] = useState<string>("");
 
+  // 🔐 REAL USER ID FROM AUTH SERVICE
+  const currentUser = authService.getCurrentUser();
+  const userId = currentUser?.userId || 0;
+
   // Fetch course info
   useEffect(() => {
     const fetchCourse = async () => {
       if (!courseId) return;
       try {
         const res = await axiosInstance.get(`/Courses/${courseId}`);
-        setCourseTitle(res.data?.title || `Course ${courseId}`);
+        const { title } = res.data || {};
+        setCourseTitle(title || `Course ${courseId}`);
       } catch (err) {
         console.log("Failed to fetch course info:", err);
         setCourseTitle(`Course ${courseId}`);
@@ -46,48 +52,50 @@ export const PaymentPage: React.FC = () => {
     fetchCourse();
   }, [courseId]);
 
-const handleSubmit = async (e?: React.FormEvent) => {
-  e?.preventDefault();
-  setProcessing(true);
-  setPopup(null);
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setProcessing(true);
+    setPopup(null);
 
-  try {
-    const response = await axiosInstance.post(
-      "/Payments/checkout",
-      { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" },
-      {
-        headers: { "Content-Type": "application/json" },
-        responseType: "text",
-        validateStatus: () => true, // never throw, always resolve
+    try {
+      const response = await axiosInstance.post(
+        "/Payments/checkout",
+        { 
+          userId: userId,
+          courseId: parseInt(courseId),
+          paymentMethod: "card"
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          responseType: "text",
+          validateStatus: () => true,
+        }
+      );
+
+      let popupMessage = response.data || "Unknown error";
+      let popupType: "success" | "error" = "error";
+
+      if (response.status === 200) {
+        popupType = "success";
+      } else if (response.status === 400) {
+        popupType = "error";
+      } else {
+        popupMessage = "Payment failed. Please try again.";
       }
-    );
 
-    let popupMessage = response.data || "Unknown error";
-    let popupType: "success" | "error" = "error";
-
-    if (response.status === 200) {
-      popupType = "success";
-    } else if (response.status === 400) {
-      // For 400 we assume server text tells us exactly what happened
-      popupType = "error";
-    } else {
-      popupMessage = "Payment failed. Please try again.";
+      setPopup({ type: popupType, message: popupMessage });
+    } catch (err) {
+      setPopup({ type: "error", message: "Payment failed. Please try again." });
+    } finally {
+      setProcessing(false);
     }
-
-    setPopup({ type: popupType, message: popupMessage });
-  } catch (err) {
-    setPopup({ type: "error", message: "Payment failed. Please try again." });
-  } finally {
-    setProcessing(false);
-  }
-};
-
-
+  };
 
   return (
     <MainLayout>
       <div style={{ maxWidth: 720, margin: "24px auto", padding: 20, background: "#f9f9f9", borderRadius: 10, position: "relative" }}>
         <h2 style={{ marginBottom: 16 }}>Complete Your Payment</h2>
+
         <p>Course: <strong>{courseTitle || `Course ${courseId}`}</strong></p>
         <p>Amount: <strong>${price}</strong></p>
 
@@ -155,32 +163,33 @@ const handleSubmit = async (e?: React.FormEvent) => {
             </button>
           </div>
         </form>
-{popup && (
-  <div
-    style={{
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      backgroundColor: popup.type === "success" ? "#4caf50" : "#f44336",
-      color: "#fff",
-      padding: "30px 40px",
-      borderRadius: 12,
-      textAlign: "center",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
-      fontSize: 18,
-      fontWeight: 600,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 12,
-      zIndex: 9999, // make sure it's above everything
-    }}
-  >
-    {popup.type === "success" && <span style={{ fontSize: 48 }}>✔️</span>}
-    <span>{popup.message}</span>
-  </div>
-)}
+
+        {popup && (
+          <div
+            style={{
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              backgroundColor: popup.type === "success" ? "#4caf50" : "#f44336",
+              color: "#fff",
+              padding: "30px 40px",
+              borderRadius: 12,
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+              fontSize: 18,
+              fontWeight: 600,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 12,
+              zIndex: 9999,
+            }}
+          >
+            {popup.type === "success" && <span style={{ fontSize: 48 }}>✔️</span>}
+            <span>{popup.message}</span>
+          </div>
+        )}
 
       </div>
     </MainLayout>
