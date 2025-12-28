@@ -41,7 +41,7 @@ export default function App() {
             <Route path="/my-courses" element={<StudentDashboard />} />
             <Route path="/instructor" element={<InstructorDashboard />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/course/:courseId" element={<CoursePage />} />
+            <Route path="/course/:courseId/video" element={<CoursePage />} />
           </Routes>
         </div>
 

@@ -90,15 +90,12 @@ export const StudentDashboard: React.FC = () => {
           >
             {enrollments.map((course) => (
               <Link
-                key={course.courseId}
-                to={`/course/${course.courseId}`}
+                key={enrollment.courseId}
+                to={`/course/${enrollment.courseId}/video`} // updated path
                 style={{ textDecoration: "none" }}
               >
                 <Card>
-                  <h3>{course.title}</h3>
-                  {progress[course.courseId] !== undefined && (
-                    <p>Progress: {progress[course.courseId]}%</p>
-                  )}
+                  <h3>{enrollment.title}</h3>
                 </Card>
               </Link>
             ))}
