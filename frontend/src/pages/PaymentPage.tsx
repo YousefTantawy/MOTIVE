@@ -49,7 +49,7 @@ export const PaymentPage: React.FC = () => {
  const handleSubmit = async (e?: React.FormEvent) => {
   e?.preventDefault();
   setProcessing(true);
-  setPopup(null);
+  setPopup(null); // reset previous popup
 
   try {
     const response = await axiosInstance.post(
@@ -58,11 +58,10 @@ export const PaymentPage: React.FC = () => {
       {
         headers: { "Content-Type": "application/json" },
         responseType: "text",
-        validateStatus: () => true, // accept all HTTP statuses
+        validateStatus: () => true, // treat all statuses as resolved
       }
     );
 
-    // Decide message and type based on status code
     let popupMessage = "";
     let popupType: "success" | "error" = "error";
 
@@ -70,17 +69,20 @@ export const PaymentPage: React.FC = () => {
       popupMessage = `Payment completed for ${courseTitle || `Course ${courseId}`}`;
       popupType = "success";
     } else if (response.status === 400) {
-      popupMessage = "User is already enrolled in this course.";
+      popupMessage = response.data || "User is already enrolled in this course.";
     } else {
-      popupMessage = "Payment failed. Please try again.";
+      popupMessage = response.data || "Payment failed. Please try again.";
     }
 
-    // show the popup after the response is fully back
+    // Show the popup
     setPopup({ type: popupType, message: popupMessage });
+  } catch (err) {
+    setPopup({ type: "error", message: "Payment failed. Please try again." });
   } finally {
     setProcessing(false);
   }
 };
+
 
   return (
     <MainLayout>
@@ -153,33 +155,33 @@ export const PaymentPage: React.FC = () => {
             </button>
           </div>
         </form>
+{popup && (
+  <div
+    style={{
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: popup.type === "success" ? "#4caf50" : "#f44336",
+      color: "#fff",
+      padding: "30px 40px",
+      borderRadius: 12,
+      textAlign: "center",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+      fontSize: 18,
+      fontWeight: 600,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 12,
+      zIndex: 9999, // make sure it's above everything
+    }}
+  >
+    {popup.type === "success" && <span style={{ fontSize: 48 }}>✔️</span>}
+    <span>{popup.message}</span>
+  </div>
+)}
 
-        {popup && (
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: popup.type === "success" ? "#4caf50" : "#f44336",
-              color: "#fff",
-              padding: "30px 40px",
-              borderRadius: 12,
-              textAlign: "center",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
-              fontSize: 18,
-              fontWeight: 600,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 12,
-              zIndex: 1000
-            }}
-          >
-            {popup.type === "success" && <span style={{ fontSize: 48 }}>✔️</span>}
-            <span>{popup.message}</span>
-          </div>
-        )}
       </div>
     </MainLayout>
   );
