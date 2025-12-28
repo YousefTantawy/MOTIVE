@@ -19,12 +19,13 @@ const ProfilePage: React.FC = () => {
   const [biography, setBiography] = useState("");
   const [email, setEmail] = useState("");
   const [profilePictureUrl, setProfilePictureUrl] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
+  // Load profile
   useEffect(() => {
     if (!userId) return;
 
@@ -34,7 +35,6 @@ const ProfilePage: React.FC = () => {
         const data = response.data || response;
 
         setProfile(data);
-
         setFirstName(data.firstName ?? "");
         setLastName(data.lastName ?? "");
         setHeadline(data.headline ?? "");
@@ -42,10 +42,10 @@ const ProfilePage: React.FC = () => {
         setEmail(data.email ?? "");
         setProfilePictureUrl(data.profilePictureUrl ?? "");
 
-        // Fetch phones (ignore 405)
+        // Fetch phone numbers
         try {
           const phoneResp = await axiosInstance.get(`/Auth/${userId}/phones`);
-          setPhoneNumber(phoneResp.data?.phoneNumbers?.[0] ?? "");
+          setPhoneNumbers(phoneResp.data?.phoneNumbers ?? []);
         } catch (err: any) {
           if (err.response?.status !== 405) console.error(err);
         }
@@ -60,6 +60,7 @@ const ProfilePage: React.FC = () => {
     loadProfile();
   }, [userId]);
 
+  // Delete countdown
   useEffect(() => {
     if (!showDeleteConfirm) return;
     setCountdown(5);
@@ -102,7 +103,12 @@ const ProfilePage: React.FC = () => {
         case "lastName":
         case "headline":
         case "biography":
-          await axiosInstance.put(`/Auth/update-details/${userId}`, { firstName, lastName, headline, biography });
+          await axiosInstance.put(`/Auth/update-details/${userId}`, {
+            firstName,
+            lastName,
+            headline,
+            biography,
+          });
           alert("Details updated successfully");
           break;
         case "email":
@@ -113,9 +119,9 @@ const ProfilePage: React.FC = () => {
           await axiosInstance.put(`/Auth/update-picture/${userId}`, { profilePictureUrl });
           alert("Profile picture updated successfully");
           break;
-        case "phoneNumber":
-          await axiosInstance.put(`/Auth/${userId}/phones`, { phoneNumbers: [phoneNumber] });
-          alert("Phone number updated successfully");
+        case "phoneNumbers":
+          await axiosInstance.put(`/Auth/${userId}/phones`, { phoneNumbers });
+          alert("Phone numbers updated successfully");
           break;
         case "password":
           await axiosInstance.put(`/Auth/change-password/${userId}`, passwords);
@@ -151,7 +157,15 @@ const ProfilePage: React.FC = () => {
           {profile?.roleId === 2 && (
             <button
               onClick={() => navigate("/instructor")}
-              style={{ padding: "8px 16px", backgroundColor: "#646cff", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#646cff",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
             >
               Instructor Stats
             </button>
@@ -169,7 +183,13 @@ const ProfilePage: React.FC = () => {
             />
             {editField === "profilePictureUrl" ? (
               <>
-                <input type="text" value={profilePictureUrl} maxLength={255} onChange={(e) => setProfilePictureUrl(e.target.value)} style={{ padding: 8, width: "300px" }} />
+                <input
+                  type="text"
+                  value={profilePictureUrl}
+                  maxLength={255}
+                  onChange={(e) => setProfilePictureUrl(e.target.value)}
+                  style={{ padding: 8, width: "300px" }}
+                />
                 <button onClick={() => handleSave("profilePictureUrl")}>Save</button>
               </>
             ) : (
@@ -190,7 +210,9 @@ const ProfilePage: React.FC = () => {
                     type="text"
                     value={field === "firstName" ? firstName : lastName}
                     maxLength={255}
-                    onChange={(e) => (field === "firstName" ? setFirstName(e.target.value) : setLastName(e.target.value))}
+                    onChange={(e) =>
+                      field === "firstName" ? setFirstName(e.target.value) : setLastName(e.target.value)
+                    }
                   />
                   <button onClick={() => handleSave(field)}>Save</button>
                 </>
@@ -203,18 +225,53 @@ const ProfilePage: React.FC = () => {
             </div>
           ))}
 
-          {/* Phone Number */}
+          {/* Phone Numbers (Dynamic List) */}
           <div style={{ marginBottom: 10 }}>
-            <label>Phone Number: </label>
-            {editField === "phoneNumber" ? (
+            <label>Phone Numbers: </label>
+            {editField === "phoneNumbers" ? (
               <>
-                <input type="text" value={phoneNumber} maxLength={255} onChange={(e) => setPhoneNumber(e.target.value)} />
-                <button onClick={() => handleSave("phoneNumber")}>Save</button>
+                {phoneNumbers.map((num, idx) => (
+                  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
+                    <input
+                      type="text"
+                      value={num}
+                      maxLength={255}
+                      onChange={(e) => {
+                        const newNums = [...phoneNumbers];
+                        newNums[idx] = e.target.value;
+                        setPhoneNumbers(newNums);
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      onClick={() => {
+                        const newNums = phoneNumbers.filter((_, i) => i !== idx);
+                        setPhoneNumbers(newNums);
+                      }}
+                      style={{ backgroundColor: "#ff4d4f", color: "#fff", border: "none", padding: "2px 8px" }}
+                    >
+                      X
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setPhoneNumbers([...phoneNumbers, ""])}
+                  style={{ marginBottom: 5 }}
+                >
+                  + Add Number
+                </button>
+                <button onClick={() => handleSave("phoneNumbers")}>Save</button>
               </>
             ) : (
               <>
-                <span>{phoneNumber || "-"}</span>
-                <button onClick={() => setEditField("phoneNumber")}>{phoneNumber ? "Change" : "Add"}</button>
+                <ul>
+                  {phoneNumbers.map((num, idx) => (
+                    <li key={idx}>{num}</li>
+                  ))}
+                </ul>
+                <button onClick={() => setEditField("phoneNumbers")}>
+                  {phoneNumbers.length ? "Change" : "Add"}
+                </button>
               </>
             )}
           </div>
@@ -226,9 +283,19 @@ const ProfilePage: React.FC = () => {
               {editField === field ? (
                 <>
                   {field === "biography" ? (
-                    <textarea value={biography} maxLength={255} onChange={(e) => setBiography(e.target.value)} style={{ width: "70%", minHeight: 100 }} />
+                    <textarea
+                      value={biography}
+                      maxLength={255}
+                      onChange={(e) => setBiography(e.target.value)}
+                      style={{ width: "70%", minHeight: 100 }}
+                    />
                   ) : (
-                    <input type="text" value={headline} maxLength={255} onChange={(e) => setHeadline(e.target.value)} />
+                    <input
+                      type="text"
+                      value={headline}
+                      maxLength={255}
+                      onChange={(e) => setHeadline(e.target.value)}
+                    />
                   )}
                   <button onClick={() => handleSave(field)}>Save</button>
                 </>
@@ -287,7 +354,7 @@ const ProfilePage: React.FC = () => {
 
         {/* Danger Zone */}
         <section style={{ marginTop: 50, borderTop: "1px solid #ddd", paddingTop: 20 }}>
-          <h2 style={{ color: "red" }}>Danger Zone</h2>
+          <h2 style={{ color: "red" }}> </h2>
           {!showDeleteConfirm ? (
             <button
               onClick={() => setShowDeleteConfirm(true)}
