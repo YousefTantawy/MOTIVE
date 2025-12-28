@@ -8,7 +8,6 @@ import axiosInstance from "../lib/axios";
 interface Enrollment {
   courseId: number;
   title: string;
-  progress?: number; // optional if backend doesn’t provide
 }
 
 export const StudentDashboard: React.FC = () => {
@@ -24,13 +23,9 @@ export const StudentDashboard: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
+        // Fetch enrolled courses from backend
         const res = await axiosInstance.get<Enrollment[]>(`/Dashboard/user/${userId}/courses`);
-        setEnrollments(
-          res.map((course) => ({
-            ...course,
-            progress: Math.floor(Math.random() * 101), // Mocked progress, replace if API provides
-          }))
-        );
+        setEnrollments(res || []);
       } catch (err) {
         console.error("Failed to load enrollments:", err);
         setError("Failed to load your courses. Please try again.");
@@ -65,33 +60,11 @@ export const StudentDashboard: React.FC = () => {
             {enrollments.map((enrollment) => (
               <Link
                 key={enrollment.courseId}
-                to={`/course/${enrollment.courseId}`}
+                to={`/course/${enrollment.courseId}`} // Navigate to actual course page
                 style={{ textDecoration: "none" }}
               >
                 <Card>
                   <h3>{enrollment.title}</h3>
-                  <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: 14, color: "#666" }}>
-                      Progress: {enrollment.progress}%
-                    </div>
-                    <div
-                      style={{
-                        backgroundColor: "#e0e0e0",
-                        borderRadius: 10,
-                        height: 8,
-                        marginTop: 8,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        style={{
-                          backgroundColor: "#4f46e5",
-                          height: "100%",
-                          width: `${enrollment.progress}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
                 </Card>
               </Link>
             ))}
