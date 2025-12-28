@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
-import axiosInstance from "../lib/axios"; // make sure this exists
+import axiosInstance from "../lib/axios";
 
 const validateCardNumber = (num: string) => /^[0-9]{13,19}$/.test(num.replace(/\s+/g, ""));
 const validateExpiry = (mmyy: string) => {
@@ -40,14 +40,14 @@ export const PaymentPage: React.FC = () => {
     setProcessing(true);
     try {
       const response = await axiosInstance.post(
-        "/Payments/checkout", // ensure your baseURL is correct
+        "/Payments/checkout",
         { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" },
-        { responseType: "text" } // treat plain text response
+        { responseType: "text" }
       );
 
       if (response.data === "success") {
         setPopup({ type: "success", message: `Payment completed for course ${courseId}` });
-        setTimeout(() => navigate("/my-courses"), 2000); // auto-navigate after 2s
+        setTimeout(() => navigate("/my-courses"), 2000);
       } else {
         setPopup({ type: "error", message: "Payment failed. Please try again." });
       }
@@ -60,49 +60,82 @@ export const PaymentPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div style={{ maxWidth: 720, margin: "24px auto", padding: 20, background: "#fff", borderRadius: 8, position: "relative" }}>
-        <h2>Payment</h2>
-        <p>Course: {courseId || "Unknown"}</p>
-        <p>Amount: ${price}</p>
+      <div style={{ maxWidth: 720, margin: "24px auto", padding: 20, background: "#f9f9f9", borderRadius: 10, position: "relative" }}>
+        <h2 style={{ marginBottom: 16 }}>Complete Your Payment</h2>
+        <p>Course: <strong>{courseId || "Unknown"}</strong></p>
+        <p>Amount: <strong>${price}</strong></p>
 
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
+        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
+          {/* Cardholder Name */}
           <label>
-            Cardholder name
-            <input value={cardName} onChange={(e) => setCardName(e.target.value)} placeholder="Name on card" maxLength={255} />
+            Cardholder Name
+            <input
+              value={cardName}
+              onChange={(e) => setCardName(e.target.value)}
+              placeholder="Name on card"
+              maxLength={255}
+              style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
+            />
           </label>
 
+          {/* Card Number */}
           <label>
-            Card number
+            Card Number
             <input
               value={cardNumber}
               onChange={(e) => setCardNumber(e.target.value.replace(/[^0-9\s]/g, ""))}
               placeholder="4242 4242 4242 4242"
               maxLength={19}
+              style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
             />
           </label>
 
-          <div style={{ display: "flex", gap: 12 }}>
+          <div style={{ display: "flex", gap: 16 }}>
+            {/* Expiry */}
             <label style={{ flex: 1 }}>
               Expiry (MM/YY)
-              <input value={expiry} onChange={(e) => setExpiry(e.target.value)} placeholder="MM/YY" maxLength={5} />
+              <input
+                value={expiry}
+                onChange={(e) => setExpiry(e.target.value)}
+                placeholder="MM/YY"
+                maxLength={5}
+                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
+              />
             </label>
+
+            {/* CVV */}
             <label style={{ flex: 1 }}>
               CVV
-              <input value={cvv} onChange={(e) => setCvv(e.target.value.replace(/[^0-9]/g, ""))} placeholder="123" maxLength={4} />
+              <input
+                value={cvv}
+                onChange={(e) => setCvv(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="123"
+                maxLength={4}
+                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
+              />
             </label>
           </div>
 
+          {/* Buttons */}
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-            <button type="submit" disabled={processing}>
+            <button
+              type="submit"
+              disabled={processing}
+              style={{ flex: 1, padding: 12, backgroundColor: "#0a84ff", color: "#fff", borderRadius: 8, fontWeight: 600 }}
+            >
               {processing ? "Processing..." : `Pay $${price}`}
             </button>
-            <button type="button" onClick={() => navigate(-1)}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={{ flex: 1, padding: 12, borderRadius: 8, border: "1px solid #ccc" }}
+            >
               Cancel
             </button>
           </div>
         </form>
 
-        {/* Popup overlay */}
+        {/* Popup */}
         {popup && (
           <div
             style={{
@@ -115,18 +148,17 @@ export const PaymentPage: React.FC = () => {
               padding: "30px 40px",
               borderRadius: 12,
               textAlign: "center",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
               fontSize: 18,
               fontWeight: 600,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               gap: 12,
+              zIndex: 1000
             }}
           >
-            {popup.type === "success" && (
-              <span style={{ fontSize: 48 }}>✔️</span>
-            )}
+            {popup.type === "success" && <span style={{ fontSize: 48 }}>✔️</span>}
             <span>{popup.message}</span>
           </div>
         )}
