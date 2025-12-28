@@ -47,37 +47,30 @@ export const PaymentPage: React.FC = () => {
   }, [courseId]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  e?.preventDefault();
 
-    if (!cardName.trim()) return setPopup({ type: "error", message: "Please enter the cardholder name." });
-    if (!validateCardNumber(cardNumber)) return setPopup({ type: "error", message: "Invalid card number." });
-    if (!validateExpiry(expiry)) return setPopup({ type: "error", message: "Invalid or expired expiry date (MM/YY)." });
-    if (!validateCvv(cvv)) return setPopup({ type: "error", message: "Invalid CVV." });
+  if (!cardName.trim()) return setPopup({ type: "error", message: "Please enter the cardholder name." });
+  if (!validateCardNumber(cardNumber)) return setPopup({ type: "error", message: "Invalid card number." });
+  if (!validateExpiry(expiry)) return setPopup({ type: "error", message: "Invalid or expired expiry date (MM/YY)." });
+  if (!validateCvv(cvv)) return setPopup({ type: "error", message: "Invalid CVV." });
 
-    setProcessing(true);
+  setProcessing(true);
 
-    try {
-      const response = await axiosInstance.post(
-        "/Payments/checkout",
-        { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" },
-        { headers: { "Content-Type": "application/json" }, responseType: "text" }
-      );
+  try {
+    const response = await axiosInstance.post(
+      "/Payments/checkout",
+      { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" },
+      { headers: { "Content-Type": "application/json" }, responseType: "text" }
+    );
 
-      const message = response.data === "success" 
-        ? `Payment completed for ${courseTitle}`
-        : response.data;
+    setPopup({ type: "success", message: response.data }); // <-- just show backend text
+  } catch (err: any) {
+    setPopup({ type: "error", message: err.response?.data || err.message }); // <-- just show backend text
+  } finally {
+    setProcessing(false);
+  }
+};
 
-      setPopup({ type: "success", message });
-    } catch (err: any) {
-      const backendMessage = err.response?.data;
-      setPopup({
-        type: "error",
-        message: backendMessage || "Payment failed. Please try again."
-      });
-    } finally {
-      setProcessing(false);
-    }
-  };
 
   return (
     <MainLayout>
