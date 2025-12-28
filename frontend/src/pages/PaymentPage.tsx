@@ -24,6 +24,9 @@ export const PaymentPage: React.FC = () => {
   const courseId = params.get("courseId") || "";
   const price = params.get("price") || "0";
 
+  const currentUser = authService.getCurrentUser();
+  const userId = currentUser?.userId || 0;
+
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -32,17 +35,20 @@ export const PaymentPage: React.FC = () => {
   const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [courseTitle, setCourseTitle] = useState<string>("");
 
-  // 🔐 REAL USER ID FROM AUTH SERVICE
-  const currentUser = authService.getCurrentUser();
-  const userId = currentUser?.userId || 0;
-
-  // Fetch course info
+  // Fetch course title
   useEffect(() => {
     const fetchCourse = async () => {
       if (!courseId) return;
       try {
         const res = await axiosInstance.get(`/Courses/${courseId}`);
-        const { title } = res.data || {};
+
+        // safely extract title in case backend wraps response
+        const title =
+          res.data?.title ||
+          res.data?.course?.title ||
+          res.data?.data?.title ||
+          null;
+
         setCourseTitle(title || `Course ${courseId}`);
       } catch (err) {
         console.log("Failed to fetch course info:", err);
@@ -60,10 +66,10 @@ export const PaymentPage: React.FC = () => {
     try {
       const response = await axiosInstance.post(
         "/Payments/checkout",
-        { 
+        {
           userId: userId,
           courseId: parseInt(courseId),
-          paymentMethod: "card"
+          paymentMethod: "card",
         },
         {
           headers: { "Content-Type": "application/json" },
@@ -72,20 +78,29 @@ export const PaymentPage: React.FC = () => {
         }
       );
 
-      let popupMessage = response.data || "Unknown error";
-      let popupType: "success" | "error" = "error";
+      let popupMessage = (response.data as any) || "";
 
       if (response.status === 200) {
-        popupType = "success";
+        setPopup({
+          type: "success",
+          message: popupMessage || "Payment successful!",
+        });
       } else if (response.status === 400) {
-        popupType = "error";
+        setPopup({
+          type: "error",
+          message: popupMessage || "Payment failed.",
+        });
       } else {
-        popupMessage = "Payment failed. Please try again.";
+        setPopup({
+          type: "error",
+          message: "Payment failed. Please try again.",
+        });
       }
-
-      setPopup({ type: popupType, message: popupMessage });
     } catch (err) {
-      setPopup({ type: "error", message: "Payment failed. Please try again." });
+      setPopup({
+        type: "error",
+        message: "Payment failed. Please try again.",
+      });
     } finally {
       setProcessing(false);
     }
@@ -93,11 +108,24 @@ export const PaymentPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div style={{ maxWidth: 720, margin: "24px auto", padding: 20, background: "#f9f9f9", borderRadius: 10, position: "relative" }}>
+      <div
+        style={{
+          maxWidth: 720,
+          margin: "24px auto",
+          padding: 20,
+          background: "#f9f9f9",
+          borderRadius: 10,
+          position: "relative",
+        }}
+      >
         <h2 style={{ marginBottom: 16 }}>Complete Your Payment</h2>
 
-        <p>Course: <strong>{courseTitle || `Course ${courseId}`}</strong></p>
-        <p>Amount: <strong>${price}</strong></p>
+        <p>
+          Course: <strong>{courseTitle || `Course ${courseId}`}</strong>
+        </p>
+        <p>
+          Amount: <strong>${price}</strong>
+        </p>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
           <label>
@@ -150,10 +178,18 @@ export const PaymentPage: React.FC = () => {
             <button
               type="submit"
               disabled={processing}
-              style={{ flex: 1, padding: 12, backgroundColor: "#0a84ff", color: "#fff", borderRadius: 8, fontWeight: 600 }}
+              style={{
+                flex: 1,
+                padding: 12,
+                backgroundColor: "#0a84ff",
+                color: "#fff",
+                borderRadius: 8,
+                fontWeight: 600,
+              }}
             >
               {processing ? "Processing..." : `Pay $${price}`}
             </button>
+
             <button
               type="button"
               onClick={() => navigate(-1)}
@@ -190,7 +226,6 @@ export const PaymentPage: React.FC = () => {
             <span>{popup.message}</span>
           </div>
         )}
-
       </div>
     </MainLayout>
   );
