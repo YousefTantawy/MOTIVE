@@ -14,10 +14,7 @@ export const PaymentPage: React.FC = () => {
   const currentUser = authService.getCurrentUser();
   const userId = currentUser?.userId || 0;
 
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [processing, setProcessing] = useState(false);
   const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [courseTitle, setCourseTitle] = useState<string>("");
@@ -28,13 +25,7 @@ export const PaymentPage: React.FC = () => {
       if (!courseId) return;
       try {
         const res = await axiosInstance.get(`/Courses/${courseId}`);
-
-        // Extract title safely
-        const title =
-          (res as any)?.title ||
-          (res as any)?.data?.title ||
-          `Course ${courseId}`;
-
+        const title = (res as any)?.title || (res as any)?.data?.title || `Course ${courseId}`;
         setCourseTitle(title);
       } catch (err) {
         console.log("Failed to fetch course info:", err);
@@ -44,35 +35,38 @@ export const PaymentPage: React.FC = () => {
     fetchCourse();
   }, [courseId]);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
-  e?.preventDefault();
-  setProcessing(true);
-  setPopup(null);
-
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Payments/checkout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        courseId: parseInt(courseId),
-        paymentMethod: "card",
-      }),
-    });
-
-    if (res.status === 200) {
-      setPopup({ type: "success", message: "Payment successful!" });
-    } else if (res.status === 400) {
-      setPopup({ type: "error", message: "User is already enrolled in this course." });
-    } else {
-      setPopup({ type: "error", message: "Payment failed. Please try again." });
+  const handleSubmit = async () => {
+    if (!paymentMethod) {
+      setPopup({ type: "error", message: "Please select a payment method." });
+      return;
     }
-  } catch (err) {
-    setPopup({ type: "error", message: "Payment failed. Please try again." });
-  } finally {
-    setProcessing(false);
-  }
-};
+
+    setProcessing(true);
+    setPopup(null);
+
+    // Simulate 3-second processing
+    setTimeout(async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Payments/checkout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, courseId: parseInt(courseId), paymentMethod }),
+        });
+
+        if (res.status === 200) {
+          setPopup({ type: "success", message: "Payment successful!" });
+        } else if (res.status === 400) {
+          setPopup({ type: "error", message: "User is already enrolled in this course." });
+        } else {
+          setPopup({ type: "error", message: "Payment failed. Please try again." });
+        }
+      } catch (err) {
+        setPopup({ type: "error", message: "Payment failed. Please try again." });
+      } finally {
+        setProcessing(false);
+      }
+    }, 3000);
+  };
 
   return (
     <MainLayout>
@@ -95,79 +89,79 @@ export const PaymentPage: React.FC = () => {
           Amount: <strong>${price}</strong>
         </p>
 
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
-          <label>
-            Cardholder Name
-            <input
-              value={cardName}
-              onChange={(e) => setCardName(e.target.value)}
-              placeholder="Name on card"
-              maxLength={255}
-              style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
-            />
-          </label>
-
-          <label>
-            Card Number
-            <input
-              value={cardNumber}
-              onChange={(e) => setCardNumber(e.target.value.replace(/[^0-9\s]/g, ""))}
-              placeholder="4242 4242 4242 4242"
-              maxLength={19}
-              style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
-            />
-          </label>
-
-          <div style={{ display: "flex", gap: 16 }}>
-            <label style={{ flex: 1 }}>
-              Expiry (MM/YY)
-              <input
-                value={expiry}
-                onChange={(e) => setExpiry(e.target.value)}
-                placeholder="MM/YY"
-                maxLength={5}
-                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
-              />
-            </label>
-
-            <label style={{ flex: 1 }}>
-              CVV
-              <input
-                value={cvv}
-                onChange={(e) => setCvv(e.target.value.replace(/[^0-9]/g, ""))}
-                placeholder="123"
-                maxLength={4}
-                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
-              />
-            </label>
-          </div>
-
-          <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+        {/* Payment method buttons */}
+        <div style={{ display: "flex", gap: 12, marginTop: 16, marginBottom: 16 }}>
+          {["Fawry", "Visa", "Paypal"].map((method) => (
             <button
-              type="submit"
-              disabled={processing}
+              key={method}
+              type="button"
+              onClick={() => setPaymentMethod(method)}
               style={{
                 flex: 1,
                 padding: 12,
-                backgroundColor: "#0a84ff",
-                color: "#fff",
                 borderRadius: 8,
+                border: paymentMethod === method ? "2px solid #0a84ff" : "1px solid #ccc",
+                backgroundColor: paymentMethod === method ? "#0a84ff" : "#fff",
+                color: paymentMethod === method ? "#fff" : "#000",
                 fontWeight: 600,
+                cursor: "pointer",
               }}
             >
-              {processing ? "Processing..." : `Pay $${price}`}
+              {method}
             </button>
+          ))}
+        </div>
 
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              style={{ flex: 1, padding: 12, borderRadius: 8, border: "1px solid #ccc" }}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+        {/* Pay / Cancel buttons */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={processing}
+            style={{
+              flex: 1,
+              padding: 12,
+              backgroundColor: "#0a84ff",
+              color: "#fff",
+              borderRadius: 8,
+              fontWeight: 600,
+              cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {processing ? "Processing..." : `Pay $${price}`}
+            {processing && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  height: 3,
+                  width: "100%",
+                  backgroundColor: "#fff",
+                  animation: "loadingBar 3s linear",
+                }}
+              />
+            )}
+          </button>
 
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            style={{
+              flex: 1,
+              padding: 12,
+              borderRadius: 8,
+              border: "1px solid #ccc",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+
+        {/* Popup */}
         {popup && (
           <div
             style={{
@@ -175,7 +169,7 @@ export const PaymentPage: React.FC = () => {
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              backgroundColor: popup.type === "success" ? "#4caf50" : "#f44336",
+              backgroundColor: popup.type === "success" ? "#4f46e5" : "#f44336",
               color: "#fff",
               padding: "30px 40px",
               borderRadius: 12,
@@ -190,10 +184,20 @@ export const PaymentPage: React.FC = () => {
               zIndex: 9999,
             }}
           >
-            {popup.type === "success" && <span style={{ fontSize: 48 }}>✔️</span>}
+            {popup.type === "success" && <span style={{ fontSize: 48, color: "#fff" }}>✔️</span>}
             <span>{popup.message}</span>
           </div>
         )}
+
+        {/* Loading bar keyframes */}
+        <style>
+          {`
+            @keyframes loadingBar {
+              0% { transform: translateX(-100%); }
+              100% { transform: translateX(0); }
+            }
+          `}
+        </style>
       </div>
     </MainLayout>
   );
