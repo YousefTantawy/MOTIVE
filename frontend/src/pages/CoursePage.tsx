@@ -127,14 +127,21 @@ export const CoursePage: React.FC = () => {
       <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, flexWrap: "wrap", position: "relative" }}>
         
 {/* Sidebar */}
-<div style={{
-  width: sidebarOpen ? 300 : 0,
-  flexShrink: 0,
-  borderRight: sidebarOpen ? "1px solid #ddd" : "none",
-  paddingRight: sidebarOpen ? 10 : 0,
-  overflow: "hidden",
-  transition: "width 0.3s ease",
-}}>
+<div
+  style={{
+    position: "fixed", // sidebar stays fixed
+    top: 0,
+    left: 0,
+    height: "100vh",
+    width: sidebarOpen ? 300 : 0,
+    borderRight: sidebarOpen ? "1px solid #ddd" : "none",
+    padding: sidebarOpen ? "20px 10px" : 0,
+    overflowY: "auto",
+    transition: "width 0.3s ease",
+    backgroundColor: "#fff",
+    zIndex: 999,
+  }}
+>
   {sidebarOpen && (
     <>
       <h2>{course?.courseTitle}</h2>
@@ -152,13 +159,17 @@ export const CoursePage: React.FC = () => {
                   padding: "8px 12px",
                   marginBottom: 4,
                   cursor: "pointer",
-                  backgroundColor: currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
+                  backgroundColor:
+                    currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
                   borderRadius: 4,
                 }}
               >
-                {/* Clicking lesson title selects it */}
-                <span onClick={() => setCurrentLesson(lesson)} style={{ flex: 1 }}>
-                  {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume)`}
+                <span
+                  onClick={() => setCurrentLesson(lesson)}
+                  style={{ flex: 1 }}
+                >
+                  {lesson.title}{" "}
+                  {lesson.lastWatchedSecond > 0 && `(Resume)`}
                 </span>
 
                 {/* Completion Checkmark */}
@@ -173,7 +184,6 @@ export const CoursePage: React.FC = () => {
                         lessonId: lesson.lessonId,
                         isCompleted: newStatus,
                       });
-                      // Update local state
                       setCourse((prev) => {
                         if (!prev) return prev;
                         const updatedSections = prev.sections.map((s) => ({
@@ -212,8 +222,8 @@ export const CoursePage: React.FC = () => {
 <div
   onClick={() => setSidebarOpen(!sidebarOpen)}
   style={{
-    position: "fixed", // stays fixed on scroll
-    left: sidebarOpen ? 300 : 0, // moves to edge of sidebar
+    position: "fixed",
+    left: sidebarOpen ? 300 : 0,
     top: 150,
     width: 40,
     height: 40,
@@ -231,6 +241,7 @@ export const CoursePage: React.FC = () => {
 >
   {sidebarOpen ? "<" : ">"}
 </div>
+
 
 
 
