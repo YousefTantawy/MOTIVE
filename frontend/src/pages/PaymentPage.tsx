@@ -21,7 +21,6 @@ export const PaymentPage: React.FC = () => {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const courseId = params.get("courseId") || "";
-  const courseName = params.get("courseName") || `Course ${courseId}`;
   const price = params.get("price") || "0";
 
   const [cardName, setCardName] = useState("");
@@ -52,20 +51,17 @@ export const PaymentPage: React.FC = () => {
       console.log("Payment response:", response.data);
 
       if (response.data === "success") {
-        setPopup({ type: "success", message: `Payment completed for course ${courseName}` });
+        setPopup({ type: "success", message: `Payment completed for course ${courseId}` });
         setTimeout(() => navigate("/my-courses"), 2000);
       } else {
-        setPopup({ type: "error", message: "Payment failed. Please try again." });
+        setPopup({ type: "error", message: response.data || "Payment failed. Please try again." });
       }
     } catch (err: any) {
       console.log("Payment request error:", err);
 
-      // Custom message for "already enrolled"
-      if (err.response?.status === 400 && err.response?.data?.includes("already enrolled")) {
-        setPopup({ type: "error", message: "User is already enrolled in this course." });
-      } else {
-        setPopup({ type: "error", message: "Payment failed: " + (err.response?.status || err.message) });
-      }
+      // Show server error message if available, fallback to default
+      const serverMessage = err.response?.data || err.message || "Unknown error";
+      setPopup({ type: "error", message: serverMessage });
     } finally {
       setProcessing(false);
     }
@@ -75,7 +71,7 @@ export const PaymentPage: React.FC = () => {
     <MainLayout>
       <div style={{ maxWidth: 720, margin: "24px auto", padding: 20, background: "#f9f9f9", borderRadius: 10, position: "relative" }}>
         <h2 style={{ marginBottom: 16 }}>Complete Your Payment</h2>
-        <p>Course: <strong>{courseName}</strong></p>
+        <p>Course: <strong>{`Course ${courseId}`}</strong></p>
         <p>Amount: <strong>${price}</strong></p>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
