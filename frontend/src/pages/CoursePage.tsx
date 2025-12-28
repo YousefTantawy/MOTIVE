@@ -40,6 +40,7 @@ export const CoursePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
+  const [markedComplete, setMarkedComplete] = useState(false);
 
   // Fetch course data
   useEffect(() => {
@@ -78,9 +79,10 @@ export const CoursePage: React.FC = () => {
     }
   };
 
-  // Mark current lesson complete
+  // Mark current video lesson as complete
   const handleCompleteLesson = async () => {
     if (!currentLesson) return;
+
     try {
       await axiosInstance.post("/Dashboard/completeLessonCheck", {
         userId,
@@ -88,6 +90,7 @@ export const CoursePage: React.FC = () => {
         lessonId: currentLesson.lessonId,
         isCompleted: true,
       });
+
       setCourse((prev) => {
         if (!prev) return prev;
         const updatedSections = prev.sections.map((sec) => ({
@@ -98,6 +101,7 @@ export const CoursePage: React.FC = () => {
         }));
         return { ...prev, sections: updatedSections };
       });
+      setMarkedComplete(true);
     } catch (err) {
       console.error("Failed to mark lesson complete:", err);
     }
@@ -125,16 +129,8 @@ export const CoursePage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div
-        style={{
-          display: "flex",
-          maxWidth: 1100,
-          margin: "0 auto",
-          padding: 20,
-          gap: 20,
-          position: "relative",
-        }}
-      >
+      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, position: "relative" }}>
+        
         {/* Sidebar */}
         <div
           style={{
@@ -161,6 +157,7 @@ export const CoursePage: React.FC = () => {
                     {section.lessons.map((lesson) => {
                       const isDone = lesson.isCompleted || false;
 
+                      // inline function for toggling completion
                       const toggleComplete = async () => {
                         try {
                           await axiosInstance.post("/Dashboard/completeLessonCheck", {
@@ -169,6 +166,7 @@ export const CoursePage: React.FC = () => {
                             lessonId: lesson.lessonId,
                             isCompleted: !isDone,
                           });
+
                           setCourse((prev) => {
                             if (!prev) return prev;
                             const updatedSections = prev.sections.map((sec) => ({
@@ -199,15 +197,13 @@ export const CoursePage: React.FC = () => {
                             cursor: "pointer",
                           }}
                         >
-                          <span onClick={() => setCurrentLesson(lesson)}>
+                          <span onClick={() => { setCurrentLesson(lesson); setMarkedComplete(lesson.isCompleted || false); }}>
                             {lesson.title}{" "}
                             {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
                           </span>
+
                           <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleComplete();
-                            }}
+                            onClick={(e) => { e.stopPropagation(); toggleComplete(); }}
                             style={{
                               width: 20,
                               height: 20,
@@ -239,7 +235,7 @@ export const CoursePage: React.FC = () => {
           style={{
             position: "fixed",
             left: sidebarOpen ? 300 : 0,
-            top: 164,
+            top: 64 + 100,
             width: 40,
             height: 40,
             backgroundColor: "#646cff",
@@ -258,38 +254,25 @@ export const CoursePage: React.FC = () => {
         </div>
 
         {/* Video + Details + Review */}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 400,
-            marginLeft: sidebarOpen ? 300 : 0,
-            transition: "margin-left 0.3s ease",
-            display: "flex",
-            flexDirection: "column",
-            gap: 20,
-          }}
-        >
+        <div style={{ flex: 1, minWidth: 400, marginLeft: sidebarOpen ? 300 : 0, transition: "margin-left 0.3s ease", display: "flex", flexDirection: "column", gap: 20 }}>
+          
           {/* Video */}
           {currentLesson ? (
-            <div
-              style={{
-                position: "relative",
-                paddingTop: "56.25%",
-                borderRadius: 8,
-                overflow: "hidden",
-                backgroundColor: "#000",
-              }}
-            >
+            <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: 8, overflow: "hidden", backgroundColor: "#000" }}>
               <video
                 key={currentLesson.lessonId}
                 src={currentLesson.videoUrl || undefined}
                 controls
                 autoPlay
                 style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-                onTimeUpdate={(e) =>
-                  handleTimeUpdate(Math.floor((e.target as HTMLVideoElement).currentTime))
-                }
-                onEnded={handleCompleteLesson}
+                onTimeUpdate={(e) => {
+                  const video = e.currentTarget;
+                  handleTimeUpdate(Math.floor(video.currentTime));
+
+                  if (!markedComplete && video.duration - video.currentTime <= 5) {
+                    handleCompleteLesson();
+                  }
+                }}
                 ref={(video) => {
                   if (video && currentLesson.lastWatchedSecond > 0) {
                     video.currentTime = currentLesson.lastWatchedSecond;
@@ -304,56 +287,33 @@ export const CoursePage: React.FC = () => {
           {/* Course & Lesson Details */}
           <div style={{ padding: 20, backgroundColor: "#f0f0f5", borderRadius: 8 }}>
             <h3>Course Details</h3>
-            <p>
-              <strong>Course:</strong> {course?.courseTitle}
-            </p>
-            <p>
-              <strong>Instructor:</strong> {course?.instructor}
-            </p>
-            <p>
-              <strong>Current Lesson:</strong> {currentLesson?.title}
-            </p>
-            <p>
-              <strong>Type:</strong> {currentLesson?.type}
-            </p>
-            {currentLesson?.textContent && (
-              <p>
-                <strong>Notes:</strong> {currentLesson.textContent}
-              </p>
-            )}
+            <p><strong>Course:</strong> {course?.courseTitle}</p>
+            <p><strong>Instructor:</strong> {course?.instructor}</p>
+            <p><strong>Current Lesson:</strong> {currentLesson?.title}</p>
+            <p><strong>Type:</strong> {currentLesson?.type}</p>
+            {currentLesson?.textContent && <p><strong>Notes:</strong> {currentLesson.textContent}</p>}
           </div>
 
           {/* Review Section */}
           <div style={{ padding: 20, backgroundColor: "#f0f0f5", borderRadius: 8 }}>
             <h3>Leave a Review</h3>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              {[1, 2, 3, 4, 5].map((star) => (
+              {[1,2,3,4,5].map((star) => (
                 <span
                   key={star}
                   onClick={() => setRating(star)}
-                  style={{
-                    cursor: "pointer",
-                    fontSize: 24,
-                    color: star <= rating ? "#ffc107" : "#ccc",
-                  }}
+                  style={{ cursor: "pointer", fontSize: 24, color: star <= rating ? "#ffc107" : "#ccc" }}
                 >
                   ★
                 </span>
               ))}
-              <span>{rating} / 5</span>
+              <span>{rating.toFixed(1)} / 5</span>
             </div>
             <textarea
               placeholder="Write your comment..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              style={{
-                width: "100%",
-                minHeight: 80,
-                padding: 10,
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                marginBottom: 10,
-              }}
+              style={{ width: "100%", minHeight: 80, padding: 10, borderRadius: 6, border: "1px solid #ccc", marginBottom: 10 }}
             />
             <button
               onClick={handleSubmitReview}
