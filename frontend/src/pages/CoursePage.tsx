@@ -150,57 +150,85 @@ const handleCompleteLesson = async () => {
             <div>
               <h2 style={{ marginTop: 0 }}>{course?.courseTitle}</h2>
               {course?.sections.map((section) => (
-                <div key={section.sectionId} style={{ marginBottom: 20 }}>
-                  <h3>{section.title}</h3>
-                  <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-                    {section.lessons.map((lesson) => {
-                      const isDone = lesson.isCompleted || false;
-                      return (
-                        <li
-                          key={lesson.lessonId}
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: "6px 10px",
-                            marginBottom: 4,
-                            borderRadius: 6,
-                            backgroundColor:
-                              currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <span onClick={() => setCurrentLesson(lesson)}>
-                            {lesson.title}{" "}
-                            {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
-                          </span>
+  <div key={section.sectionId} style={{ marginBottom: 20 }}>
+    <h3>{section.title}</h3>
+    <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+      {section.lessons.map((lesson) => {
+        const isDone = lesson.isCompleted || false;
 
-                          {/* Custom checkbox */}
-                          <div
-                            onClick={(e) => { e.stopPropagation(); toggleLessonComplete(lesson); }}
-                            style={{
-                              width: 20,
-                              height: 20,
-                              border: "2px solid #646cff",
-                              borderRadius: 4,
-                              backgroundColor: isDone ? "#646cff" : "transparent",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              cursor: "pointer",
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            {isDone && <span style={{ color: "#fff", fontSize: 14 }}>✔</span>}
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))}
+        // inline function for toggling completion
+        const toggleComplete = async () => {
+          try {
+            await axiosInstance.post("/Dashboard/completeLessonCheck", {
+              userId,
+              courseId: Number(courseId),
+              lessonId: lesson.lessonId,
+              isCompleted: !isDone,
+            });
+
+            // update local state
+            setCourse((prev) => {
+              if (!prev) return prev;
+              const updatedSections = prev.sections.map((sec) => ({
+                ...sec,
+                lessons: sec.lessons.map((l) =>
+                  l.lessonId === lesson.lessonId ? { ...l, isCompleted: !isDone } : l
+                ),
+              }));
+              return { ...prev, sections: updatedSections };
+            });
+          } catch (err) {
+            console.error("Failed to toggle lesson completion:", err);
+          }
+        };
+
+        return (
+          <li
+            key={lesson.lessonId}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "6px 10px",
+              marginBottom: 4,
+              borderRadius: 6,
+              backgroundColor:
+                currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
+              cursor: "pointer",
+            }}
+          >
+            <span onClick={() => setCurrentLesson(lesson)}>
+              {lesson.title}{" "}
+              {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
+            </span>
+
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleComplete(); // use the inline function
+              }}
+              style={{
+                width: 20,
+                height: 20,
+                border: "2px solid #646cff",
+                borderRadius: 4,
+                backgroundColor: isDone ? "#646cff" : "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+            >
+              {isDone && <span style={{ color: "#fff", fontSize: 14 }}>✔</span>}
             </div>
-          )}
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+))}
+
         </div>
 
         {/* Sidebar Toggle Button */}
