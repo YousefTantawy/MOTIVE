@@ -46,7 +46,7 @@ export const PaymentPage: React.FC = () => {
 
     setProcessing(true);
     try {
-      await axiosInstance.post("/api/Payments/checkout", {
+      await axiosInstance.post("/Payments/checkout", {
         userId,
         courseId,
         paymentMethod: "card",
