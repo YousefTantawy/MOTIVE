@@ -10,11 +10,32 @@ interface Enrollment {
   title: string;
 }
 
+interface Lesson {
+  lessonId: number;
+  title: string;
+  type: string;
+  duration: number;
+  lastWatchedSecond: number;
+}
+
+interface CourseProgress {
+  courseId: number;
+  courseTitle: string;
+  instructor: string;
+  overallProgress: number;
+  sections: {
+    sectionId: number;
+    title: string;
+    lessons: Lesson[];
+  }[];
+}
+
 export const StudentDashboard: React.FC = () => {
   const currentUser = authService.getCurrentUser();
   const userId = currentUser?.userId || 0;
 
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [progress, setProgress] = useState<Record<number, number>>({}); // courseId => overallProgress
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,11 +44,22 @@ export const StudentDashboard: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        // Fetch enrolled courses from backend
         const res = await axiosInstance.get<Enrollment[]>(`/Dashboard/user/${userId}/courses`);
         setEnrollments(res || []);
-      } catch (err) {
-        console.error("Failed to load enrollments:", err);
+
+        // Fetch individual course progress
+        const progressData: Record<number, number> = {};
+        await Promise.all(
+          (res || []).map(async (course) => {
+            const courseRes = await axiosInstance.get<CourseProgress>(
+              `/Dashboard/${course.courseId}/dashboard/${userId}`
+            );
+            progressData[course.courseId] = courseRes.overallProgress;
+          })
+        );
+        setProgress(progressData);
+      } catch (err: any) {
+        console.error("Failed to load enrollments or progress:", err);
         setError("Failed to load your courses. Please try again.");
       } finally {
         setLoading(false);
@@ -39,32 +71,34 @@ export const StudentDashboard: React.FC = () => {
 
   return (
     <MainLayout>
-      <div style={{ maxWidth: 1000, margin: "24px auto", padding: 20 }}>
-        <h2>My Courses</h2>
+      <div style={{ maxWidth: 1100, margin: "24px auto", padding: 20 }}>
+        <h1 style={{ textAlign: "center", marginBottom: 40 }}>Welcome to Motive</h1>
 
         {loading ? (
-          <div>Loading your courses...</div>
+          <div style={{ textAlign: "center" }}>Loading your courses...</div>
         ) : error ? (
-          <div style={{ color: "red" }}>{error}</div>
+          <div style={{ color: "red", textAlign: "center" }}>{error}</div>
         ) : enrollments.length === 0 ? (
-          <p>You are not enrolled in any courses yet.</p>
+          <p style={{ textAlign: "center" }}>You are not enrolled in any courses yet.</p>
         ) : (
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
               gap: 20,
-              marginTop: 20,
             }}
           >
-            {enrollments.map((enrollment) => (
+            {enrollments.map((course) => (
               <Link
-                key={enrollment.courseId}
-                to={`/course/${enrollment.courseId}`} // Navigate to actual course page
+                key={course.courseId}
+                to={`/course/${course.courseId}`}
                 style={{ textDecoration: "none" }}
               >
                 <Card>
-                  <h3>{enrollment.title}</h3>
+                  <h3>{course.title}</h3>
+                  {progress[course.courseId] !== undefined && (
+                    <p>Progress: {progress[course.courseId]}%</p>
+                  )}
                 </Card>
               </Link>
             ))}
