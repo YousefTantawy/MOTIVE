@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../lib/axios";
 import { CourseCard } from "../components/CourseCard";
 
@@ -44,25 +44,19 @@ export const HomePage: React.FC = () => {
   }, []);
 
   const renderCourseCard = (c: SimpleCourse) => {
-    const ratingText =
-      c.avgRating !== undefined && c.avgRating !== null
-        ? `${c.avgRating.toFixed(1)} / 5.0`
-        : "N/A";
+    // Build array of star fill percentages
+    const reviews =
+      c.avgRating !== null && c.avgRating !== undefined
+        ? Array.from({ length: 5 }, (_, i) => Math.min(Math.max(c.avgRating - i, 0), 1))
+        : [];
 
     return (
       <CourseCard
         key={c.courseId}
         courseId={c.courseId}
         title={c.title}
-        description={`<strong>Price:</strong> $${c.price}<br/><strong>Rating:</strong> ${ratingText}`}
-        reviews={
-          c.avgRating !== null && c.avgRating !== undefined
-            ? Array.from({ length: 5 }, (_, i) => {
-                const percentage = Math.min(Math.max(c.avgRating - i, 0), 1);
-                return percentage; // store fraction of star
-              })
-            : []
-        }
+        description={`<strong>Price:</strong> $${c.price}`}
+        reviews={reviews}
       />
     );
   };
@@ -71,31 +65,106 @@ export const HomePage: React.FC = () => {
   if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
 
   return (
-    <div style={{ padding: 20, maxWidth: 1100, margin: "0 auto" }}>
-      <h1>Welcome to Motive</h1>
+    <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
+      <h1 style={{ textAlign: "center", marginBottom: 30 }}>Motive</h1>
 
-      <Section title="Trending">{trending.map(renderCourseCard)}</Section>
-      <Section title="Recently Added">{recent.map(renderCourseCard)}</Section>
-      <Section title="Best Sellers">{bestSellers.map(renderCourseCard)}</Section>
-      <Section title="Top Rated">{topRated.map(renderCourseCard)}</Section>
+      <CarouselSection title="Trending" courses={trending} />
+      <CarouselSection title="Recently Added" courses={recent} />
+      <CarouselSection title="Best Sellers" courses={bestSellers} />
+      <CarouselSection title="Top Rated" courses={topRated} />
     </div>
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
+// Horizontal Carousel Section
+const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
   title,
-  children,
-}) => (
-  <div style={{ marginTop: 25 }}>
-    <h2>{title}</h2>
-    <div
-      style={{
-        display: "grid",
-        gap: 16,
-        gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-      }}
-    >
-      {children}
+  courses,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: "left" | "right") => {
+    if (!containerRef.current) return;
+    const width = containerRef.current.clientWidth;
+    containerRef.current.scrollBy({ left: direction === "right" ? width : -width, behavior: "smooth" });
+  };
+
+  return (
+    <div style={{ marginTop: 25, position: "relative" }}>
+      <h2 style={{ marginLeft: 0 }}>{title}</h2>
+
+      <button
+        onClick={() => scroll("left")}
+        style={{
+          position: "absolute",
+          left: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
+          zIndex: 10,
+          background: "#fff",
+          border: "1px solid #ccc",
+          borderRadius: "50%",
+          width: 40,
+          height: 40,
+          cursor: "pointer",
+        }}
+      >
+        ◀
+      </button>
+      <button
+        onClick={() => scroll("right")}
+        style={{
+          position: "absolute",
+          right: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
+          zIndex: 10,
+          background: "#fff",
+          border: "1px solid #ccc",
+          borderRadius: "50%",
+          width: 40,
+          height: 40,
+          cursor: "pointer",
+        }}
+      >
+        ▶
+      </button>
+
+      <div
+        ref={containerRef}
+        style={{
+          display: "flex",
+          overflowX: "auto",
+          gap: 16,
+          scrollBehavior: "smooth",
+          paddingBottom: 10,
+          paddingLeft: 0,
+        }}
+      >
+        {courses.map((c) => (
+          <div key={c.courseId} style={{ minWidth: 250, flexShrink: 0 }}>
+            {renderCourseCard(c)}
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
+
+// Render stars function outside component to reuse
+const renderCourseCard = (c: SimpleCourse) => {
+  const reviews =
+    c.avgRating !== null && c.avgRating !== undefined
+      ? Array.from({ length: 5 }, (_, i) => Math.min(Math.max(c.avgRating - i, 0), 1))
+      : [];
+
+  return (
+    <CourseCard
+      key={c.courseId}
+      courseId={c.courseId}
+      title={c.title}
+      description={`<strong>Price:</strong> $${c.price}`}
+      reviews={reviews}
+    />
+  );
+};
