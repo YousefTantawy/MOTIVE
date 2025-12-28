@@ -22,7 +22,6 @@ const ProfilePage: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
 
-  // ---------- DELETE ACCOUNT ----------
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
@@ -43,10 +42,13 @@ const ProfilePage: React.FC = () => {
         setEmail(data.email ?? "");
         setProfilePictureUrl(data.profilePictureUrl ?? "");
 
-        // Fetch phone numbers
-        const phoneResp = await axiosInstance.get(`/Auth/${userId}/phones`);
-        const phoneData = phoneResp.data?.phoneNumbers?.[0] ?? "";
-        setPhoneNumber(phoneData);
+        // Fetch phones (ignore 405)
+        try {
+          const phoneResp = await axiosInstance.get(`/Auth/${userId}/phones`);
+          setPhoneNumber(phoneResp.data?.phoneNumbers?.[0] ?? "");
+        } catch (err: any) {
+          if (err.response?.status !== 405) console.error(err);
+        }
       } catch (err) {
         console.error("Failed to load profile:", err);
         alert("Failed to load profile");
@@ -58,7 +60,6 @@ const ProfilePage: React.FC = () => {
     loadProfile();
   }, [userId]);
 
-  // ---------- DELETE COUNTDOWN ----------
   useEffect(() => {
     if (!showDeleteConfirm) return;
     setCountdown(5);
@@ -150,15 +151,7 @@ const ProfilePage: React.FC = () => {
           {profile?.roleId === 2 && (
             <button
               onClick={() => navigate("/instructor")}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#646cff",
-                color: "#fff",
-                border: "none",
-                borderRadius: 6,
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
+              style={{ padding: "8px 16px", backgroundColor: "#646cff", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}
             >
               Instructor Stats
             </button>
@@ -176,7 +169,7 @@ const ProfilePage: React.FC = () => {
             />
             {editField === "profilePictureUrl" ? (
               <>
-                <input type="text" value={profilePictureUrl} onChange={(e) => setProfilePictureUrl(e.target.value)} style={{ padding: 8, width: "300px" }} />
+                <input type="text" value={profilePictureUrl} maxLength={255} onChange={(e) => setProfilePictureUrl(e.target.value)} style={{ padding: 8, width: "300px" }} />
                 <button onClick={() => handleSave("profilePictureUrl")}>Save</button>
               </>
             ) : (
@@ -196,6 +189,7 @@ const ProfilePage: React.FC = () => {
                   <input
                     type="text"
                     value={field === "firstName" ? firstName : lastName}
+                    maxLength={255}
                     onChange={(e) => (field === "firstName" ? setFirstName(e.target.value) : setLastName(e.target.value))}
                   />
                   <button onClick={() => handleSave(field)}>Save</button>
@@ -214,7 +208,7 @@ const ProfilePage: React.FC = () => {
             <label>Phone Number: </label>
             {editField === "phoneNumber" ? (
               <>
-                <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                <input type="text" value={phoneNumber} maxLength={255} onChange={(e) => setPhoneNumber(e.target.value)} />
                 <button onClick={() => handleSave("phoneNumber")}>Save</button>
               </>
             ) : (
@@ -232,9 +226,9 @@ const ProfilePage: React.FC = () => {
               {editField === field ? (
                 <>
                   {field === "biography" ? (
-                    <textarea value={biography} onChange={(e) => setBiography(e.target.value)} style={{ width: "70%", minHeight: 100 }} />
+                    <textarea value={biography} maxLength={255} onChange={(e) => setBiography(e.target.value)} style={{ width: "70%", minHeight: 100 }} />
                   ) : (
-                    <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} />
+                    <input type="text" value={headline} maxLength={255} onChange={(e) => setHeadline(e.target.value)} />
                   )}
                   <button onClick={() => handleSave(field)}>Save</button>
                 </>
@@ -253,7 +247,7 @@ const ProfilePage: React.FC = () => {
           <h2>Email</h2>
           {editField === "email" ? (
             <>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "50%" }} />
+              <input type="email" value={email} maxLength={255} onChange={(e) => setEmail(e.target.value)} style={{ width: "50%" }} />
               <button onClick={() => handleSave("email")}>Save</button>
             </>
           ) : (
@@ -271,12 +265,14 @@ const ProfilePage: React.FC = () => {
             <>
               <input
                 type="password"
+                maxLength={255}
                 placeholder="Current Password"
                 value={passwords.currentPassword}
                 onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
               />
               <input
                 type="password"
+                maxLength={255}
                 placeholder="New Password"
                 value={passwords.newPassword}
                 onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
@@ -289,7 +285,7 @@ const ProfilePage: React.FC = () => {
           )}
         </section>
 
-        {/* --------- DANGER ZONE --------- */}
+        {/* Danger Zone */}
         <section style={{ marginTop: 50, borderTop: "1px solid #ddd", paddingTop: 20 }}>
           <h2 style={{ color: "red" }}>Danger Zone</h2>
           {!showDeleteConfirm ? (
