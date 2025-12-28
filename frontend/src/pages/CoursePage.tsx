@@ -126,82 +126,110 @@ export const CoursePage: React.FC = () => {
     <MainLayout>
       <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, flexWrap: "wrap", position: "relative" }}>
         
-        {/* Sidebar */}
-        <div style={{
-          width: sidebarOpen ? 300 : 0,
-          flexShrink: 0,
-          borderRight: sidebarOpen ? "1px solid #ddd" : "none",
-          paddingRight: sidebarOpen ? 10 : 0,
-          overflow: "hidden",
-          transition: "width 0.3s ease"
-        }}>
-          {sidebarOpen && (
-            <>
-              <h2>{course?.courseTitle}</h2>
-              {course?.sections.map((section) => (
-                <div key={section.sectionId} style={{ marginBottom: 20 }}>
-                  <h3>{section.title}</h3>
-                  <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-                    {section.lessons.map((lesson) => (
-                      <li
-                        key={lesson.lessonId}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "8px 12px",
-                          marginBottom: 4,
-                          cursor: "pointer",
-                          backgroundColor: currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
-                          borderRadius: 4,
-                        }}
-                        onClick={() => setCurrentLesson(lesson)}
-                      >
-                        <span>
-                          {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume)` }
-                        </span>
-                        <span
-                          style={{
-                            width: 20,
-                            height: 20,
-                            border: "2px solid #646cff",
-                            borderRadius: 4,
-                            display: "inline-block",
-                            backgroundColor: lesson.isCompleted ? "#646cff" : "transparent",
-                          }}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </>
-          )}
-        </div>
+ {/* Sidebar */}
+<div style={{
+  width: sidebarOpen ? 300 : 0,
+  flexShrink: 0,
+  borderRight: sidebarOpen ? "1px solid #ddd" : "none",
+  paddingRight: sidebarOpen ? 10 : 0,
+  overflow: "hidden",
+  transition: "width 0.3s ease",
+  position: "relative"
+}}>
+  {sidebarOpen && (
+    <>
+      <h2>{course?.courseTitle}</h2>
+      {course?.sections.map((section) => (
+        <div key={section.sectionId} style={{ marginBottom: 20 }}>
+          <h3>{section.title}</h3>
+          <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+            {section.lessons.map((lesson) => (
+              <li
+                key={lesson.lessonId}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "8px 12px",
+                  marginBottom: 4,
+                  cursor: "pointer",
+                  backgroundColor: currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
+                  borderRadius: 4,
+                }}
+              >
+                <span onClick={() => setCurrentLesson(lesson)} style={{ flex: 1 }}>
+                  {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume)`}
+                </span>
 
-        {/* Toggle Sidebar Button */}
-        <div
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          style={{
-            position: "fixed",
-            left: sidebarOpen ? 300 : 0,
-            top: 150,
-            width: 40,
-            height: 40,
-            backgroundColor: "#646cff",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            borderRadius: 6,
-            transition: "left 0.3s ease",
-            fontWeight: "bold",
-            zIndex: 10
-          }}
-        >
-          {sidebarOpen ? "<" : ">"}
+                {/* Completion Checkmark */}
+                <span
+                  onClick={async (e) => {
+                    e.stopPropagation(); // Prevent selecting the lesson
+                    try {
+                      await axiosInstance.post("/Dashboard/completeLessonCheck", {
+                        userId,
+                        courseId: Number(courseId),
+                        lessonId: lesson.lessonId,
+                        isCompleted: true,
+                      });
+                      // Update local state
+                      setCourse((prev) => {
+                        if (!prev) return prev;
+                        const updatedSections = prev.sections.map((s) => ({
+                          ...s,
+                          lessons: s.lessons.map((l) =>
+                            l.lessonId === lesson.lessonId ? { ...l, isCompleted: true } : l
+                          ),
+                        }));
+                        return { ...prev, sections: updatedSections };
+                      });
+                    } catch (err) {
+                      console.error("Failed to mark lesson complete:", err);
+                    }
+                  }}
+                  style={{
+                    width: 20,
+                    height: 20,
+                    border: "2px solid #646cff",
+                    borderRadius: 4,
+                    display: "inline-block",
+                    backgroundColor: lesson.isCompleted ? "#646cff" : "transparent",
+                    cursor: "pointer",
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
         </div>
+      ))}
+    </>
+  )}
+</div>
+
+{/* Sidebar Toggle Button */}
+<div
+  onClick={() => setSidebarOpen(!sidebarOpen)}
+  style={{
+    position: "fixed", // stays fixed on scroll
+    left: sidebarOpen ? 300 : 0,
+    top: 150,
+    width: 40,
+    height: 40,
+    backgroundColor: "#646cff",
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    borderRadius: 6,
+    transition: "left 0.3s ease",
+    fontWeight: "bold",
+    zIndex: 1000, // ensure it's above the sidebar
+  }}
+>
+  {sidebarOpen ? "<" : ">"}
+</div>
+
 
         {/* Video + Review + Details */}
         <div style={{ flex: 1, minWidth: 400, display: "flex", flexDirection: "column", gap: 20 }}>
