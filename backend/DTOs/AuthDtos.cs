@@ -22,7 +22,13 @@ namespace MotiveBackend.DTOs
 		public string Password { get; set; }
 	}
 
-	public class LoginDto
+    public class UserLinkDto
+    {
+        public string PlatformName { get; set; }
+        public string Url { get; set; }
+    }
+
+    public class LoginDto
 	{
 		[Required]
 		public string Email { get; set; }
@@ -59,5 +65,9 @@ namespace MotiveBackend.DTOs
     public class UpdateUserPhonesDto
     {
         public List<string> PhoneNumbers { get; set; } = new List<string>();
+    }
+    public class UpdateUserLinksDto
+    {
+        public List<UserLinkDto> Links { get; set; } = new List<UserLinkDto>();
     }
 }

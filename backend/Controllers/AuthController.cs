@@ -93,6 +93,9 @@ namespace MotiveBackend.Controllers
         public async Task<IActionResult> GetProfile(ulong userId)
         {
             var user = await _context.Users
+                .Include(u => u.UserPhones)
+                .Include(u => u.UserLinks)
+                .Where(u => u.UserId == userId)
                 .Select(u => new
                 {
                     u.UserId,
@@ -103,9 +106,15 @@ namespace MotiveBackend.Controllers
                     u.Headline,
                     u.Biography,
                     u.ProfilePictureUrl,
-                    u.CreatedAt
+                    u.CreatedAt,
+                    PhoneNumbers = u.UserPhones.Select(p => p.PhoneNumber).ToList(),
+                    Links = u.UserLinks.Select(l => new
+                    {
+                        l.PlatformName,
+                        l.Url
+                    }).ToList()
                 })
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+                .FirstOrDefaultAsync();
 
             if (user == null)
             {
@@ -292,6 +301,45 @@ namespace MotiveBackend.Controllers
             }
 
             return Ok(new { message = "Phone numbers updated successfully.", phones = request.PhoneNumbers });
+        }
+
+        [HttpPut("{userId}/links")]
+        public async Task<IActionResult> UpdateUserLinks(ulong userId, [FromBody] UpdateUserLinksDto request)
+        {
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == userId);
+            if (!userExists)
+            {
+                return NotFound("User not found.");
+            }
+
+            var currentLinks = await _context.UserLinks
+                .Where(l => l.UserId == userId)
+                .ToListAsync();
+
+            _context.UserLinks.RemoveRange(currentLinks);
+
+            if (request.Links != null && request.Links.Any())
+            {
+                var newLinks = request.Links.Select(link => new UserLink
+                {
+                    UserId = userId,
+                    PlatformName = link.PlatformName,
+                    Url = link.Url
+                });
+
+                await _context.UserLinks.AddRangeAsync(newLinks);
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "An error occurred while updating user links.");
+            }
+
+            return Ok(new { message = "Links updated successfully.", links = request.Links });
         }
     }
 }
