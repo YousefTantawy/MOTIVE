@@ -11,6 +11,7 @@ interface Lesson {
   videoUrl: string | null;
   duration: number;
   lastWatchedSecond: number;
+  textContent?: string | null;
 }
 
 interface Section {
@@ -57,7 +58,6 @@ export const CoursePage: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchCourse();
   }, [courseId, userId]);
 
@@ -110,58 +110,71 @@ export const CoursePage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, flexWrap: "wrap", position: "relative" }}>
         
         {/* Sidebar */}
-        {sidebarOpen && (
-          <div style={{ width: 300, flexShrink: 0, borderRight: "1px solid #ddd", paddingRight: 10 }}>
-            <h2>{course?.courseTitle}</h2>
-            {course?.sections.map((section) => (
-              <div key={section.sectionId} style={{ marginBottom: 20 }}>
-                <h3>{section.title}</h3>
-                <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-                  {section.lessons.map((lesson) => (
-                    <li
-                      key={lesson.lessonId}
-                      style={{
-                        padding: "8px 12px",
-                        marginBottom: 4,
-                        cursor: "pointer",
-                        backgroundColor: currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
-                        borderRadius: 4,
-                      }}
-                      onClick={() => setCurrentLesson(lesson)}
-                    >
-                      {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        )}
+        <div style={{
+          width: sidebarOpen ? 300 : 0,
+          flexShrink: 0,
+          borderRight: sidebarOpen ? "1px solid #ddd" : "none",
+          paddingRight: sidebarOpen ? 10 : 0,
+          overflow: "hidden",
+          transition: "width 0.3s ease"
+        }}>
+          {sidebarOpen && (
+            <>
+              <h2>{course?.courseTitle}</h2>
+              {course?.sections.map((section) => (
+                <div key={section.sectionId} style={{ marginBottom: 20 }}>
+                  <h3>{section.title}</h3>
+                  <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+                    {section.lessons.map((lesson) => (
+                      <li
+                        key={lesson.lessonId}
+                        style={{
+                          padding: "8px 12px",
+                          marginBottom: 4,
+                          cursor: "pointer",
+                          backgroundColor: currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
+                          borderRadius: 4,
+                        }}
+                        onClick={() => setCurrentLesson(lesson)}
+                      >
+                        {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
 
         {/* Toggle Sidebar Button */}
-        <button
+        <div
           onClick={() => setSidebarOpen(!sidebarOpen)}
           style={{
             position: "absolute",
             left: sidebarOpen ? 300 : 0,
             top: 100,
-            zIndex: 100,
+            width: 40,
+            height: 40,
             backgroundColor: "#646cff",
             color: "#fff",
-            border: "none",
-            borderRadius: "50%",
-            width: 30,
-            height: 30,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             cursor: "pointer",
+            borderRadius: 6,
+            transition: "left 0.3s ease",
+            fontWeight: "bold",
+            zIndex: 10
           }}
         >
           {sidebarOpen ? "<" : ">"}
-        </button>
+        </div>
 
-        {/* Video + Review */}
+        {/* Video + Review + Details */}
         <div style={{ flex: 1, minWidth: 400, display: "flex", flexDirection: "column", gap: 20 }}>
           
           {/* Video */}
@@ -181,8 +194,19 @@ export const CoursePage: React.FC = () => {
             <p>Select a lesson to start learning.</p>
           )}
 
+          {/* Course & Lesson Details */}
+          <div style={{ padding: 20, backgroundColor: "#f0f0f5", borderRadius: 8 }}>
+            <h3>Course Details</h3>
+            <p><strong>Course:</strong> {course?.courseTitle}</p>
+            <p><strong>Instructor:</strong> {course?.instructor}</p>
+            <p><strong>Current Lesson:</strong> {currentLesson?.title}</p>
+            <p><strong>Type:</strong> {currentLesson?.type}</p>
+            <p><strong>Duration:</strong> {currentLesson?.duration}s</p>
+            {currentLesson?.textContent && <p><strong>Notes:</strong> {currentLesson.textContent}</p>}
+          </div>
+
           {/* Review Section */}
-          <div style={{ marginTop: 20, padding: 20, backgroundColor: "#f0f0f5", borderRadius: 8 }}>
+          <div style={{ padding: 20, backgroundColor: "#f0f0f5", borderRadius: 8 }}>
             <h3>Leave a Review</h3>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
               {[1,2,3,4,5].map((star) => (
@@ -216,7 +240,6 @@ export const CoursePage: React.FC = () => {
               Submit Review
             </button>
           </div>
-
         </div>
       </div>
     </MainLayout>
