@@ -15,7 +15,6 @@ export const HomePage: React.FC = () => {
   const [recent, setRecent] = useState<SimpleCourse[]>([]);
   const [bestSellers, setBestSellers] = useState<SimpleCourse[]>([]);
   const [topRated, setTopRated] = useState<SimpleCourse[]>([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +33,6 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-
     Promise.all([
       fetchSection("/Courses/trending", setTrending),
       fetchSection("/Courses/recent", setRecent),
@@ -48,27 +46,20 @@ export const HomePage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: 30 }}>Welcome to Motive</h1>
+      <h1 style={{ textAlign: "center", marginBottom: 50 }}>Welcome at Motive</h1>
 
-      <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
-  <h1 style={{ textAlign: "center", marginBottom: 40 }}>Motive</h1>
-
-  <div style={{ marginBottom: 50 }}>
-    <CarouselSection title="Trending" courses={trending} />
-  </div>
-
-  <div style={{ marginBottom: 50 }}>
-    <CarouselSection title="Recently Added" courses={recent} />
-  </div>
-
-  <div style={{ marginBottom: 50 }}>
-    <CarouselSection title="Best Sellers" courses={bestSellers} />
-  </div>
-
-  <div style={{ marginBottom: 50 }}>
-    <CarouselSection title="Top Rated" courses={topRated} />
-  </div>
-</div>
+      <div style={{ marginBottom: 100 }}>
+        <CarouselSection title="Trending" courses={trending} />
+      </div>
+      <div style={{ marginBottom: 100 }}>
+        <CarouselSection title="Recently Added" courses={recent} />
+      </div>
+      <div style={{ marginBottom: 100 }}>
+        <CarouselSection title="Best Sellers" courses={bestSellers} />
+      </div>
+      <div style={{ marginBottom: 100 }}>
+        <CarouselSection title="Top Rated" courses={topRated} />
+      </div>
     </div>
   );
 };
@@ -79,103 +70,87 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
   courses,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [hovered, setHovered] = useState(false);
-
-  const CARD_COUNT_ON_SCREEN = 4;
-  const GAP = 20; // gap between cards in px
 
   const scroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;
-    const containerWidth = containerRef.current.clientWidth;
-    const scrollAmount = containerWidth; // scroll by 4 cards
+    const cardWidth = 300; // fixed card width
+    const gap = 16;
+    const scrollAmount = (cardWidth + gap) * 4; // move by 4 cards
     containerRef.current.scrollBy({ left: direction === "right" ? scrollAmount : -scrollAmount, behavior: "smooth" });
   };
 
-  const cardWidth = `calc((100% - ${(CARD_COUNT_ON_SCREEN - 1) * GAP}px) / ${CARD_COUNT_ON_SCREEN})`;
-
   return (
-    <div
-      style={{ marginTop: 25, position: "relative" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <h2 style={{ marginLeft: 0 }}>{title}</h2>
-
-      {/* Left Arrow */}
-      <button
-        onClick={() => scroll("left")}
-        style={{
-          position: "absolute",
-          left: 0,
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 10,
-          background: "rgba(255,255,255,0.8)",
-          border: "none",
-          borderRadius: "50%",
-          width: 50,
-          height: 50,
-          cursor: "pointer",
-          opacity: hovered ? 1 : 0,
-          transition: "opacity 0.3s",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: 24,
-        }}
-      >
-        ◀
-      </button>
-
-      {/* Right Arrow */}
-      <button
-        onClick={() => scroll("right")}
-        style={{
-          position: "absolute",
-          right: 0,
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 10,
-          background: "rgba(255,255,255,0.8)",
-          border: "none",
-          borderRadius: "50%",
-          width: 50,
-          height: 50,
-          cursor: "pointer",
-          opacity: hovered ? 1 : 0,
-          transition: "opacity 0.3s",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: 24,
-        }}
-      >
-        ▶
-      </button>
+    <div style={{ marginTop: 25, position: "relative" }}>
+      <h2 style={{ marginLeft: 0, marginBottom: 20 }}>{title}</h2>
 
       <div
-        ref={containerRef}
         style={{
-          display: "flex",
-          overflowX: "auto",
-          gap: GAP,
-          scrollBehavior: "smooth",
-          paddingBottom: 10,
-          paddingLeft: 0,
+          position: "relative",
         }}
+        className="carousel-wrapper"
       >
-        {courses.map((c) => (
-          <div key={c.courseId} style={{ flex: "0 0 auto", width: cardWidth }}>
-            {renderCourseCard(c)}
-          </div>
-        ))}
+        <button
+          onClick={() => scroll("left")}
+          className="carousel-arrow left"
+          style={arrowStyle}
+        >
+          ◀
+        </button>
+        <button
+          onClick={() => scroll("right")}
+          className="carousel-arrow right"
+          style={arrowStyle}
+        >
+          ▶
+        </button>
+
+        <div
+          ref={containerRef}
+          style={{
+            display: "flex",
+            overflowX: "auto",
+            gap: 16,
+            scrollBehavior: "smooth",
+            paddingBottom: 10,
+            paddingLeft: 0,
+          }}
+          className="carousel-container"
+        >
+          {courses.map((c) => (
+            <div key={c.courseId} style={{ minWidth: 300, flexShrink: 0 }}>
+              {renderCourseCard(c)}
+            </div>
+          ))}
+        </div>
       </div>
+      <style>{`
+        .carousel-wrapper:hover .carousel-arrow {
+          opacity: 1;
+        }
+        .carousel-arrow {
+          transition: opacity 0.3s;
+          opacity: 0;
+        }
+      `}</style>
     </div>
   );
 };
 
+// Arrow button style
+const arrowStyle: React.CSSProperties = {
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  zIndex: 10,
+  background: "#fff",
+  border: "1px solid #ccc",
+  borderRadius: "50%",
+  width: 40,
+  height: 40,
+  cursor: "pointer",
+};
 
-// Render stars function outside component to reuse
+// Render CourseCard with stars
 const renderCourseCard = (c: SimpleCourse) => {
   const reviews =
     c.avgRating !== null && c.avgRating !== undefined
