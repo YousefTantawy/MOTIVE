@@ -48,16 +48,16 @@ export const HomePage: React.FC = () => {
     <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
       <h1 style={{ textAlign: "center", marginBottom: 50 }}>Welcome at Motive</h1>
 
-      <div style={{ marginBottom: 100 }}>
+      <div style={{ marginBottom: 120 }}>
         <CarouselSection title="Trending" courses={trending} />
       </div>
-      <div style={{ marginBottom: 100 }}>
+      <div style={{ marginBottom: 120 }}>
         <CarouselSection title="Recently Added" courses={recent} />
       </div>
-      <div style={{ marginBottom: 100 }}>
+      <div style={{ marginBottom: 120 }}>
         <CarouselSection title="Best Sellers" courses={bestSellers} />
       </div>
-      <div style={{ marginBottom: 100 }}>
+      <div style={{ marginBottom: 120 }}>
         <CarouselSection title="Top Rated" courses={topRated} />
       </div>
     </div>
@@ -76,30 +76,28 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
     const cardWidth = 300; // fixed card width
     const gap = 16;
     const scrollAmount = (cardWidth + gap) * 4; // move by 4 cards
-    containerRef.current.scrollBy({ left: direction === "right" ? scrollAmount : -scrollAmount, behavior: "smooth" });
+    containerRef.current.scrollBy({
+      left: direction === "right" ? scrollAmount : -scrollAmount,
+      behavior: "smooth",
+    });
   };
 
   return (
     <div style={{ marginTop: 25, position: "relative" }}>
       <h2 style={{ marginLeft: 0, marginBottom: 20 }}>{title}</h2>
 
-      <div
-        style={{
-          position: "relative",
-        }}
-        className="carousel-wrapper"
-      >
+      <div style={{ position: "relative" }} className="carousel-wrapper">
         <button
           onClick={() => scroll("left")}
           className="carousel-arrow left"
-          style={arrowStyle}
+          style={{ ...arrowStyle, left: -10 }}
         >
           ◀
         </button>
         <button
           onClick={() => scroll("right")}
           className="carousel-arrow right"
-          style={arrowStyle}
+          style={{ ...arrowStyle, right: -10 }}
         >
           ▶
         </button>
@@ -123,13 +121,23 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
           ))}
         </div>
       </div>
+
       <style>{`
-        .carousel-wrapper:hover .carousel-arrow {
-          opacity: 1;
+        .carousel-wrapper {
+          position: relative;
         }
         .carousel-arrow {
           transition: opacity 0.3s;
           opacity: 0;
+          pointer-events: none;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 24px;
+        }
+        .carousel-wrapper:hover .carousel-arrow {
+          opacity: 1;
+          pointer-events: auto;
         }
       `}</style>
     </div>
