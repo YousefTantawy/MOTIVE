@@ -43,29 +43,13 @@ export const HomePage: React.FC = () => {
     ]).finally(() => setLoading(false));
   }, []);
 
-  const renderCourseCard = (c: SimpleCourse) => {
-    // Build array of star fill percentages
-    const reviews =
-      c.avgRating !== null && c.avgRating !== undefined
-        ? Array.from({ length: 5 }, (_, i) => Math.min(Math.max(c.avgRating - i, 0), 1))
-        : [];
-
-    return (
-      <CourseCard
-        key={c.courseId}
-        courseId={c.courseId}
-        title={c.title}
-        description={`<strong>Price:</strong> $${c.price}`}
-        reviews={reviews}
-      />
-    );
-  };
-
   if (loading) return <p style={{ textAlign: "center" }}>Loading…</p>;
   if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
 
   return (
     <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
+      <h1 style={{ textAlign: "center", marginBottom: 30 }}>Motive</h1>
+
       <CarouselSection title="Trending" courses={trending} />
       <CarouselSection title="Recently Added" courses={recent} />
       <CarouselSection title="Best Sellers" courses={bestSellers} />
@@ -80,6 +64,7 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
   courses,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
 
   const scroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;
@@ -88,9 +73,14 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
   };
 
   return (
-    <div style={{ marginTop: 25, position: "relative" }}>
+    <div
+      style={{ marginTop: 25, position: "relative" }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <h2 style={{ marginLeft: 0 }}>{title}</h2>
 
+      {/* Left Arrow */}
       <button
         onClick={() => scroll("left")}
         style={{
@@ -99,16 +89,24 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 10,
-          background: "#fff",
-          border: "1px solid #ccc",
+          background: "rgba(255,255,255,0.8)",
+          border: "none",
           borderRadius: "50%",
-          width: 40,
-          height: 40,
+          width: 50,
+          height: 50,
           cursor: "pointer",
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.3s",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: 24,
         }}
       >
         ◀
       </button>
+
+      {/* Right Arrow */}
       <button
         onClick={() => scroll("right")}
         style={{
@@ -117,12 +115,18 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 10,
-          background: "#fff",
-          border: "1px solid #ccc",
+          background: "rgba(255,255,255,0.8)",
+          border: "none",
           borderRadius: "50%",
-          width: 40,
-          height: 40,
+          width: 50,
+          height: 50,
           cursor: "pointer",
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.3s",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: 24,
         }}
       >
         ▶
@@ -133,14 +137,14 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
         style={{
           display: "flex",
           overflowX: "auto",
-          gap: 16,
+          gap: 20,
           scrollBehavior: "smooth",
           paddingBottom: 10,
           paddingLeft: 0,
         }}
       >
         {courses.map((c) => (
-          <div key={c.courseId} style={{ minWidth: 250, flexShrink: 0 }}>
+          <div key={c.courseId} style={{ minWidth: 300, flexShrink: 0 }}>
             {renderCourseCard(c)}
           </div>
         ))}
