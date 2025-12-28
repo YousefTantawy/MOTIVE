@@ -79,30 +79,32 @@ export const CoursePage: React.FC = () => {
   };
 
   // Toggle lesson complete / uncomplete
-  const toggleLessonComplete = async (lesson: Lesson) => {
-    const isDone = lesson.isCompleted || false;
-    try {
-      await axiosInstance.post("/Dashboard/completeLessonCheck", {
-        userId,
-        courseId: Number(courseId),
-        lessonId: lesson.lessonId,
-        isCompleted: !isDone,
-      });
+  // Mark current video lesson as complete when video ends
+const handleCompleteLesson = async () => {
+  if (!currentLesson) return;
 
-      setCourse((prev) => {
-        if (!prev) return prev;
-        const updatedSections = prev.sections.map((sec) => ({
-          ...sec,
-          lessons: sec.lessons.map((l) =>
-            l.lessonId === lesson.lessonId ? { ...l, isCompleted: !isDone } : l
-          ),
-        }));
-        return { ...prev, sections: updatedSections };
-      });
-    } catch (err) {
-      console.error("Failed to toggle lesson completion:", err);
-    }
-  };
+  try {
+    await axiosInstance.post("/Dashboard/completeLessonCheck", {
+      userId,
+      courseId: Number(courseId),
+      lessonId: currentLesson.lessonId,
+      isCompleted: true,
+    });
+
+    setCourse((prev) => {
+      if (!prev) return prev;
+      const updatedSections = prev.sections.map((sec) => ({
+        ...sec,
+        lessons: sec.lessons.map((l) =>
+          l.lessonId === currentLesson.lessonId ? { ...l, isCompleted: true } : l
+        ),
+      }));
+      return { ...prev, sections: updatedSections };
+    });
+  } catch (err) {
+    console.error("Failed to mark lesson complete:", err);
+  }
+};
 
   // Submit review
   const handleSubmitReview = async () => {
