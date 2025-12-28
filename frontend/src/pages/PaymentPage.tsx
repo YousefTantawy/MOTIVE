@@ -46,10 +46,10 @@ export const PaymentPage: React.FC = () => {
     fetchCourse();
   }, [courseId]);
 
- const handleSubmit = async (e?: React.FormEvent) => {
+const handleSubmit = async (e?: React.FormEvent) => {
   e?.preventDefault();
   setProcessing(true);
-  setPopup(null); // reset previous popup
+  setPopup(null);
 
   try {
     const response = await axiosInstance.post(
@@ -58,23 +58,22 @@ export const PaymentPage: React.FC = () => {
       {
         headers: { "Content-Type": "application/json" },
         responseType: "text",
-        validateStatus: () => true, // treat all statuses as resolved
+        validateStatus: () => true, // never throw, always resolve
       }
     );
 
-    let popupMessage = "";
+    let popupMessage = response.data || "Unknown error";
     let popupType: "success" | "error" = "error";
 
     if (response.status === 200) {
-      popupMessage = `Payment completed for ${courseTitle || `Course ${courseId}`}`;
       popupType = "success";
     } else if (response.status === 400) {
-      popupMessage = response.data || "User is already enrolled in this course.";
+      // For 400 we assume server text tells us exactly what happened
+      popupType = "error";
     } else {
-      popupMessage = response.data || "Payment failed. Please try again.";
+      popupMessage = "Payment failed. Please try again.";
     }
 
-    // Show the popup
     setPopup({ type: popupType, message: popupMessage });
   } catch (err) {
     setPopup({ type: "error", message: "Payment failed. Please try again." });
@@ -82,6 +81,7 @@ export const PaymentPage: React.FC = () => {
     setProcessing(false);
   }
 };
+
 
 
   return (
