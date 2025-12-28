@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import axiosInstance from "../lib/axios";
@@ -20,9 +20,10 @@ export const PaymentPage: React.FC = () => {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const courseId = params.get("courseId") || "";
-  const courseName = params.get("courseName") || `Course ${courseId}`;
-  const price = params.get("price") || "0";
+  const priceParam = params.get("price") || "0";
 
+  const [courseName, setCourseName] = useState<string>(`Course ${courseId}`);
+  const [price, setPrice] = useState<string>(priceParam);
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -30,38 +31,51 @@ export const PaymentPage: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
+  // Fetch course info on mount
+  useEffect(() => {
+    if (!courseId) return;
+    const fetchCourse = async () => {
+      try {
+        const res = await axiosInstance.get(`/Courses/${courseId}`);
+        setCourseName(res.data.title);
+        setPrice(res.data.price.toString());
+        console.log("Fetched course info:", res.data);
+      } catch (err: any) {
+        console.error("Failed to fetch course info:", err);
+        setCourseName(`Course ${courseId}`);
+      }
+    };
+    fetchCourse();
+  }, [courseId]);
+
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
-    // Basic validation
     if (!cardName.trim()) return setPopup({ type: "error", message: "Please enter the cardholder name." });
     if (!validateCardNumber(cardNumber)) return setPopup({ type: "error", message: "Invalid card number." });
     if (!validateExpiry(expiry)) return setPopup({ type: "error", message: "Invalid or expired expiry date (MM/YY)." });
     if (!validateCvv(cvv)) return setPopup({ type: "error", message: "Invalid CVV." });
 
     setProcessing(true);
-
-    const payload = { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" };
-    console.log("Sending payment payload:", payload);
-
     try {
+      const payload = { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" };
+      console.log("Sending payment payload:", payload);
+
       const response = await axiosInstance.post("/Payments/checkout", payload, { responseType: "text" });
+
       console.log("Payment response:", response.data);
 
       if (response.data === "success") {
-        setPopup({ type: "success", message: `Payment completed for course ${courseName}` });
+        setPopup({ type: "success", message: `Payment completed for "${courseName}"` });
         setTimeout(() => navigate("/my-courses"), 2000);
+      } else if (response.data.includes("already enrolled")) {
+        setPopup({ type: "error", message: "User is already enrolled in this course." });
       } else {
         setPopup({ type: "error", message: "Payment failed. Please try again." });
       }
     } catch (err: any) {
-      console.log("Payment request error:", err);
-
-      if (err.response?.status === 400 && err.response?.data?.includes("already enrolled")) {
-        setPopup({ type: "error", message: "You are already enrolled in this course." });
-      } else {
-        setPopup({ type: "error", message: "Payment failed: " + (err.response?.status || err.message) });
-      }
+      console.error("Payment request error:", err);
+      setPopup({ type: "error", message: "Payment failed: " + (err.response?.status || err.message) });
     } finally {
       setProcessing(false);
     }
@@ -75,7 +89,6 @@ export const PaymentPage: React.FC = () => {
         <p>Amount: <strong>${price}</strong></p>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
-          {/* Cardholder Name */}
           <label>
             Cardholder Name
             <input
@@ -87,7 +100,6 @@ export const PaymentPage: React.FC = () => {
             />
           </label>
 
-          {/* Card Number */}
           <label>
             Card Number
             <input
@@ -100,7 +112,6 @@ export const PaymentPage: React.FC = () => {
           </label>
 
           <div style={{ display: "flex", gap: 16 }}>
-            {/* Expiry */}
             <label style={{ flex: 1 }}>
               Expiry (MM/YY)
               <input
@@ -112,7 +123,6 @@ export const PaymentPage: React.FC = () => {
               />
             </label>
 
-            {/* CVV */}
             <label style={{ flex: 1 }}>
               CVV
               <input
@@ -125,7 +135,6 @@ export const PaymentPage: React.FC = () => {
             </label>
           </div>
 
-          {/* Buttons */}
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             <button
               type="submit"
@@ -144,7 +153,6 @@ export const PaymentPage: React.FC = () => {
           </div>
         </form>
 
-        {/* Popup */}
         {popup && (
           <div
             style={{
