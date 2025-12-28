@@ -58,15 +58,25 @@ export const PaymentPage: React.FC = () => {
       {
         headers: { "Content-Type": "application/json" },
         responseType: "text",
-        validateStatus: () => true, // <-- ignore HTTP status, accept all
+        validateStatus: () => true, // accept all HTTP statuses
       }
     );
 
-    // wait 3 seconds before showing the message
-    await new Promise((res) => setTimeout(res, 3000));
+    // Decide message and type based on status code
+    let popupMessage = "";
+    let popupType: "success" | "error" = "error";
 
-    // show whatever text the backend returned
-    setPopup({ type: response.status === 200 ? "success" : "error", message: response.data });
+    if (response.status === 200) {
+      popupMessage = `Payment completed for ${courseTitle || `Course ${courseId}`}`;
+      popupType = "success";
+    } else if (response.status === 400) {
+      popupMessage = "User is already enrolled in this course.";
+    } else {
+      popupMessage = "Payment failed. Please try again.";
+    }
+
+    // show the popup after the response is fully back
+    setPopup({ type: popupType, message: popupMessage });
   } finally {
     setProcessing(false);
   }
