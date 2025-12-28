@@ -4,19 +4,6 @@ import { MainLayout } from "../layouts/MainLayout";
 import axiosInstance from "../lib/axios";
 import { authService } from "../services/authService";
 
-const validateCardNumber = (num: string) =>
-  /^[0-9]{13,19}$/.test(num.replace(/\s+/g, ""));
-const validateExpiry = (mmyy: string) => {
-  if (!/^(0[1-9]|1[0-2])\/(\d{2})$/.test(mmyy)) return false;
-  const [mm, yy] = mmyy.split("/").map((s) => parseInt(s, 10));
-  const now = new Date();
-  const exp = new Date(2000 + yy, mm - 1, 1);
-  exp.setMonth(exp.getMonth() + 1);
-  exp.setDate(0);
-  return exp >= new Date(now.getFullYear(), now.getMonth(), 1);
-};
-const validateCvv = (cvv: string) => /^[0-9]{3,4}$/.test(cvv);
-
 export const PaymentPage: React.FC = () => {
   const navigate = useNavigate();
   const { search } = useLocation();
@@ -42,14 +29,13 @@ export const PaymentPage: React.FC = () => {
       try {
         const res = await axiosInstance.get(`/Courses/${courseId}`);
 
-        // safely extract title in case backend wraps response
+        // Extract title safely
         const title =
-          res.data?.title ||
-          res.data?.course?.title ||
-          res.data?.data?.title ||
-          null;
+          (res as any)?.title ||
+          (res as any)?.data?.title ||
+          `Course ${courseId}`;
 
-        setCourseTitle(title || `Course ${courseId}`);
+        setCourseTitle(title);
       } catch (err) {
         console.log("Failed to fetch course info:", err);
         setCourseTitle(`Course ${courseId}`);
@@ -67,7 +53,7 @@ export const PaymentPage: React.FC = () => {
       const response = await axiosInstance.post(
         "/Payments/checkout",
         {
-          userId: userId,
+          userId,
           courseId: parseInt(courseId),
           paymentMethod: "card",
         },
@@ -78,29 +64,15 @@ export const PaymentPage: React.FC = () => {
         }
       );
 
-      let popupMessage = (response.data as any) || "";
-
       if (response.status === 200) {
-        setPopup({
-          type: "success",
-          message: popupMessage || "Payment successful!",
-        });
+        setPopup({ type: "success", message: "Payment successful!" });
       } else if (response.status === 400) {
-        setPopup({
-          type: "error",
-          message: popupMessage || "Payment failed.",
-        });
+        setPopup({ type: "error", message: "User is already enrolled in this course." });
       } else {
-        setPopup({
-          type: "error",
-          message: "Payment failed. Please try again.",
-        });
+        setPopup({ type: "error", message: "Payment failed. Please try again." });
       }
-    } catch (err) {
-      setPopup({
-        type: "error",
-        message: "Payment failed. Please try again.",
-      });
+    } catch {
+      setPopup({ type: "error", message: "Payment failed. Please try again." });
     } finally {
       setProcessing(false);
     }
