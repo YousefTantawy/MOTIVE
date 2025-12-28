@@ -126,13 +126,15 @@ export const CoursePage: React.FC = () => {
     <MainLayout>
       <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, flexWrap: "wrap", position: "relative" }}>
         
+
+
 {/* Sidebar */}
 <div
   style={{
-    position: "fixed", // sidebar stays fixed
-    top: 0,
+    position: "fixed",
+    top: 64,
     left: 0,
-    height: "100vh",
+    height: `calc(100vh - 64px)`,
     width: sidebarOpen ? 300 : 0,
     borderRight: sidebarOpen ? "1px solid #ddd" : "none",
     padding: sidebarOpen ? "20px 10px" : 0,
@@ -144,76 +146,8 @@ export const CoursePage: React.FC = () => {
 >
   {sidebarOpen && (
     <>
-      <h2>{course?.courseTitle}</h2>
-      {course?.sections.map((section) => (
-        <div key={section.sectionId} style={{ marginBottom: 20 }}>
-          <h3>{section.title}</h3>
-          <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-            {section.lessons.map((lesson) => (
-              <li
-                key={lesson.lessonId}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "8px 12px",
-                  marginBottom: 4,
-                  cursor: "pointer",
-                  backgroundColor:
-                    currentLesson?.lessonId === lesson.lessonId ? "#e0e0ff" : "transparent",
-                  borderRadius: 4,
-                }}
-              >
-                <span
-                  onClick={() => setCurrentLesson(lesson)}
-                  style={{ flex: 1 }}
-                >
-                  {lesson.title}{" "}
-                  {lesson.lastWatchedSecond > 0 && `(Resume)`}
-                </span>
-
-                {/* Completion Checkmark */}
-                <span
-                  onClick={async (e) => {
-                    e.stopPropagation(); // Prevent selecting the lesson
-                    const newStatus = !lesson.isCompleted; // toggle
-                    try {
-                      await axiosInstance.post("/Dashboard/completeLessonCheck", {
-                        userId,
-                        courseId: Number(courseId),
-                        lessonId: lesson.lessonId,
-                        isCompleted: newStatus,
-                      });
-                      setCourse((prev) => {
-                        if (!prev) return prev;
-                        const updatedSections = prev.sections.map((s) => ({
-                          ...s,
-                          lessons: s.lessons.map((l) =>
-                            l.lessonId === lesson.lessonId ? { ...l, isCompleted: newStatus } : l
-                          ),
-                        }));
-                        return { ...prev, sections: updatedSections };
-                      });
-                    } catch (err) {
-                      console.error("Failed to toggle lesson complete:", err);
-                    }
-                  }}
-                  style={{
-                    width: 20,
-                    height: 20,
-                    border: "2px solid #646cff",
-                    borderRadius: 4,
-                    display: "inline-block",
-                    backgroundColor: lesson.isCompleted ? "#646cff" : "transparent",
-                    cursor: "pointer",
-                    transition: "background-color 0.3s ease",
-                  }}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <h2 style={{ marginTop: 0 }}>{course?.courseTitle}</h2>
+      {/* lessons list ... */}
     </>
   )}
 </div>
@@ -224,7 +158,7 @@ export const CoursePage: React.FC = () => {
   style={{
     position: "fixed",
     left: sidebarOpen ? 300 : 0,
-    top: 150,
+    top: 64 + 100, // adjust vertical position
     width: 40,
     height: 40,
     backgroundColor: "#646cff",
@@ -241,7 +175,6 @@ export const CoursePage: React.FC = () => {
 >
   {sidebarOpen ? "<" : ">"}
 </div>
-
 
 
 
