@@ -64,14 +64,18 @@ export const CourseDetailsPage: React.FC = () => {
       </MainLayout>
     );
 
-  // --- Derived values ---
-  const instructorName =
-    course.instructor?.length > 0 ? course.instructor[0].userName : "Instructor";
+ // --- Derived values ---
+const instructorName =
+  course.instructor?.length > 0 ? course.instructor[0].userName : "Instructor";
 
-  const avgRating =
-    course.reviews && course.reviews.length > 0
-      ? course.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / course.reviews.length
-      : 0;
+let avgRating =
+  course.reviews && course.reviews.length > 0
+    ? course.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / course.reviews.length
+    : 0;
+
+// Limit to 1 decimal
+avgRating = parseFloat(avgRating.toFixed(1));
+
 
   const mappedReviews =
     course.reviews?.map((r: any, i: number) => ({
