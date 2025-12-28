@@ -126,7 +126,7 @@ export const CoursePage: React.FC = () => {
     <MainLayout>
       <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: 20, gap: 20, flexWrap: "wrap", position: "relative" }}>
         
- {/* Sidebar */}
+{/* Sidebar */}
 <div style={{
   width: sidebarOpen ? 300 : 0,
   flexShrink: 0,
@@ -134,7 +134,6 @@ export const CoursePage: React.FC = () => {
   paddingRight: sidebarOpen ? 10 : 0,
   overflow: "hidden",
   transition: "width 0.3s ease",
-  position: "relative"
 }}>
   {sidebarOpen && (
     <>
@@ -157,6 +156,7 @@ export const CoursePage: React.FC = () => {
                   borderRadius: 4,
                 }}
               >
+                {/* Clicking lesson title selects it */}
                 <span onClick={() => setCurrentLesson(lesson)} style={{ flex: 1 }}>
                   {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume)`}
                 </span>
@@ -165,12 +165,13 @@ export const CoursePage: React.FC = () => {
                 <span
                   onClick={async (e) => {
                     e.stopPropagation(); // Prevent selecting the lesson
+                    const newStatus = !lesson.isCompleted; // toggle
                     try {
                       await axiosInstance.post("/Dashboard/completeLessonCheck", {
                         userId,
                         courseId: Number(courseId),
                         lessonId: lesson.lessonId,
-                        isCompleted: true,
+                        isCompleted: newStatus,
                       });
                       // Update local state
                       setCourse((prev) => {
@@ -178,13 +179,13 @@ export const CoursePage: React.FC = () => {
                         const updatedSections = prev.sections.map((s) => ({
                           ...s,
                           lessons: s.lessons.map((l) =>
-                            l.lessonId === lesson.lessonId ? { ...l, isCompleted: true } : l
+                            l.lessonId === lesson.lessonId ? { ...l, isCompleted: newStatus } : l
                           ),
                         }));
                         return { ...prev, sections: updatedSections };
                       });
                     } catch (err) {
-                      console.error("Failed to mark lesson complete:", err);
+                      console.error("Failed to toggle lesson complete:", err);
                     }
                   }}
                   style={{
@@ -195,6 +196,7 @@ export const CoursePage: React.FC = () => {
                     display: "inline-block",
                     backgroundColor: lesson.isCompleted ? "#646cff" : "transparent",
                     cursor: "pointer",
+                    transition: "background-color 0.3s ease",
                   }}
                 />
               </li>
@@ -211,7 +213,7 @@ export const CoursePage: React.FC = () => {
   onClick={() => setSidebarOpen(!sidebarOpen)}
   style={{
     position: "fixed", // stays fixed on scroll
-    left: sidebarOpen ? 300 : 0,
+    left: sidebarOpen ? 300 : 0, // moves to edge of sidebar
     top: 150,
     width: 40,
     height: 40,
@@ -224,11 +226,12 @@ export const CoursePage: React.FC = () => {
     borderRadius: 6,
     transition: "left 0.3s ease",
     fontWeight: "bold",
-    zIndex: 1000, // ensure it's above the sidebar
+    zIndex: 1000,
   }}
 >
   {sidebarOpen ? "<" : ">"}
 </div>
+
 
 
         {/* Video + Review + Details */}
@@ -263,7 +266,6 @@ export const CoursePage: React.FC = () => {
             <p><strong>Instructor:</strong> {course?.instructor}</p>
             <p><strong>Current Lesson:</strong> {currentLesson?.title}</p>
             <p><strong>Type:</strong> {currentLesson?.type}</p>
-            <p><strong>Duration:</strong> {currentLesson?.duration}s</p>
             {currentLesson?.textContent && <p><strong>Notes:</strong> {currentLesson.textContent}</p>}
           </div>
 
