@@ -33,7 +33,7 @@ export const axiosInstance = {
     console.error("Request failed:", error);
     throw error;
   }
-}
+},
 
 
   get<T>(url: string) {
