@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import axiosInstance from "../lib/axios";
@@ -29,6 +29,21 @@ export const PaymentPage: React.FC = () => {
   const [cvv, setCvv] = useState("");
   const [processing, setProcessing] = useState(false);
   const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [courseTitle, setCourseTitle] = useState<string>(""); // store course name
+
+  // Fetch course info on mount
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const res = await axiosInstance.get(`/api/Courses/${courseId}`);
+        setCourseTitle(res.data?.title || `Course ${courseId}`);
+      } catch (err) {
+        console.log("Failed to fetch course info:", err);
+        setCourseTitle(`Course ${courseId}`);
+      }
+    };
+    if (courseId) fetchCourse();
+  }, [courseId]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -51,7 +66,7 @@ export const PaymentPage: React.FC = () => {
       console.log("Payment response:", response.data);
 
       if (response.data === "success") {
-        setPopup({ type: "success", message: `Payment completed for course ${courseId}` });
+        setPopup({ type: "success", message: `Payment completed for course ${courseTitle}` });
         setTimeout(() => navigate("/my-courses"), 2000);
       } else {
         setPopup({ type: "error", message: response.data || "Payment failed. Please try again." });
@@ -59,8 +74,18 @@ export const PaymentPage: React.FC = () => {
     } catch (err: any) {
       console.log("Payment request error:", err);
 
-      // Show server error message if available, fallback to default
-      const serverMessage = err.response?.data || err.message || "Unknown error";
+      let serverMessage = "Payment failed. Please try again.";
+      if (err.response?.data) {
+        try {
+          const data = typeof err.response.data === "string" ? JSON.parse(err.response.data) : err.response.data;
+          serverMessage = data.message || data || serverMessage;
+        } catch {
+          serverMessage = err.response.data;
+        }
+      } else if (err.message) {
+        serverMessage = err.message;
+      }
+
       setPopup({ type: "error", message: serverMessage });
     } finally {
       setProcessing(false);
@@ -71,7 +96,7 @@ export const PaymentPage: React.FC = () => {
     <MainLayout>
       <div style={{ maxWidth: 720, margin: "24px auto", padding: 20, background: "#f9f9f9", borderRadius: 10, position: "relative" }}>
         <h2 style={{ marginBottom: 16 }}>Complete Your Payment</h2>
-        <p>Course: <strong>{`Course ${courseId}`}</strong></p>
+        <p>Course: <strong>{courseTitle || `Course ${courseId}`}</strong></p>
         <p>Amount: <strong>${price}</strong></p>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
