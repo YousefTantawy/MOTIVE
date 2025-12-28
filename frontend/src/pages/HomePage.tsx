@@ -50,10 +50,25 @@ export const HomePage: React.FC = () => {
     <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
       <h1 style={{ textAlign: "center", marginBottom: 30 }}>Welcome to Motive</h1>
 
-      <CarouselSection title="Trending" courses={trending} />
-      <CarouselSection title="Recently Added" courses={recent} />
-      <CarouselSection title="Best Sellers" courses={bestSellers} />
-      <CarouselSection title="Top Rated" courses={topRated} />
+      <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
+  <h1 style={{ textAlign: "center", marginBottom: 40 }}>Motive</h1>
+
+  <div style={{ marginBottom: 50 }}>
+    <CarouselSection title="Trending" courses={trending} />
+  </div>
+
+  <div style={{ marginBottom: 50 }}>
+    <CarouselSection title="Recently Added" courses={recent} />
+  </div>
+
+  <div style={{ marginBottom: 50 }}>
+    <CarouselSection title="Best Sellers" courses={bestSellers} />
+  </div>
+
+  <div style={{ marginBottom: 50 }}>
+    <CarouselSection title="Top Rated" courses={topRated} />
+  </div>
+</div>
     </div>
   );
 };
