@@ -45,38 +45,34 @@ export const PaymentPage: React.FC = () => {
   }, [courseId]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    setProcessing(true);
-    setPopup(null);
+  e?.preventDefault();
+  setProcessing(true);
+  setPopup(null);
 
-    try {
-      const response = await axiosInstance.post(
-        "/Payments/checkout",
-        {
-          userId,
-          courseId: parseInt(courseId),
-          paymentMethod: "card",
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-          responseType: "text",
-          validateStatus: () => true,
-        }
-      );
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Payments/checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        courseId: parseInt(courseId),
+        paymentMethod: "card",
+      }),
+    });
 
-      if (response.status === 200) {
-        setPopup({ type: "success", message: "Payment successful!" });
-      } else if (response.status === 400) {
-        setPopup({ type: "error", message: "User is already enrolled in this course." });
-      } else {
-        setPopup({ type: "error", message: "Payment failed. Please try again." });
-      }
-    } catch {
+    if (res.status === 200) {
+      setPopup({ type: "success", message: "Payment successful!" });
+    } else if (res.status === 400) {
+      setPopup({ type: "error", message: "User is already enrolled in this course." });
+    } else {
       setPopup({ type: "error", message: "Payment failed. Please try again." });
-    } finally {
-      setProcessing(false);
     }
-  };
+  } catch (err) {
+    setPopup({ type: "error", message: "Payment failed. Please try again." });
+  } finally {
+    setProcessing(false);
+  }
+};
 
   return (
     <MainLayout>
