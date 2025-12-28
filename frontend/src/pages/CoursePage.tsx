@@ -11,6 +11,7 @@ interface Lesson {
   videoUrl: string | null;
   duration: number;
   lastWatchedSecond: number;
+  isCompleted?: boolean;
   textContent?: string | null;
 }
 
@@ -84,6 +85,19 @@ export const CoursePage: React.FC = () => {
         lessonId: currentLesson.lessonId,
         isCompleted: true,
       });
+      // Update local state
+      setCourse((prev) => {
+        if (!prev) return prev;
+        const updatedSections = prev.sections.map((section) => ({
+          ...section,
+          lessons: section.lessons.map((lesson) =>
+            lesson.lessonId === currentLesson.lessonId
+              ? { ...lesson, isCompleted: true }
+              : lesson
+          ),
+        }));
+        return { ...prev, sections: updatedSections };
+      });
     } catch (err) {
       console.error("Failed to mark lesson complete:", err);
     }
@@ -132,6 +146,9 @@ export const CoursePage: React.FC = () => {
                       <li
                         key={lesson.lessonId}
                         style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                           padding: "8px 12px",
                           marginBottom: 4,
                           cursor: "pointer",
@@ -140,7 +157,19 @@ export const CoursePage: React.FC = () => {
                         }}
                         onClick={() => setCurrentLesson(lesson)}
                       >
-                        {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume at ${lesson.lastWatchedSecond}s)`}
+                        <span>
+                          {lesson.title} {lesson.lastWatchedSecond > 0 && `(Resume)` }
+                        </span>
+                        <span
+                          style={{
+                            width: 20,
+                            height: 20,
+                            border: "2px solid #646cff",
+                            borderRadius: 4,
+                            display: "inline-block",
+                            backgroundColor: lesson.isCompleted ? "#646cff" : "transparent",
+                          }}
+                        />
                       </li>
                     ))}
                   </ul>
@@ -154,9 +183,9 @@ export const CoursePage: React.FC = () => {
         <div
           onClick={() => setSidebarOpen(!sidebarOpen)}
           style={{
-            position: "absolute",
+            position: "fixed",
             left: sidebarOpen ? 300 : 0,
-            top: 100,
+            top: 150,
             width: 40,
             height: 40,
             backgroundColor: "#646cff",
@@ -188,6 +217,11 @@ export const CoursePage: React.FC = () => {
                 style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
                 onTimeUpdate={(e) => handleTimeUpdate(Math.floor((e.target as HTMLVideoElement).currentTime))}
                 onEnded={handleCompleteLesson}
+                ref={(video) => {
+                  if (video && currentLesson.lastWatchedSecond > 0) {
+                    video.currentTime = currentLesson.lastWatchedSecond;
+                  }
+                }}
               />
             </div>
           ) : (
