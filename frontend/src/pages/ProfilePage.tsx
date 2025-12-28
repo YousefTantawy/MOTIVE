@@ -31,40 +31,27 @@ const ProfilePage: React.FC = () => {
     if (!userId) return;
 
     const loadProfile = async () => {
-      try {
-        const response = await axiosInstance.get(`/Auth/profile/${userId}`);
-        const data = response.data || response;
+  try {
+    const response = await axiosInstance.get(`/Auth/profile/${userId}`);
+    const data = response.data || response;
 
-        setProfile(data);
-        setFirstName(data.firstName ?? "");
-        setLastName(data.lastName ?? "");
-        setHeadline(data.headline ?? "");
-        setBiography(data.biography ?? "");
-        setEmail(data.email ?? "");
-        setProfilePictureUrl(data.profilePictureUrl ?? "");
+    setProfile(data);
+    setFirstName(data.firstName ?? "");
+    setLastName(data.lastName ?? "");
+    setHeadline(data.headline ?? "");
+    setBiography(data.biography ?? "");
+    setEmail(data.email ?? "");
+    setProfilePictureUrl(data.profilePictureUrl ?? "");
+    setPhoneNumbers(data.phoneNumbers ?? []); // directly from profile
+    setLinks(data.links?.map((l: any) => ({ PlatformName: l.PlatformName || "", Url: l.Url || "" })) ?? []);
+  } catch (err) {
+    console.error("Failed to load profile:", err);
+    alert("Failed to load profile");
+  } finally {
+    setLoading(false);
+  }
+};
 
-        // Map links from API
-        setLinks(
-          data.links?.map((l: any) => ({
-            PlatformName: l.PlatformName || "",
-            Url: l.Url || "",
-          })) ?? []
-        );
-
-        // Fetch phone numbers
-        try {
-          const phoneResp = await axiosInstance.get(`/Auth/${userId}/phones`);
-          setPhoneNumbers(phoneResp.data?.phoneNumbers ?? []);
-        } catch (err: any) {
-          if (err.response?.status !== 405) console.error(err);
-        }
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-        alert("Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    };
 
     loadProfile();
   }, [userId]);
@@ -286,73 +273,72 @@ const ProfilePage: React.FC = () => {
             )}
           </div>
 
-          {/* Links */}
-          <div style={{ marginBottom: 10 }}>
-            <label>Links: </label>
-            {editField === "links" ? (
-              <>
-                {links.map((link, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
-                    <input
-                      type="text"
-                      placeholder="Platform Name"
-                      value={link.PlatformName}
-                      onChange={(e) => {
-                        const newLinks = [...links];
-                        newLinks[idx].PlatformName = e.target.value;
-                        setLinks(newLinks);
-                      }}
-                      style={{ flex: 1 }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="URL"
-                      value={link.Url}
-                      onChange={(e) => {
-                        const newLinks = [...links];
-                        newLinks[idx].Url = e.target.value;
-                        setLinks(newLinks);
-                      }}
-                      style={{ flex: 2 }}
-                    />
-                    <button
-                      onClick={() => {
-                        const newLinks = links.filter((_, i) => i !== idx);
-                        setLinks(newLinks);
-                      }}
-                      style={{ backgroundColor: "#ff4d4f", color: "#fff", border: "none", padding: "2px 8px" }}
-                    >
-                      X
-                    </button>
-                  </div>
-                ))}
-                <button onClick={() => setLinks([...links, { PlatformName: "", Url: "" }])} style={{ marginBottom: 5 }}>
-                  + Add Link
-                </button>
-                <button onClick={() => handleSave("links")}>Save</button>
-              </>
-            ) : (
-              <>
-                {links.length > 0 ? (
-                  <ul>
-                    {links.map((link, idx) => (
-                      <li key={idx}>
-                        <a href={link.Url} target="_blank" rel="noopener noreferrer">
-                          {link.PlatformName}: {link.Url}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No links added.</p>
-                )}
-                <button onClick={() => setEditField("links")}>
-                  {links.length ? "Change" : "Add"}
-                </button>
-              </>
-            )}
-          </div>
-
+{/* Links */}
+<div style={{ marginBottom: 10 }}>
+  <label>Links: </label>
+  {editField === "links" ? (
+    <>
+      {links.map((link, idx) => (
+        <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
+          <input
+            type="text"
+            placeholder="Platform Name"
+            value={link.PlatformName}
+            onChange={(e) => {
+              const newLinks = [...links];
+              newLinks[idx].PlatformName = e.target.value;
+              setLinks(newLinks);
+            }}
+            style={{ flex: 1 }}
+          />
+          <input
+            type="text"
+            placeholder="URL"
+            value={link.Url}
+            onChange={(e) => {
+              const newLinks = [...links];
+              newLinks[idx].Url = e.target.value;
+              setLinks(newLinks);
+            }}
+            style={{ flex: 2 }}
+          />
+          <button
+            onClick={() => {
+              const newLinks = links.filter((_, i) => i !== idx);
+              setLinks(newLinks);
+            }}
+            style={{ backgroundColor: "#ff4d4f", color: "#fff", border: "none", padding: "2px 8px" }}
+          >
+            X
+          </button>
+        </div>
+      ))}
+      <button onClick={() => setLinks([...links, { PlatformName: "", Url: "" }])} style={{ marginBottom: 5 }}>
+        + Add Link
+      </button>
+      <button onClick={() => handleSave("links")}>Save</button>
+    </>
+  ) : (
+    <>
+      {links.length > 0 ? (
+        <ul>
+          {links.map((link, idx) => (
+            <li key={idx}>
+              <a href={link.Url} target="_blank" rel="noopener noreferrer">
+                {link.PlatformName}: {link.Url}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No links added.</p>
+      )}
+      <button onClick={() => setEditField("links")}>
+        {links.length ? "Change" : "Add"}
+      </button>
+    </>
+  )}
+</div>
           {/* Headline & Biography */}
           {["headline", "biography"].map((field) => (
             <div key={field} style={{ marginBottom: 10 }}>
@@ -431,6 +417,7 @@ const ProfilePage: React.FC = () => {
 
         {/* Danger Zone */}
         <section style={{ marginTop: 50, borderTop: "1px solid #ddd", paddingTop: 20 }}>
+          <h2 style={{ color: "red" }}> </h2>
           {!showDeleteConfirm ? (
             <button
               onClick={() => setShowDeleteConfirm(true)}
