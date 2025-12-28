@@ -43,8 +43,14 @@ const ProfilePage: React.FC = () => {
     setEmail(data.email ?? "");
     setProfilePictureUrl(data.profilePictureUrl ?? "");
     setPhoneNumbers(data.phoneNumbers ?? []); // directly from profile
-    setLinks(data.links?.map((l: any) => ({ PlatformName: l.PlatformName || "", Url: l.Url || "" })) ?? []);
-  } catch (err) {
+    // Inside useEffect, when loading profile
+setLinks(
+  data.links?.map((l: any) => ({
+    PlatformName: l.PlatformName || "",
+    Url: l.Url || "",
+  })) ?? []
+);
+
     console.error("Failed to load profile:", err);
     alert("Failed to load profile");
   } finally {
@@ -320,19 +326,22 @@ const ProfilePage: React.FC = () => {
     </>
   ) : (
     <>
-      {links.length > 0 ? (
-        <ul>
-          {links.map((link, idx) => (
-            <li key={idx}>
-              <a href={link.Url} target="_blank" rel="noopener noreferrer">
-                {link.PlatformName}: {link.Url}
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No links added.</p>
-      )}
+{links.length > 0 ? (
+  <ul>
+    {links.map((link, idx) => 
+      (link.PlatformName || link.Url) && (
+        <li key={idx}>
+          <a href={link.Url} target="_blank" rel="noopener noreferrer">
+            {link.PlatformName}: {link.Url}
+          </a>
+        </li>
+      )
+    )}
+  </ul>
+) : (
+  <p>No links added.</p>
+)}
+
       <button onClick={() => setEditField("links")}>
         {links.length ? "Change" : "Add"}
       </button>
