@@ -2,8 +2,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://172.213.228.233:5168/api";
 
 export const axiosInstance = {
-  // Generic request function
-  async request<T>(url: string, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET", body?: any): Promise<T> {
+  async request<T>(
+    url: string,
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET",
+    body?: any
+  ): Promise<T> {
     const fullUrl = `${API_BASE_URL}${url}`;
 
     try {
@@ -15,18 +18,43 @@ export const axiosInstance = {
         body: body ? JSON.stringify(body) : undefined,
       });
 
+      // Read raw text ONCE
+      const text = await response.text();
+
+      // Handle errors and expose backend message
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let message = `HTTP error! status: ${response.status}`;
+
+        if (text) {
+          try {
+            const parsed = JSON.parse(text);
+            message = parsed?.message || parsed || message;
+          } catch {
+            message = text;
+          }
+        }
+
+        throw new Error(message);
       }
 
-      return (await response.json()) as T;
+      // If no body → return null
+      if (!text) {
+        return null as unknown as T;
+      }
+
+      // Try parsing JSON
+      try {
+        return JSON.parse(text) as T;
+      } catch {
+        // If not JSON, return raw text
+        return text as unknown as T;
+      }
     } catch (error) {
       console.error("Request failed:", error);
       throw error;
     }
   },
 
-  // Convenience methods
   get<T>(url: string) {
     return this.request<T>(url, "GET");
   },
