@@ -20,6 +20,7 @@ const ProfilePage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [profilePictureUrl, setProfilePictureUrl] = useState("");
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
+  const [links, setLinks] = useState<{ type: string; url: string }[]>([]);
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -41,6 +42,7 @@ const ProfilePage: React.FC = () => {
         setBiography(data.biography ?? "");
         setEmail(data.email ?? "");
         setProfilePictureUrl(data.profilePictureUrl ?? "");
+        setLinks(data.links ?? []);
 
         // Fetch phone numbers
         try {
@@ -122,6 +124,10 @@ const ProfilePage: React.FC = () => {
         case "phoneNumbers":
           await axiosInstance.put(`/Auth/${userId}/phones`, { phoneNumbers });
           alert("Phone numbers updated successfully");
+          break;
+        case "links":
+          await axiosInstance.put(`/Auth/${userId}/links`, { links });
+          alert("Links updated successfully");
           break;
         case "password":
           await axiosInstance.put(`/Auth/change-password/${userId}`, passwords);
@@ -225,7 +231,7 @@ const ProfilePage: React.FC = () => {
             </div>
           ))}
 
-          {/* Phone Numbers (Dynamic List) */}
+          {/* Phone Numbers */}
           <div style={{ marginBottom: 10 }}>
             <label>Phone Numbers: </label>
             {editField === "phoneNumbers" ? (
@@ -254,10 +260,7 @@ const ProfilePage: React.FC = () => {
                     </button>
                   </div>
                 ))}
-                <button
-                  onClick={() => setPhoneNumbers([...phoneNumbers, ""])}
-                  style={{ marginBottom: 5 }}
-                >
+                <button onClick={() => setPhoneNumbers([...phoneNumbers, ""])} style={{ marginBottom: 5 }}>
                   + Add Number
                 </button>
                 <button onClick={() => handleSave("phoneNumbers")}>Save</button>
@@ -271,6 +274,73 @@ const ProfilePage: React.FC = () => {
                 </ul>
                 <button onClick={() => setEditField("phoneNumbers")}>
                   {phoneNumbers.length ? "Change" : "Add"}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Links */}
+          <div style={{ marginBottom: 10 }}>
+            <label>Links: </label>
+            {editField === "links" ? (
+              <>
+                {links.map((link, idx) => (
+                  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
+                    <input
+                      type="text"
+                      placeholder="Type (e.g., LinkedIn)"
+                      value={link.type}
+                      onChange={(e) => {
+                        const newLinks = [...links];
+                        newLinks[idx].type = e.target.value;
+                        setLinks(newLinks);
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="URL"
+                      value={link.url}
+                      onChange={(e) => {
+                        const newLinks = [...links];
+                        newLinks[idx].url = e.target.value;
+                        setLinks(newLinks);
+                      }}
+                      style={{ flex: 2 }}
+                    />
+                    <button
+                      onClick={() => {
+                        const newLinks = links.filter((_, i) => i !== idx);
+                        setLinks(newLinks);
+                      }}
+                      style={{ backgroundColor: "#ff4d4f", color: "#fff", border: "none", padding: "2px 8px" }}
+                    >
+                      X
+                    </button>
+                  </div>
+                ))}
+                <button onClick={() => setLinks([...links, { type: "", url: "" }])} style={{ marginBottom: 5 }}>
+                  + Add Link
+                </button>
+                <button onClick={() => handleSave("links")}>Save</button>
+              </>
+            ) : (
+              <>
+                {links.length > 0 ? (
+                  <ul>
+                    {links.map((link, idx) => (
+                      <li key={idx}>
+                        <a href={link.url} target="_blank" rel="noopener noreferrer">
+                          {link.type}: {link.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No links added.</p>
+                )}
+                <button onClick={() => setEditField("links")}>
+                  {links.length ? "Change" : "Add"}
                 </button>
               </>
             )}
