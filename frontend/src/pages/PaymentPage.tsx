@@ -38,12 +38,12 @@ export const PaymentPage: React.FC = () => {
     if (!validateCvv(cvv)) return setPopup({ type: "error", message: "Invalid CVV." });
 
     setProcessing(true);
+
+    const payload = { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" };
+    console.log("Sending payment payload:", payload);
+
     try {
-      const response = await axiosInstance.post(
-        "/Payments/checkout",
-        { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" },
-        { responseType: "text" }
-      );
+      const response = await axiosInstance.post("/Payments/checkout", payload, { responseType: "text" });
 
       if (response.data === "success") {
         setPopup({ type: "success", message: `Payment completed for course ${courseId}` });
@@ -52,6 +52,7 @@ export const PaymentPage: React.FC = () => {
         setPopup({ type: "error", message: "Payment failed. Please try again." });
       }
     } catch (err: any) {
+      console.log("Payment request error:", err);
       setPopup({ type: "error", message: "Payment failed: " + (err.response?.status || err.message) });
     } finally {
       setProcessing(false);
@@ -66,7 +67,6 @@ export const PaymentPage: React.FC = () => {
         <p>Amount: <strong>${price}</strong></p>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
-          {/* Cardholder Name */}
           <label>
             Cardholder Name
             <input
@@ -78,7 +78,6 @@ export const PaymentPage: React.FC = () => {
             />
           </label>
 
-          {/* Card Number */}
           <label>
             Card Number
             <input
@@ -91,7 +90,6 @@ export const PaymentPage: React.FC = () => {
           </label>
 
           <div style={{ display: "flex", gap: 16 }}>
-            {/* Expiry */}
             <label style={{ flex: 1 }}>
               Expiry (MM/YY)
               <input
@@ -103,7 +101,6 @@ export const PaymentPage: React.FC = () => {
               />
             </label>
 
-            {/* CVV */}
             <label style={{ flex: 1 }}>
               CVV
               <input
@@ -116,7 +113,6 @@ export const PaymentPage: React.FC = () => {
             </label>
           </div>
 
-          {/* Buttons */}
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             <button
               type="submit"
@@ -135,7 +131,6 @@ export const PaymentPage: React.FC = () => {
           </div>
         </form>
 
-        {/* Popup */}
         {popup && (
           <div
             style={{
