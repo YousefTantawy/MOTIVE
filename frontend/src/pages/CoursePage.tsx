@@ -225,7 +225,6 @@ export const CoursePage: React.FC = () => {
 ))}
 
 
-</div>
 
 {/* Sidebar Toggle Button */}
 <div
