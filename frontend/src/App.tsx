@@ -13,7 +13,7 @@ import { StudentDashboard } from "./pages/StudentDashboard";
 import { InstructorDashboard } from "./pages/InstructorDashboard";
 import { CourseDetailsPage } from "./pages/CourseDetailsPage";
 import { PaymentPage } from "./pages/PaymentPage";
-import { ProfilePage } from "./pages/ProfilePage";
+import  ProfilePage  from "./pages/ProfilePage";
 
 export default function App() {
   return (
