@@ -20,7 +20,7 @@ const ProfilePage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [profilePictureUrl, setProfilePictureUrl] = useState("");
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
-  const [links, setLinks] = useState<{ PlatformName: string; Url: string }[]>([]);
+  const [links, setLinks] = useState<{ platformName: string; url: string }[]>([]);
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -46,10 +46,11 @@ const ProfilePage: React.FC = () => {
     // Inside useEffect, when loading profile
 setLinks(
   data.links?.map((l: any) => ({
-    PlatformName: l.PlatformName || "",
-    Url: l.Url || "",
+    platformName: l.platformName || "",
+    url: l.url || "",
   })) ?? []
 );
+
 
     console.error("Failed to load profile:", err);
     alert("Failed to load profile");
@@ -284,41 +285,42 @@ setLinks(
   <label>Links: </label>
   {editField === "links" ? (
     <>
-      {links.map((link, idx) => (
-        <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
-          <input
-            type="text"
-            placeholder="Platform Name"
-            value={link.PlatformName}
-            onChange={(e) => {
-              const newLinks = [...links];
-              newLinks[idx].PlatformName = e.target.value;
-              setLinks(newLinks);
-            }}
-            style={{ flex: 1 }}
-          />
-          <input
-            type="text"
-            placeholder="URL"
-            value={link.Url}
-            onChange={(e) => {
-              const newLinks = [...links];
-              newLinks[idx].Url = e.target.value;
-              setLinks(newLinks);
-            }}
-            style={{ flex: 2 }}
-          />
-          <button
-            onClick={() => {
-              const newLinks = links.filter((_, i) => i !== idx);
-              setLinks(newLinks);
-            }}
-            style={{ backgroundColor: "#ff4d4f", color: "#fff", border: "none", padding: "2px 8px" }}
-          >
-            X
-          </button>
-        </div>
-      ))}
+{links.map((link, idx) => (
+  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 5 }}>
+    <input
+      type="text"
+      placeholder="Platform Name"
+      value={link.platformName}
+      onChange={(e) => {
+        const newLinks = [...links];
+        newLinks[idx].platformName = e.target.value;
+        setLinks(newLinks);
+      }}
+      style={{ flex: 1 }}
+    />
+    <input
+      type="text"
+      placeholder="URL"
+      value={link.url}
+      onChange={(e) => {
+        const newLinks = [...links];
+        newLinks[idx].url = e.target.value;
+        setLinks(newLinks);
+      }}
+      style={{ flex: 2 }}
+    />
+    <button
+      onClick={() => {
+        const newLinks = links.filter((_, i) => i !== idx);
+        setLinks(newLinks);
+      }}
+      style={{ backgroundColor: "#ff4d4f", color: "#fff", border: "none", padding: "2px 8px" }}
+    >
+      X
+    </button>
+  </div>
+))}
+
       <button onClick={() => setLinks([...links, { PlatformName: "", Url: "" }])} style={{ marginBottom: 5 }}>
         + Add Link
       </button>
@@ -328,19 +330,18 @@ setLinks(
     <>
 {links.length > 0 ? (
   <ul>
-    {links.map((link, idx) => 
-      (link.PlatformName || link.Url) && (
-        <li key={idx}>
-          <a href={link.Url} target="_blank" rel="noopener noreferrer">
-            {link.PlatformName}: {link.Url}
-          </a>
-        </li>
-      )
-    )}
+    {links.map((link, idx) => (
+      <li key={idx}>
+        <a href={link.url} target="_blank" rel="noopener noreferrer">
+          {link.platformName}: {link.url}
+        </a>
+      </li>
+    ))}
   </ul>
 ) : (
   <p>No links added.</p>
 )}
+
 
       <button onClick={() => setEditField("links")}>
         {links.length ? "Change" : "Add"}
