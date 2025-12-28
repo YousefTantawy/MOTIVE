@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import axiosInstance from "../lib/axios";
 
-const validateCardNumber = (num: string) => /^[0-9]{13,19}$/.test(num.replace(/\s+/g, ""));
+const validateCardNumber = (num: string) =>
+  /^[0-9]{13,19}$/.test(num.replace(/\s+/g, ""));
 const validateExpiry = (mmyy: string) => {
   if (!/^(0[1-9]|1[0-2])\/(\d{2})$/.test(mmyy)) return false;
   const [mm, yy] = mmyy.split("/").map((s) => parseInt(s, 10));
@@ -20,33 +21,15 @@ export const PaymentPage: React.FC = () => {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const courseId = params.get("courseId") || "";
-  const priceParam = params.get("price") || "0";
+  const courseName = params.get("courseName") || `Course ${courseId}`;
+  const price = params.get("price") || "0";
 
-  const [courseName, setCourseName] = useState<string>(`Course ${courseId}`);
-  const [price, setPrice] = useState<string>(priceParam);
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [processing, setProcessing] = useState(false);
   const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
-
-  // Fetch course info on mount
-  useEffect(() => {
-    if (!courseId) return;
-    const fetchCourse = async () => {
-      try {
-        const res = await axiosInstance.get(`/Courses/${courseId}`);
-        setCourseName(res.data.title);
-        setPrice(res.data.price.toString());
-        console.log("Fetched course info:", res.data);
-      } catch (err: any) {
-        console.error("Failed to fetch course info:", err);
-        setCourseName(`Course ${courseId}`);
-      }
-    };
-    fetchCourse();
-  }, [courseId]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -57,25 +40,32 @@ export const PaymentPage: React.FC = () => {
     if (!validateCvv(cvv)) return setPopup({ type: "error", message: "Invalid CVV." });
 
     setProcessing(true);
-    try {
-      const payload = { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" };
-      console.log("Sending payment payload:", payload);
+    console.log("Sending payment payload:", { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" });
 
-      const response = await axiosInstance.post("/Payments/checkout", payload, { responseType: "text" });
+    try {
+      const response = await axiosInstance.post(
+        "/Payments/checkout",
+        { userId: 1, courseId: parseInt(courseId), paymentMethod: "card" },
+        { responseType: "text" }
+      );
 
       console.log("Payment response:", response.data);
 
       if (response.data === "success") {
-        setPopup({ type: "success", message: `Payment completed for "${courseName}"` });
+        setPopup({ type: "success", message: `Payment completed for course ${courseName}` });
         setTimeout(() => navigate("/my-courses"), 2000);
-      } else if (response.data.includes("already enrolled")) {
-        setPopup({ type: "error", message: "User is already enrolled in this course." });
       } else {
         setPopup({ type: "error", message: "Payment failed. Please try again." });
       }
     } catch (err: any) {
-      console.error("Payment request error:", err);
-      setPopup({ type: "error", message: "Payment failed: " + (err.response?.status || err.message) });
+      console.log("Payment request error:", err);
+
+      // Custom message for "already enrolled"
+      if (err.response?.status === 400 && err.response?.data?.includes("already enrolled")) {
+        setPopup({ type: "error", message: "User is already enrolled in this course." });
+      } else {
+        setPopup({ type: "error", message: "Payment failed: " + (err.response?.status || err.message) });
+      }
     } finally {
       setProcessing(false);
     }
