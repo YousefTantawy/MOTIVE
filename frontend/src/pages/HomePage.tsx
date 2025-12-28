@@ -66,11 +66,17 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
 
+  const CARD_COUNT_ON_SCREEN = 4;
+  const GAP = 20; // gap between cards in px
+
   const scroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;
-    const width = containerRef.current.clientWidth;
-    containerRef.current.scrollBy({ left: direction === "right" ? width : -width, behavior: "smooth" });
+    const containerWidth = containerRef.current.clientWidth;
+    const scrollAmount = containerWidth; // scroll by 4 cards
+    containerRef.current.scrollBy({ left: direction === "right" ? scrollAmount : -scrollAmount, behavior: "smooth" });
   };
+
+  const cardWidth = `calc((100% - ${(CARD_COUNT_ON_SCREEN - 1) * GAP}px) / ${CARD_COUNT_ON_SCREEN})`;
 
   return (
     <div
@@ -137,14 +143,14 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
         style={{
           display: "flex",
           overflowX: "auto",
-          gap: 20,
+          gap: GAP,
           scrollBehavior: "smooth",
           paddingBottom: 10,
           paddingLeft: 0,
         }}
       >
         {courses.map((c) => (
-          <div key={c.courseId} style={{ minWidth: 300, flexShrink: 0 }}>
+          <div key={c.courseId} style={{ flex: "0 0 auto", width: cardWidth }}>
             {renderCourseCard(c)}
           </div>
         ))}
@@ -152,6 +158,7 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
     </div>
   );
 };
+
 
 // Render stars function outside component to reuse
 const renderCourseCard = (c: SimpleCourse) => {
