@@ -45,7 +45,6 @@ export const CoursePage: React.FC = () => {
           `/Dashboard/${courseId}/dashboard/${userId}`
         );
         setCourse(res);
-        // Auto-select first lesson
         const firstLesson = res.sections[0]?.lessons[0] || null;
         setCurrentLesson(firstLesson);
       } catch (err: any) {
@@ -59,7 +58,6 @@ export const CoursePage: React.FC = () => {
     fetchCourse();
   }, [courseId, userId]);
 
-  // Handle video time updates
   const handleTimeUpdate = async (seconds: number) => {
     if (!currentLesson) return;
     try {
@@ -74,7 +72,6 @@ export const CoursePage: React.FC = () => {
     }
   };
 
-  // Handle marking lesson complete
   const handleCompleteLesson = async () => {
     if (!currentLesson) return;
     try {
@@ -94,8 +91,15 @@ export const CoursePage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div style={{ display: "flex", gap: 20, maxWidth: 1100, margin: "0 auto", padding: 20 }}>
-        {/* Lessons / Sections */}
+      <div style={{
+        display: "flex",
+        gap: 20,
+        maxWidth: 1100,
+        margin: "0 auto",
+        padding: 20,
+        flexWrap: "wrap"
+      }}>
+        {/* Lessons Sidebar */}
         <div style={{ width: 300, flexShrink: 0 }}>
           <h2>{course?.courseTitle}</h2>
           {course?.sections.map((section) => (
@@ -123,19 +127,27 @@ export const CoursePage: React.FC = () => {
         </div>
 
         {/* Video Player */}
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 400 }}>
           {currentLesson ? (
-            <video
-              key={currentLesson.lessonId}
-              src={currentLesson.videoUrl || undefined}
-              controls
-              autoPlay
-              width="100%"
-              onTimeUpdate={(e) =>
-                handleTimeUpdate(Math.floor((e.target as HTMLVideoElement).currentTime))
-              }
-              onEnded={handleCompleteLesson}
-            />
+            <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: 8, overflow: "hidden", backgroundColor: "#000" }}>
+              <video
+                key={currentLesson.lessonId}
+                src={currentLesson.videoUrl || undefined}
+                controls
+                autoPlay
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+                onTimeUpdate={(e) =>
+                  handleTimeUpdate(Math.floor((e.target as HTMLVideoElement).currentTime))
+                }
+                onEnded={handleCompleteLesson}
+              />
+            </div>
           ) : (
             <p>Select a lesson to start learning.</p>
           )}
