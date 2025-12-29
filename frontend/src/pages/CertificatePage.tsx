@@ -28,7 +28,7 @@ const CertificatePage: React.FC = () => {
         const userId = currentUser.userId;
 
         const res = await axiosInstance.get(
-          `/Dashboard/certificate/course/${courseId}/user/${userId}`
+          `/Dashboard/certificate/${userId}/${courseId}`
         );
         setData(res.data || res);
       } catch (err) {

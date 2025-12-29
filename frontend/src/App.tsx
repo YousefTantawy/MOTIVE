@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { DarkModeProvider, useDarkMode } from "./contexts/DarkModeContext";
 
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
@@ -18,19 +17,16 @@ import  ProfilePage  from "./pages/ProfilePage";
 import { CoursePage } from "./pages/CoursePage";
 import CertificatePage from "./pages/CertificatePage";
 
-function AppContent() {
-  const { isDarkMode } = useDarkMode();
-  
+
+export default function App() {
   return (
     <Router>
       <div style={{ 
         fontFamily: "Arial, sans-serif", 
-        backgroundColor: isDarkMode ? "#1a1a1a" : "#f5f5f5",
-        color: isDarkMode ? "#f5f5f5" : "#000",
+        backgroundColor:"#f5f5f5", 
         minHeight:"100vh",
         display:"flex", 
-        flexDirection:"column",
-        transition: "background-color 0.3s, color 0.3s"
+        flexDirection:"column"
       }}>
         <Navbar />
 
@@ -54,13 +50,5 @@ function AppContent() {
         <Footer />
       </div>
     </Router>
-  );
-}
-
-export default function App() {
-  return (
-    <DarkModeProvider>
-      <AppContent />
-    </DarkModeProvider>
   );
 }
