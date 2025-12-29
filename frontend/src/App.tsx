@@ -15,7 +15,8 @@ import { CourseDetailsPage } from "./pages/CourseDetailsPage";
 import { PaymentPage } from "./pages/PaymentPage";
 import  ProfilePage  from "./pages/ProfilePage";
 import { CoursePage } from "./pages/CoursePage";
-import { CertificatePage } from "./pages/CertificatePage";
+import CertificatePage from "./pages/CertificatePage";
+
 
 export default function App() {
   return (
