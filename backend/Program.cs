@@ -13,36 +13,29 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()  // Allows http://localhost:5173, 3000, 8080... anything
-              .AllowAnyMethod()  // Allows GET, POST, PUT, DELETE
-              .AllowAnyHeader(); // Allows any custom headers
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseCors();
-}
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-    // Trust the loopback address (Nginx is on localhost)
     KnownNetworks = { },
     KnownProxies = { }
 });
-app.UseHttpsRedirection();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseCors();
 
 app.UseAuthorization();
 

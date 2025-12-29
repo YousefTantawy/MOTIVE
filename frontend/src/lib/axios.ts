@@ -1,5 +1,4 @@
 // src/lib/axios.ts
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://motive.italynorth.cloudapp.azure.com/api";
 const API_BASE_URL = "https://motive.italynorth.cloudapp.azure.com/api";
 
 export const axiosInstance = {
