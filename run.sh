@@ -32,6 +32,8 @@ echo "--------------------------------------------------"
 
 # (Optional: remove these lines if you want multiple instances)
 
+git pull
+
 screen -X -S motive-backend quit > /dev/null 2>&1
 
 screen -X -S motive-frontend quit > /dev/null 2>&1
