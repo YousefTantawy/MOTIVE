@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../lib/axios";
 import { Button } from "../components/ui/Button";
+import { authService } from "../services/authService";
 
 interface CertificateResponse {
   studentName: string;
@@ -12,14 +13,22 @@ interface CertificateResponse {
 }
 
 const CertificatePage: React.FC = () => {
-  const { enrollmentId } = useParams<{ enrollmentId: string }>();
+  const { courseId } = useParams<{ courseId: string }>();
   const [data, setData] = useState<CertificateResponse | null>(null);
 
   useEffect(() => {
     const loadCert = async () => {
       try {
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser) {
+          alert("Please log in to view your certificate");
+          return;
+        }
+
+        const userId = currentUser.userId;
+
         const res = await axiosInstance.get(
-          `/Dashboard/certificate/${enrollmentId}`
+          `/Dashboard/certificate/course/${courseId}/user/${userId}`
         );
         setData(res.data || res);
       } catch (err) {
@@ -29,7 +38,7 @@ const CertificatePage: React.FC = () => {
     };
 
     loadCert();
-  }, [enrollmentId]);
+  }, [courseId]);
 
   if (!data) return <p>Loading...</p>;
 
