@@ -1,21 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5168',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-    
-    allowedHosts: [
-      'motive.italynorth.cloudapp.azure.com',
-      'localhost'
-    ]
-  },
+    host: '0.0.0.0', // Allows Nginx to talk to it
+    port: 5173,
+    hmr: {
+        host: 'motive.italynorth.cloudapp.azure.com',
+        clientPort: 443 // CRITICAL: Tells the browser to use HTTPS for the WebSocket connection
+    }
+  }
 })
