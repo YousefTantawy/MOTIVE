@@ -1,5 +1,5 @@
 // src/lib/axios.ts
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://172.213.228.233:5168/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://motive.italynorth.cloudapp.azure.com/api";
 
 export const axiosInstance = {
   async request<T>(url: string, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET", body?: any): Promise<T> {
