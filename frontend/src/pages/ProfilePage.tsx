@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import { authService } from "../services/authService";
 import axiosInstance from "../lib/axios";
+import { useDarkMode } from "../contexts/DarkModeContext";
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const currentUser = authService.getCurrentUser();
   const userId = currentUser?.userId;
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
@@ -28,7 +30,8 @@ const ProfilePage: React.FC = () => {
 
   // Styles
   const cardStyle: React.CSSProperties = {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: isDarkMode ? "#2a2a2a" : "#f8f9fa",
+    color: isDarkMode ? "#f5f5f5" : "#000",
     padding: 20,
     borderRadius: 12,
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
@@ -43,7 +46,9 @@ const ProfilePage: React.FC = () => {
     width: "100%",
     padding: 8,
     borderRadius: 6,
-    border: "1px solid #ccc",
+    border: isDarkMode ? "1px solid #555" : "1px solid #ccc",
+    backgroundColor: isDarkMode ? "#333" : "#fff",
+    color: isDarkMode ? "#f5f5f5" : "#000",
     marginTop: 5,
   };
 
@@ -205,11 +210,16 @@ const ProfilePage: React.FC = () => {
           }}
         >
           <h1>Profile</h1>
-          {profile?.roleId === 2 && (
-            <button onClick={() => navigate("/instructor")} style={btnStyle}>
-              Instructor Stats
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={toggleDarkMode} style={btnStyle}>
+              {isDarkMode ? "🌞 Light" : "🌙 Dark"}
             </button>
-          )}
+            {profile?.roleId === 2 && (
+              <button onClick={() => navigate("/instructor")} style={btnStyle}>
+                Instructor Stats
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Profile Picture */}
