@@ -49,10 +49,10 @@ export const PaymentPage: React.FC = () => {
     // Simulate 3-second processing
     setTimeout(async () => {
       try {
-       const res = await axiosInstance.post("/Payments/checkout", {
+const res = await axiosInstance.post("/Payments/checkout", {
   userId,
   courseId: parseInt(courseId),
-  paymentMethod
+  paymentMethod,
 });
 
 
