@@ -35,12 +35,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors();
 }
-
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    // Trust the loopback address (Nginx is on localhost)
+    KnownNetworks = { },
+    KnownProxies = { }
 });
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
