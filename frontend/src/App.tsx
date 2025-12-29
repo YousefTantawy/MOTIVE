@@ -15,7 +15,7 @@ import { CourseDetailsPage } from "./pages/CourseDetailsPage";
 import { PaymentPage } from "./pages/PaymentPage";
 import  ProfilePage  from "./pages/ProfilePage";
 import { CoursePage } from "./pages/CoursePage";
-
+import { CertificatePage } from "./pages/CertificatePage";
 
 export default function App() {
   return (
@@ -42,6 +42,7 @@ export default function App() {
             <Route path="/instructor" element={<InstructorDashboard />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/course/:courseId/video" element={<CoursePage />} />
+            <Route path="/certificate/:enrollmentId" element={<CertificatePage />} />
           </Routes>
         </div>
 

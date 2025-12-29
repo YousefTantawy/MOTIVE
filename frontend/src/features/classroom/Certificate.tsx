@@ -6,6 +6,7 @@ interface CertificateProps {
   courseName: string;
   completionDate: string;
   certificateId: string;
+  onDownload?: () => void;
 }
 
 export const Certificate: React.FC<CertificateProps> = ({
@@ -13,6 +14,7 @@ export const Certificate: React.FC<CertificateProps> = ({
   courseName,
   completionDate,
   certificateId,
+  onDownload
 }) => (
   <div
     style={{
@@ -28,12 +30,17 @@ export const Certificate: React.FC<CertificateProps> = ({
     <h2>{studentName}</h2>
     <p>has successfully completed</p>
     <h3>{courseName}</h3>
+
     <p style={{ marginTop: "20px", fontSize: "14px", color: "#666" }}>
       Completed on {completionDate}
     </p>
-    <p style={{ fontSize: "12px", color: "#999" }}>Certificate ID: {certificateId}</p>
+
+    <p style={{ fontSize: "12px", color: "#999" }}>
+      Certificate ID: {certificateId}
+    </p>
+
     <div style={{ marginTop: "20px" }}>
-      <Button>Download Certificate</Button>
+      <Button onClick={onDownload}>Download Certificate</Button>
     </div>
   </div>
 );
