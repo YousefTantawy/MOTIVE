@@ -19,6 +19,8 @@ export const PaymentPage: React.FC = () => {
   const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [courseTitle, setCourseTitle] = useState<string>("");
 
+  console.log("Using API base URL:", import.meta.env.VITE_API_BASE_URL);
+
   // Fetch course title
   useEffect(() => {
     const fetchCourse = async () => {
