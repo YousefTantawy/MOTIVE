@@ -49,11 +49,12 @@ export const PaymentPage: React.FC = () => {
     // Simulate 3-second processing
     setTimeout(async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Payments/checkout`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, courseId: parseInt(courseId), paymentMethod }),
-        });
+       const res = await axiosInstance.post("/Payments/checkout", {
+  userId,
+  courseId: parseInt(courseId),
+  paymentMethod
+});
+
 
         if (res.status === 200) {
           setPopup({ type: "success", message: "Payment successful!" });
