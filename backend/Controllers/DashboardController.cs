@@ -231,5 +231,33 @@ namespace MotiveBackend.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { message = "Review submitted successfully." });
         }
+
+        [HttpGet("certificate/{enrollmentId}")]
+        public async Task<IActionResult> GetCertificate(ulong enrollmentId)
+        {
+            var certificateData = await _context.Enrollments
+                .Include(e => e.User)
+                .Include(e => e.Course)
+                .Include(e => e.Certificate)
+                .Where(e => e.EnrollmentId == enrollmentId)
+                .Select(e => new
+                {
+                    StudentName = $"{e.User.FirstName} {e.User.LastName}",
+                    CourseName = e.Course.Title,
+                    IssueDate = e.Certificate != null ? e.Certificate.IssueDate : DateTime.Now,
+                    PdfUrl = e.Certificate != null ? e.Certificate.PdfUrl : "No URL generated",
+                    UniqueCode = e.Certificate != null
+                        ? $"MOT{e.Certificate.CertificateId}{e.CourseId}"
+                        : "PENDING"
+                })
+                .FirstOrDefaultAsync();
+
+            if (certificateData == null)
+            {
+                return NotFound("Enrollment or Certificate data not found.");
+            }
+
+            return Ok(certificateData);
+        }
     }    
 }
