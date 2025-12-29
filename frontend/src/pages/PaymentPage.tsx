@@ -37,39 +37,37 @@ export const PaymentPage: React.FC = () => {
     fetchCourse();
   }, [courseId]);
 
-  const handleSubmit = async () => {
-    if (!paymentMethod) {
-      setPopup({ type: "error", message: "Please select a payment method." });
-      return;
+const handleSubmit = async () => {
+  if (!paymentMethod) {
+    setPopup({ type: "error", message: "Please select a payment method." });
+    return;
+  }
+
+  setProcessing(true);
+  setPopup(null);
+
+  try {
+    const res = await axiosInstance.post("/Payments/checkout", {
+      userId,
+      courseId: parseInt(courseId),
+      paymentMethod,
+    });
+
+    // axiosInstance returns parsed JSON, not response object, so you may need:
+    // if (res.success) or res.status depending on backend
+
+    setPopup({ type: "success", message: "Payment successful!" });
+  } catch (err: any) {
+    if (err.message.includes("400")) {
+      setPopup({ type: "error", message: "User is already enrolled in this course." });
+    } else {
+      setPopup({ type: "error", message: "Payment failed. Please try again." });
     }
+  } finally {
+    setProcessing(false);
+  }
+};
 
-    setProcessing(true);
-    setPopup(null);
-
-    // Simulate 3-second processing
-    setTimeout(async () => {
-      try {
-const res = await axiosInstance.post("/Payments/checkout", {
-  userId,
-  courseId: parseInt(courseId),
-  paymentMethod,
-});
-
-
-        if (res.status === 200) {
-          setPopup({ type: "success", message: "Payment successful!" });
-        } else if (res.status === 400) {
-          setPopup({ type: "error", message: "User is already enrolled in this course." });
-        } else {
-          setPopup({ type: "error", message: "Payment failed. Please try again." });
-        }
-      } catch (err) {
-        setPopup({ type: "error", message: "Payment failed. Please try again." });
-      } finally {
-        setProcessing(false);
-      }
-    }, 3000);
-  };
 
   return (
     <MainLayout>
