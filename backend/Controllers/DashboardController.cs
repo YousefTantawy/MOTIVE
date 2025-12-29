@@ -232,16 +232,18 @@ namespace MotiveBackend.Controllers
             return Ok(new { message = "Review submitted successfully." });
         }
 
-        [HttpGet("certificate/{enrollmentId}")]
-        public async Task<IActionResult> GetCertificate(ulong enrollmentId)
+        [HttpGet("certificate/{userId}/{courseId}")]
+        public async Task<IActionResult> GetCertificate(ulong userId, ulong courseId)
         {
             var certificateData = await _context.Enrollments
                 .Include(e => e.User)
                 .Include(e => e.Course)
                 .Include(e => e.Certificate)
-                .Where(e => e.EnrollmentId == enrollmentId)
+                // Check if an enrollment exists matching BOTH the user and the course
+                .Where(e => e.UserId == userId && e.CourseId == courseId)
                 .Select(e => new
                 {
+                    EnrollmentId = e.EnrollmentId, // Fixed the syntax error here
                     StudentName = $"{e.User.FirstName} {e.User.LastName}",
                     CourseName = e.Course.Title,
                     IssueDate = e.Certificate != null ? e.Certificate.IssueDate : DateTime.Now,
@@ -254,7 +256,7 @@ namespace MotiveBackend.Controllers
 
             if (certificateData == null)
             {
-                return NotFound("Enrollment or Certificate data not found.");
+                return NotFound("No enrollment found for this user in this course.");
             }
 
             return Ok(certificateData);
