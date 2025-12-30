@@ -55,6 +55,7 @@ export const InstructorDashboard: React.FC = () => {
   const [categories, setCategories] = useState<{catId: number; name: string}[]>([]);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string>("");
+  const [deleteCourseId, setDeleteCourseId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -450,6 +451,23 @@ export const InstructorDashboard: React.FC = () => {
     }
   };
 
+  const handleDeleteCourse = async (courseId: number) => {
+    if (!userId) return;
+    const confirmed = window.confirm("Delete this course? This cannot be undone.");
+    if (!confirmed) return;
+
+    setDeleteCourseId(courseId);
+    try {
+      await axiosInstance.delete(`/Studio/course/${courseId}/instructor/${userId}`);
+      setCourses((prev) => prev.filter((course) => course.courseId !== courseId));
+    } catch (err: any) {
+      console.error("Failed to delete course:", err);
+      alert(err?.message || "Failed to delete course.");
+    } finally {
+      setDeleteCourseId(null);
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "statistics":
@@ -498,20 +516,37 @@ export const InstructorDashboard: React.FC = () => {
                   <div>
                     <strong>Students:</strong> {course.studentCount}
                   </div>
-                  <button
-                    style={{
-                      marginTop: 10,
-                      padding: "8px 16px",
-                      backgroundColor: "#646cff",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 6,
-                      cursor: "pointer",
-                    }}
-                    onClick={() => console.log("Edit course", course.courseId)}
-                  >
-                    Edit Course
-                  </button>
+                  <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                    <button
+                      style={{
+                        flex: 1,
+                        padding: "8px 16px",
+                        backgroundColor: "#646cff",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 6,
+                        cursor: "pointer",
+                      }}
+                      onClick={() => console.log("Edit course", course.courseId)}
+                    >
+                      Edit Course
+                    </button>
+                    <button
+                      style={{
+                        flex: 1,
+                        padding: "8px 16px",
+                        backgroundColor: "#ff4d4f",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 6,
+                        cursor: deleteCourseId === course.courseId ? "not-allowed" : "pointer",
+                      }}
+                      disabled={deleteCourseId === course.courseId}
+                      onClick={() => handleDeleteCourse(course.courseId)}
+                    >
+                      {deleteCourseId === course.courseId ? "Deleting..." : "Delete Course"}
+                    </button>
+                  </div>
                 </div>
               ))
             )}
