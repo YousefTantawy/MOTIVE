@@ -120,7 +120,7 @@ export const AdminDashboard: React.FC = () => {
             value={deleteUserId}
             onChange={(e) => setDeleteUserId(e.target.value)}
             placeholder="User ID"
-            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #d1d5db", marginBottom: 8 }}
+            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #d1d5db", marginBottom: 8, boxSizing: "border-box" }}
           />
           <button
             onClick={handleDeleteUser}
@@ -137,7 +137,7 @@ export const AdminDashboard: React.FC = () => {
             value={deleteCourseId}
             onChange={(e) => setDeleteCourseId(e.target.value)}
             placeholder="Course ID"
-            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #d1d5db", marginBottom: 8 }}
+            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #d1d5db", marginBottom: 8, boxSizing: "border-box" }}
           />
           <button
             onClick={handleDeleteCourse}
