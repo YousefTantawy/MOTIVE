@@ -516,47 +516,6 @@ export const InstructorDashboard: React.FC = () => {
               </div>
             )}
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-<<<<<<< HEAD
-              <input
-                type="text"
-                placeholder="Course Title"
-                value={newCourse.title}
-                onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
-                style={{ padding: "10px", borderRadius: 6, border: "1px solid #ccc" }}
-              />
-              <select
-                value={newCourse.category}
-                onChange={(e) => setNewCourse({ ...newCourse, category: e.target.value })}
-                style={{ padding: "10px", borderRadius: 6, border: "1px solid #ccc" }}
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.catId} value={cat.catId}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-              <textarea
-                placeholder="Course Description"
-                value={newCourse.description}
-                onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
-                style={{ padding: "10px", borderRadius: 6, border: "1px solid #ccc", minHeight: "100px" }}
-              />
-              <input
-                type="text"
-                placeholder="Language"
-                value={newCourse.language}
-                onChange={(e) => setNewCourse({ ...newCourse, language: e.target.value })}
-                style={{ padding: "10px", borderRadius: 6, border: "1px solid #ccc" }}
-              />
-              <input
-                type="number"
-                placeholder="Price ($)"
-                value={newCourse.price}
-                onChange={(e) => setNewCourse({ ...newCourse, price: e.target.value })}
-                style={{ padding: "10px", borderRadius: 6, border: "1px solid #ccc" }}
-              />
-=======
               {/* Basic Course Info */}
               <div style={{ borderTop: "2px solid #ddd", paddingTop: "20px" }}>
                 <h3>Course Information</h3>
@@ -654,17 +613,12 @@ export const InstructorDashboard: React.FC = () => {
                     <option value="Advanced">Advanced</option>
                   </select>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Category IDs (comma separated)"
-                  value={newCourse.categoryIds.join(",")}
+                <select
+                  value={newCourse.categoryIds[0] || ""}
                   onChange={(e) =>
                     handleBasicFieldChange(
                       "categoryIds",
-                      e.target.value
-                        .split(",")
-                        .map((id) => Number(id.trim()))
-                        .filter((id) => !isNaN(id))
+                      e.target.value ? [Number(e.target.value)] : []
                     )
                   }
                   style={{
@@ -673,9 +627,15 @@ export const InstructorDashboard: React.FC = () => {
                     borderRadius: 6,
                     border: "1px solid #ccc",
                   }}
-                />
+                >
+                  <option value="">Select Category *</option>
+                  {categories.map((cat) => (
+                    <option key={cat.catId} value={cat.catId}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
->>>>>>> 1e1269ba59f8af66f6e096635d886b4a8f4acb1c
 
               {/* Objectives */}
               <div style={{ borderTop: "2px solid #ddd", paddingTop: "20px" }}>
