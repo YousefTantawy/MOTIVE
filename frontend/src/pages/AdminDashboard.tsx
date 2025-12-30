@@ -27,7 +27,8 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const user = authService.getCurrentUser();
-    if (!user || user.roleId !== ADMIN_ROLE_ID) {
+    const roleId = user?.roleId != null ? Number(user.roleId) : NaN;
+    if (!user || roleId !== ADMIN_ROLE_ID) {
       navigate("/", { replace: true });
       return;
     }
