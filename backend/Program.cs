@@ -19,6 +19,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpClient("AIService", client =>
+{
+    // Ensure this matches the port in your Python uvicorn.run command
+    client.BaseAddress = new Uri("http://localhost:5171/");
+});
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
