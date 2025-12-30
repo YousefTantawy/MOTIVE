@@ -17,18 +17,17 @@ namespace MotiveBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("courses/{userId}")]
+        [HttpGet("ownedcourses/{userId}")]
         public async Task<IActionResult> GetInstructorCourses(ulong userId)
         {
             var courses = await _context.Courses
-                .Where(c => c.InstructorId == userId)
+                .Where(c => _context.CourseInstructors.Any(ci => ci.CourseId == c.CourseId && ci.UserId == userId))
                 .Select(c => new
                 {
                     c.CourseId,
                     c.Title,
                     c.Price,
-                    c.Thumbnail,
-                    c.Category,
+                    c.ThumbnailUrl,
                     StudentCount = _context.Enrollments.Count(e => e.CourseId == c.CourseId)
                 })
                 .ToListAsync();
@@ -36,12 +35,12 @@ namespace MotiveBackend.Controllers
             return Ok(courses);
         }
 
-        [HttpGet("revenue/{userId}")]
+        [HttpGet("myrevenue/{userId}")]
         public async Task<IActionResult> GetTotalRevenue(ulong userId)
         {
             var totalRevenue = await _context.Enrollments
                 .Include(e => e.Course)
-                .Where(e => e.Course.InstructorId == userId)
+                .Where(e => _context.CourseInstructors.Any(ci => ci.CourseId == e.CourseId && ci.UserId == userId))
                 .SumAsync(e => e.Course.Price);
 
             return Ok(new { UserId = userId, TotalRevenue = totalRevenue });
