@@ -13,7 +13,7 @@ namespace MotiveBackend.DTOs
         public string Language { get; set; } = "English";
 
         // Categories (List of IDs)
-        public List<ulong> CategoryIds { get; set; } = new();
+        public List<ulong> Category { get; set; } = new();
 
         // Level 2: Description & Metadata
         public string FullDescription { get; set; }

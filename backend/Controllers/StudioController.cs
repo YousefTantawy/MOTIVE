@@ -80,7 +80,7 @@ namespace MotiveBackend.Controllers
                 };
                 _context.CourseInstructors.Add(instructorLink);
 
-                foreach (var catId in request.CategoryIds)
+                foreach (var catId in request.Category)
                 {
                     _context.CourseCategories.Add(new CourseCategory
                     {
@@ -181,6 +181,20 @@ namespace MotiveBackend.Controllers
         {
             var slug = title.ToLower().Replace(" ", "-").Replace(",", "").Replace(".", "");
             return $"{slug}-{Guid.NewGuid().ToString().Substring(0, 8)}";
+        }
+
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var categories = await _context.Categories
+                .Select(c => new
+                {
+                    catId = c.CategoryId,
+                    name = c.Name,       
+                })
+                .ToListAsync();
+
+            return Ok(categories);
         }
     }
 }
