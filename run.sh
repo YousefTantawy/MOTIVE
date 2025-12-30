@@ -8,9 +8,12 @@ BACKEND_DIR="backend"
 
 FRONTEND_DIR="frontend"
 
+AI_DIR="ai-service"
 # Ports (Must match what you opened in Azure!)
 
 BACKEND_PORT="5168"
+
+AI_PORT="5171"
 
 FRONTEND_PORT="5173"
 
