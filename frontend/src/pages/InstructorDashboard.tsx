@@ -52,12 +52,9 @@ export const InstructorDashboard: React.FC = () => {
   const [revenue, setRevenue] = useState<number>(0);
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-<<<<<<< HEAD
   const [categories, setCategories] = useState<{catId: number; name: string}[]>([]);
-=======
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string>("");
->>>>>>> 1e1269ba59f8af66f6e096635d886b4a8f4acb1c
 
   useEffect(() => {
     const fetchData = async () => {
