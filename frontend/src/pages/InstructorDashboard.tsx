@@ -634,28 +634,56 @@ export const InstructorDashboard: React.FC = () => {
                     <option value="Advanced">Advanced</option>
                   </select>
                 </div>
-                <select
-                  value={newCourse.categoryIds[0] || ""}
-                  onChange={(e) =>
-                    handleBasicFieldChange(
-                      "categoryIds",
-                      e.target.value ? [Number(e.target.value)] : []
-                    )
-                  }
+                
+                {/* Categories */}
+                <h3>Categories</h3>
+                {newCourse.categoryIds.map((catId, idx) => (
+                  <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                    <select
+                      value={catId || ""}
+                      onChange={(e) => handleCategoryChange(idx, Number(e.target.value))}
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        borderRadius: 6,
+                        border: "1px solid #ccc",
+                      }}
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.catId} value={cat.catId}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => removeCategoryItem(idx)}
+                      style={{
+                        padding: "8px 12px",
+                        backgroundColor: "#ff4d4f",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 6,
+                        cursor: "pointer",
+                      }}
+                    >
+                      X
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={addCategory}
                   style={{
-                    width: "100%",
-                    padding: "10px",
+                    padding: "8px 12px",
+                    backgroundColor: "#646cff",
+                    color: "#fff",
+                    border: "none",
                     borderRadius: 6,
-                    border: "1px solid #ccc",
+                    cursor: "pointer",
                   }}
                 >
-                  <option value="">Select Category *</option>
-                  {categories.map((cat) => (
-                    <option key={cat.catId} value={cat.catId}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                  + Add Category
+                </button>
               </div>
 
               {/* Objectives */}
