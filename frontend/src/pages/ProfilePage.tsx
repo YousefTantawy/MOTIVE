@@ -205,11 +205,18 @@ const ProfilePage: React.FC = () => {
           }}
         >
           <h1>Profile</h1>
-          {profile?.roleId === 2 && (
-            <button onClick={() => navigate("/instructor")} style={btnStyle}>
-              Instructor Stats
-            </button>
-          )}
+          <div style={{ display: "flex", gap: 10 }}>
+            {profile?.roleId === 2 && (
+              <button onClick={() => navigate("/instructor")} style={btnStyle}>
+                Instructor Stats
+              </button>
+            )}
+            {profile?.roleId === 1 && (
+              <button onClick={() => navigate("/admin")} style={btnStyle}>
+                Admin Dashboard
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Profile Picture */}
