@@ -196,5 +196,28 @@ namespace MotiveBackend.Controllers
 
             return Ok(categories);
         }
+
+        [HttpDelete("course/{courseId}/instructor/{userId}")]
+        public async Task<IActionResult> DeleteCourse(ulong courseId, ulong userId)
+        {
+            var course = await _context.Courses.FindAsync(courseId);
+            if (course == null)
+            {
+                return NotFound("Course not found.");
+            }
+
+            var isOwner = await _context.CourseInstructors
+                .AnyAsync(ci => ci.CourseId == courseId && ci.UserId == userId);
+
+            if (!isOwner)
+            {
+                return Unauthorized("You are not authorized to delete this course.");
+            }
+
+            _context.Courses.Remove(course);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Course deleted successfully." });
+        }
     }
 }
