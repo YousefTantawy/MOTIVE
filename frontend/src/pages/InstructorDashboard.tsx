@@ -20,17 +20,20 @@ export const InstructorDashboard: React.FC = () => {
   const [revenue, setRevenue] = useState<number>(0);
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<{catId: number; name: string}[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [revenueRes, coursesRes] = await Promise.all([
+        const [revenueRes, coursesRes, categoriesRes] = await Promise.all([
           axiosInstance.get(`/Studio/myrevenue/${userId}`),
-          axiosInstance.get(`/Studio/ownedcourses/${userId}`)
+          axiosInstance.get(`/Studio/ownedcourses/${userId}`),
+          axiosInstance.get(`/Studio/categories`)
         ]);
         setRevenue(revenueRes.totalRevenue || 0);
         setCourses(coursesRes || []);
+        setCategories(categoriesRes || []);
       } catch (err) {
         console.error("Failed to load data:", err);
       } finally {
@@ -177,13 +180,18 @@ export const InstructorDashboard: React.FC = () => {
                 onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
                 style={{ padding: "10px", borderRadius: 6, border: "1px solid #ccc" }}
               />
-              <input
-                type="text"
-                placeholder="Category"
+              <select
                 value={newCourse.category}
                 onChange={(e) => setNewCourse({ ...newCourse, category: e.target.value })}
                 style={{ padding: "10px", borderRadius: 6, border: "1px solid #ccc" }}
-              />
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat.catId} value={cat.catId}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
               <textarea
                 placeholder="Course Description"
                 value={newCourse.description}

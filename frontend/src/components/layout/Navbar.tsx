@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
+import axiosInstance from "../../lib/axios";
 
 interface User {
   userId: number;
@@ -12,10 +13,13 @@ interface User {
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{courseId: number; title: string; price: number; rating: number}[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     let isMounted = true; // to prevent state update after unmount
@@ -80,16 +84,49 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleLogout = () => {
     authService.logout();
     navigate("/");
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim() !== "") {
-      navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
+  const handleSearch = async (query: string) => {
+    if (query.trim() === "") {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
     }
+
+    try {
+      const response = await axiosInstance.get(`/Courses/search?query=${encodeURIComponent(query)}`);
+      setSearchResults(response || []);
+      setShowResults(true);
+    } catch (err) {
+      console.error("Search failed:", err);
+      setSearchResults([]);
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    handleSearch(query);
+  };
+
+  const handleCourseClick = (courseId: number) => {
+    setShowResults(false);
+    setSearchQuery("");
+    navigate(`/course/${courseId}`);
   };
 
   const linkStyle = (path: string) => ({
@@ -166,11 +203,11 @@ export const Navbar: React.FC = () => {
         )}
       </div>
 
-      <form onSubmit={handleSearch} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+      <div ref={searchRef} style={{ flex: 1, display: "flex", justifyContent: "center", position: "relative" }}>
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
           placeholder="Search courses..."
           style={{
             width: "60%",
@@ -180,7 +217,48 @@ export const Navbar: React.FC = () => {
             border: "1px solid #ccc",
           }}
         />
-      </form>
+        {showResults && searchResults.length > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "60%",
+              maxWidth: 400,
+              backgroundColor: "#fff",
+              border: "1px solid #ccc",
+              borderRadius: 6,
+              marginTop: 4,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              maxHeight: 400,
+              overflowY: "auto",
+              zIndex: 2000,
+            }}
+          >
+            {searchResults.map((course) => (
+              <div
+                key={course.courseId}
+                onClick={() => handleCourseClick(course.courseId)}
+                style={{
+                  padding: "12px 16px",
+                  cursor: "pointer",
+                  borderBottom: "1px solid #eee",
+                  transition: "background-color 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
+              >
+                <div style={{ fontWeight: 600, color: "#333", marginBottom: 4 }}>{course.title}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "#666" }}>
+                  <span>${course.price.toFixed(2)}</span>
+                  <span>⭐ {course.rating}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div>
         {!user ? (
