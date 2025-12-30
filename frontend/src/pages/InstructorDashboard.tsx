@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StudioLayout } from "../layouts/StudioLayout";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import axiosInstance from "../lib/axios";
+import { authService } from "../services/authService";
 
 interface Stats {
   views: number;
@@ -11,42 +12,33 @@ interface Stats {
 type TabType = "statistics" | "my-courses" | "create-course";
 
 export const InstructorDashboard: React.FC = () => {
+  const currentUser = authService.getCurrentUser();
+  const userId = currentUser?.userId || 0;
+  
   const [activeTab, setActiveTab] = useState<TabType>("statistics");
-  const [mockStats] = useState<Stats>({ views: 1245, earnings: 3500, totalCourses: 12 });
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [revenue, setRevenue] = useState<number>(0);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Mock data for charts
-  const viewsData = [
-    { month: "Jan", views: 800 },
-    { month: "Feb", views: 950 },
-    { month: "Mar", views: 1100 },
-    { month: "Apr", views: 1000 },
-    { month: "May", views: 1200 },
-    { month: "Jun", views: 1245 },
-  ];
-
-  const earningsData = [
-    { month: "Jan", earnings: 2000 },
-    { month: "Feb", earnings: 2400 },
-    { month: "Mar", earnings: 2800 },
-    { month: "Apr", earnings: 3000 },
-    { month: "May", earnings: 3300 },
-    { month: "Jun", earnings: 3500 },
-  ];
-
-  const courseRevenueData = [
-    { name: "C# Design Patterns", revenue: 1500 },
-    { name: "React Mastery", revenue: 1200 },
-    { name: "Node.js Basics", revenue: 800 },
-  ];
-
-  const COLORS = ["#646cff", "#28a745", "#ff4d4f"];
-
-  // Mock course data for "My Courses"
-  const [courses] = useState([
-    { id: 1, title: "Advanced C# Design Patterns", price: 99, status: "Published" },
-    { id: 2, title: "React Mastery", price: 149, status: "Draft" },
-  ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [revenueRes, coursesRes] = await Promise.all([
+          axiosInstance.get(`/Studio/myrevenue/${userId}`),
+          axiosInstance.get(`/Studio/ownedcourses/${userId}`)
+        ]);
+        setRevenue(revenueRes.totalRevenue || 0);
+        setCourses(coursesRes || []);
+      } catch (err) {
+        console.error("Failed to load data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (userId) fetchData();
+  }, [userId]);
 
   // Create Course Form State
   const [newCourse, setNewCourse] = useState({
@@ -92,60 +84,6 @@ export const InstructorDashboard: React.FC = () => {
   };
 
   const removeArrayItem = (field: "objectives" | "requirements" | "targetAudience", index: number) => {
-
-            {/* Views Over Time - Line Chart */}
-            <div style={{ backgroundColor: "#fff", padding: 20, borderRadius: 12, marginBottom: 30, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-              <h2>Views Over Time</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={viewsData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="views" stroke="#646cff" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Earnings Trend - Bar Chart */}
-            <div style={{ backgroundColor: "#fff", padding: 20, borderRadius: 12, marginBottom: 30, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-              <h2>Earnings Trend</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={earningsData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="earnings" fill="#28a745" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Revenue by Course - Pie Chart */}
-            <div style={{ backgroundColor: "#fff", padding: 20, borderRadius: 12, marginBottom: 30, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-              <h2>Revenue by Course</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={courseRevenueData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="revenue"
-                  >
-                    {courseRevenueData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
     setNewCourse((prev) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
@@ -168,11 +106,15 @@ export const InstructorDashboard: React.FC = () => {
         return (
           <div>
             <h1>Statistics</h1>
-            <section style={{ display: "flex", gap: "20px", marginBottom: "40px" }}>
-              <StatsCard label="Total Views" value={mockStats.views} />
-              <StatsCard label="Earnings ($)" value={mockStats.earnings} />
-              <StatsCard label="Total Courses" value={mockStats.totalCourses} />
-            </section>
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              <section style={{ display: "flex", gap: "20px", marginBottom: "40px" }}>
+                <StatsCard label="Total Revenue ($)" value={revenue.toFixed(2)} />
+                <StatsCard label="Total Courses" value={courses.length} />
+                <StatsCard label="Total Students" value={courses.reduce((sum, c) => sum + (c.studentCount || 0), 0)} />
+              </section>
+            )}
           </div>
         );
 
@@ -180,40 +122,46 @@ export const InstructorDashboard: React.FC = () => {
         return (
           <div>
             <h1>My Courses</h1>
-            {courses.map((course) => (
-              <div
-                key={course.id}
-                style={{
-                  backgroundColor: "#f8f9fa",
-                  padding: 20,
-                  borderRadius: 12,
-                  marginBottom: 20,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                }}
-              >
-                <h3>{course.title}</h3>
-                <div style={{ marginTop: 10 }}>
-                  <strong>Price:</strong> ${course.price}
-                </div>
-                <div>
-                  <strong>Status:</strong> {course.status}
-                </div>
-                <button
+            {loading ? (
+              <p>Loading...</p>
+            ) : courses.length === 0 ? (
+              <p>No courses yet. Create your first course!</p>
+            ) : (
+              courses.map((course) => (
+                <div
+                  key={course.courseId}
                   style={{
-                    marginTop: 10,
-                    padding: "8px 16px",
-                    backgroundColor: "#646cff",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 6,
-                    cursor: "pointer",
+                    backgroundColor: "#f8f9fa",
+                    padding: 20,
+                    borderRadius: 12,
+                    marginBottom: 20,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                   }}
-                  onClick={() => console.log("Edit course", course.id)}
                 >
-                  Edit Course
-                </button>
-              </div>
-            ))}
+                  <h3>{course.title}</h3>
+                  <div style={{ marginTop: 10 }}>
+                    <strong>Price:</strong> ${course.price}
+                  </div>
+                  <div>
+                    <strong>Students:</strong> {course.studentCount}
+                  </div>
+                  <button
+                    style={{
+                      marginTop: 10,
+                      padding: "8px 16px",
+                      backgroundColor: "#646cff",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => console.log("Edit course", course.courseId)}
+                  >
+                    Edit Course
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         );
 
