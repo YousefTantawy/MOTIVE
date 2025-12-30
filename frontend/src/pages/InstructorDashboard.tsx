@@ -162,6 +162,27 @@ export const InstructorDashboard: React.FC = () => {
     }));
   };
 
+  const addCategory = () => {
+    setNewCourse((prev) => ({
+      ...prev,
+      categoryIds: [...prev.categoryIds, 0],
+    }));
+  };
+
+  const removeCategoryItem = (index: number) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      categoryIds: prev.categoryIds.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleCategoryChange = (index: number, value: number) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      categoryIds: prev.categoryIds.map((catId, i) => (i === index ? value : catId)),
+    }));
+  };
+
   const addSection = () => {
     setNewCourse((prev) => ({
       ...prev,
