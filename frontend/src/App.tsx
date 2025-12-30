@@ -16,6 +16,7 @@ import { PaymentPage } from "./pages/PaymentPage";
 import  ProfilePage  from "./pages/ProfilePage";
 import { CoursePage } from "./pages/CoursePage";
 import CertificatePage from "./pages/CertificatePage";
+import { AdminDashboard } from "./pages/AdminDashboard";
 
 
 export default function App() {
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/my-courses" element={<StudentDashboard />} />
             <Route path="/instructor" element={<InstructorDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/course/:courseId/video" element={<CoursePage />} />
             <Route path="/certificate/:courseId" element={<CertificatePage />} />

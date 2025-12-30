@@ -185,8 +185,8 @@ export const Navbar: React.FC = () => {
           <>
             <Link to="/my-courses" style={linkStyle("/my-courses")}>My Learning</Link>
 
+            {user.roleId === 1 && <Link to="/admin" style={linkStyle("/admin")}>Admin</Link>}
             {user.roleId === 2 && <Link to="/instructor" style={linkStyle("/instructor")}>Studio</Link>}
-            {user.roleId === 1 && <Link to="/admin" style={linkStyle("/admin")}>Admin Dashboard</Link>}
 
             <Link
               to="/profile"
