@@ -51,6 +51,31 @@ namespace MotiveBackend.Controllers
             return Ok(topRated);
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchCourses([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Search query cannot be empty.");
+            }
+
+            var searchResults = await _context.Courses
+                .Where(c => c.Title.Contains(query))
+                .Select(c => new
+                {
+                    c.CourseId,
+                    c.Title,
+                    c.Price,
+                    Rating = _context.UserReviews
+                        .Where(r => r.CourseId == c.CourseId)
+                        .Select(r => (double?)r.RatingValue)
+                        .Average() ?? 0
+                })
+                .ToListAsync();
+
+            return Ok(searchResults);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCourseDetail(ulong id)
         {

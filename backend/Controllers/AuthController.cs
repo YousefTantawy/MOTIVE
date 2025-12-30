@@ -25,11 +25,13 @@ namespace MotiveBackend.Controllers
         {
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             {
+                await LogLoginAttempt(null, false, "Email already exists");
                 return BadRequest("Email is already registered.");
             }
 
             if (request.RoleId != 2 && request.RoleId != 3)
             {
+                await LogLoginAttempt(null, false, "Role mismatch error");
                 return BadRequest("Invalid Role selected. Only Student (3) or Instructor (2) allowed.");
             }
 
@@ -56,6 +58,8 @@ namespace MotiveBackend.Controllers
             _context.Authidentities.Add(newAuth);
             await _context.SaveChangesAsync();
 
+            await LogLoginAttempt(newUser.UserId, true, null);
+
             return Ok(new { message = "Registration successful!", userId = newUser.UserId });
         }
 
@@ -69,6 +73,7 @@ namespace MotiveBackend.Controllers
 
             if (authRecord == null)
             {
+                await LogLoginAttempt(null, false, "Invalid credentials.");
                 return Unauthorized("Invalid credentials.");
             }
 
@@ -76,8 +81,12 @@ namespace MotiveBackend.Controllers
 
             if (!isPasswordValid)
             {
+                await LogLoginAttempt(null, false, "Invalid credentials.");
                 return Unauthorized("Invalid credentials.");
             }
+
+            await LogLoginAttempt(authRecord.UserId, true, null);
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {
@@ -85,6 +94,22 @@ namespace MotiveBackend.Controllers
                 userId = authRecord.UserId,
                 roleId = authRecord.User.Role.RoleId
             });
+        }
+
+        private async Task LogLoginAttempt(ulong? userId, bool isSuccess, string? failureReason)
+        {
+            var loginEvent = new LoginEvent
+            {
+                UserId = userId,
+                AttemptTime = DateTime.Now,
+                IsSuccessful = isSuccess,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = Request.Headers["User-Agent"].ToString(),
+                FailureReason = failureReason
+            };
+
+            _context.LoginEvents.Add(loginEvent);
+            await _context.SaveChangesAsync();
         }
 
         // ------------------------------------------------------------------ Profile APIs ------------------------------------------------------------------

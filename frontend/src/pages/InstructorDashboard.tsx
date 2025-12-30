@@ -3,10 +3,42 @@ import { StudioLayout } from "../layouts/StudioLayout";
 import axiosInstance from "../lib/axios";
 import { authService } from "../services/authService";
 
-interface Stats {
-  views: number;
-  earnings: number;
-  totalCourses: number;
+interface Resource {
+  name: string;
+  url: string;
+}
+
+interface Lesson {
+  title: string;
+  contentType: string;
+  videoUrl: string;
+  textContent: string;
+  durationSeconds: number;
+  isPreviewable: boolean;
+  orderIndex: number;
+  resources: Resource[];
+}
+
+interface Section {
+  title: string;
+  objective: string;
+  orderIndex: number;
+  lessons: Lesson[];
+}
+
+interface CreateCoursePayload {
+  instructorId: number;
+  title: string;
+  price: number;
+  thumbnailUrl: string;
+  difficultyLevel: string;
+  language: string;
+  categoryIds: number[];
+  fullDescription: string;
+  objectives: string[];
+  requirements: string[];
+  targetAudiences: string[];
+  sections: Section[];
 }
 
 type TabType = "statistics" | "my-courses" | "create-course";
@@ -20,7 +52,12 @@ export const InstructorDashboard: React.FC = () => {
   const [revenue, setRevenue] = useState<number>(0);
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
   const [categories, setCategories] = useState<{catId: number; name: string}[]>([]);
+=======
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState<string>("");
+>>>>>>> 1e1269ba59f8af66f6e096635d886b4a8f4acb1c
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,16 +81,37 @@ export const InstructorDashboard: React.FC = () => {
   }, [userId]);
 
   // Create Course Form State
-  const [newCourse, setNewCourse] = useState({
+  const [newCourse, setNewCourse] = useState<CreateCoursePayload>({
+    instructorId: userId,
     title: "",
-    category: "",
-    description: "",
-    price: "",
-    language: "",
+    price: 0,
+    thumbnailUrl: "",
+    difficultyLevel: "Beginner",
+    language: "English",
+    categoryIds: [],
+    fullDescription: "",
     objectives: [""],
     requirements: [""],
-    targetAudience: [""],
-    videoFile: null as File | null,
+    targetAudiences: [""],
+    sections: [
+      {
+        title: "",
+        objective: "",
+        orderIndex: 0,
+        lessons: [
+          {
+            title: "",
+            contentType: "Video",
+            videoUrl: "",
+            textContent: "",
+            durationSeconds: 0,
+            isPreviewable: false,
+            orderIndex: 0,
+            resources: [],
+          },
+        ],
+      },
+    ],
   });
 
   const StatsCard: React.FC<{ label: string; value: number | string }> = ({ label, value }) => (
@@ -72,34 +130,305 @@ export const InstructorDashboard: React.FC = () => {
     </div>
   );
 
-  const handleArrayChange = (field: "objectives" | "requirements" | "targetAudience", index: number, value: string) => {
+  const handleBasicFieldChange = (field: keyof Omit<CreateCoursePayload, 'sections' | 'objectives' | 'requirements' | 'targetAudiences'>, value: any) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleArrayChange = (
+    field: "objectives" | "requirements" | "targetAudiences",
+    index: number,
+    value: string
+  ) => {
     setNewCourse((prev) => ({
       ...prev,
       [field]: prev[field].map((item, i) => (i === index ? value : item)),
     }));
   };
 
-  const addArrayItem = (field: "objectives" | "requirements" | "targetAudience") => {
+  const addArrayItem = (field: "objectives" | "requirements" | "targetAudiences") => {
     setNewCourse((prev) => ({
       ...prev,
       [field]: [...prev[field], ""],
     }));
   };
 
-  const removeArrayItem = (field: "objectives" | "requirements" | "targetAudience", index: number) => {
+  const removeArrayItem = (
+    field: "objectives" | "requirements" | "targetAudiences",
+    index: number
+  ) => {
     setNewCourse((prev) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
   };
 
-  const handleVideoDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("video/")) {
-      setNewCourse((prev) => ({ ...prev, videoFile: file }));
-    } else {
-      alert("Please drop a video file");
+  const addSection = () => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: [
+        ...prev.sections,
+        {
+          title: "",
+          objective: "",
+          orderIndex: prev.sections.length,
+          lessons: [
+            {
+              title: "",
+              contentType: "Video",
+              videoUrl: "",
+              textContent: "",
+              durationSeconds: 0,
+              isPreviewable: false,
+              orderIndex: 0,
+              resources: [],
+            },
+          ],
+        },
+      ],
+    }));
+  };
+
+  const removeSection = (sectionIndex: number) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: prev.sections.filter((_, i) => i !== sectionIndex),
+    }));
+  };
+
+  const updateSection = (sectionIndex: number, field: string, value: any) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: prev.sections.map((sec, i) =>
+        i === sectionIndex ? { ...sec, [field]: value } : sec
+      ),
+    }));
+  };
+
+  const addLesson = (sectionIndex: number) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: prev.sections.map((sec, i) =>
+        i === sectionIndex
+          ? {
+              ...sec,
+              lessons: [
+                ...sec.lessons,
+                {
+                  title: "",
+                  contentType: "Video",
+                  videoUrl: "",
+                  textContent: "",
+                  durationSeconds: 0,
+                  isPreviewable: false,
+                  orderIndex: sec.lessons.length,
+                  resources: [],
+                },
+              ],
+            }
+          : sec
+      ),
+    }));
+  };
+
+  const removeLesson = (sectionIndex: number, lessonIndex: number) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: prev.sections.map((sec, i) =>
+        i === sectionIndex
+          ? {
+              ...sec,
+              lessons: sec.lessons.filter((_, j) => j !== lessonIndex),
+            }
+          : sec
+      ),
+    }));
+  };
+
+  const updateLesson = (
+    sectionIndex: number,
+    lessonIndex: number,
+    field: string,
+    value: any
+  ) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: prev.sections.map((sec, i) =>
+        i === sectionIndex
+          ? {
+              ...sec,
+              lessons: sec.lessons.map((lesson, j) =>
+                j === lessonIndex ? { ...lesson, [field]: value } : lesson
+              ),
+            }
+          : sec
+      ),
+    }));
+  };
+
+  const addResource = (sectionIndex: number, lessonIndex: number) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: prev.sections.map((sec, i) =>
+        i === sectionIndex
+          ? {
+              ...sec,
+              lessons: sec.lessons.map((lesson, j) =>
+                j === lessonIndex
+                  ? {
+                      ...lesson,
+                      resources: [...lesson.resources, { name: "", url: "" }],
+                    }
+                  : lesson
+              ),
+            }
+          : sec
+      ),
+    }));
+  };
+
+  const removeResource = (
+    sectionIndex: number,
+    lessonIndex: number,
+    resourceIndex: number
+  ) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: prev.sections.map((sec, i) =>
+        i === sectionIndex
+          ? {
+              ...sec,
+              lessons: sec.lessons.map((lesson, j) =>
+                j === lessonIndex
+                  ? {
+                      ...lesson,
+                      resources: lesson.resources.filter(
+                        (_, k) => k !== resourceIndex
+                      ),
+                    }
+                  : lesson
+              ),
+            }
+          : sec
+      ),
+    }));
+  };
+
+  const updateResource = (
+    sectionIndex: number,
+    lessonIndex: number,
+    resourceIndex: number,
+    field: string,
+    value: string
+  ) => {
+    setNewCourse((prev) => ({
+      ...prev,
+      sections: prev.sections.map((sec, i) =>
+        i === sectionIndex
+          ? {
+              ...sec,
+              lessons: sec.lessons.map((lesson, j) =>
+                j === lessonIndex
+                  ? {
+                      ...lesson,
+                      resources: lesson.resources.map((res, k) =>
+                        k === resourceIndex ? { ...res, [field]: value } : res
+                      ),
+                    }
+                  : lesson
+              ),
+            }
+          : sec
+      ),
+    }));
+  };
+
+  const handleCreateCourse = async () => {
+    setCreateError("");
+    setCreateLoading(true);
+
+    try {
+      // Filter out empty strings from arrays
+      const payload: CreateCoursePayload = {
+        ...newCourse,
+        instructorId: userId,
+        price: Number(newCourse.price),
+        objectives: newCourse.objectives.filter((obj) => obj.trim()),
+        requirements: newCourse.requirements.filter((req) => req.trim()),
+        targetAudiences: newCourse.targetAudiences.filter((aud) => aud.trim()),
+        sections: newCourse.sections
+          .filter((sec) => sec.title.trim())
+          .map((sec) => ({
+            ...sec,
+            lessons: sec.lessons
+              .filter((les) => les.title.trim())
+              .map((les, lesIdx) => ({
+                ...les,
+                orderIndex: lesIdx,
+                durationSeconds: Number(les.durationSeconds),
+              })),
+          }))
+          .map((sec, secIdx) => ({
+            ...sec,
+            orderIndex: secIdx,
+          })),
+      };
+
+      const response = await axiosInstance.post<{ message: string; courseId: number }>(
+        "/Studio/create",
+        payload
+      );
+
+      if (response && response.message) {
+        alert(`Course created successfully! Course ID: ${response.courseId}`);
+        // Reset form
+        setNewCourse({
+          instructorId: userId,
+          title: "",
+          price: 0,
+          thumbnailUrl: "",
+          difficultyLevel: "Beginner",
+          language: "English",
+          categoryIds: [],
+          fullDescription: "",
+          objectives: [""],
+          requirements: [""],
+          targetAudiences: [""],
+          sections: [
+            {
+              title: "",
+              objective: "",
+              orderIndex: 0,
+              lessons: [
+                {
+                  title: "",
+                  contentType: "Video",
+                  videoUrl: "",
+                  textContent: "",
+                  durationSeconds: 0,
+                  isPreviewable: false,
+                  orderIndex: 0,
+                  resources: [],
+                },
+              ],
+            },
+          ],
+        });
+        // Refresh courses list
+        if (userId) {
+          const coursesRes = await axiosInstance.get(
+            `/Studio/ownedcourses/${userId}`
+          );
+          setCourses(coursesRes || []);
+        }
+      }
+    } catch (err: any) {
+      console.error("Failed to create course:", err);
+      setCreateError(err.message || "Failed to create course. Please try again.");
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -115,7 +444,10 @@ export const InstructorDashboard: React.FC = () => {
               <section style={{ display: "flex", gap: "20px", marginBottom: "40px" }}>
                 <StatsCard label="Total Revenue ($)" value={revenue.toFixed(2)} />
                 <StatsCard label="Total Courses" value={courses.length} />
-                <StatsCard label="Total Students" value={courses.reduce((sum, c) => sum + (c.studentCount || 0), 0)} />
+                <StatsCard
+                  label="Total Students"
+                  value={courses.reduce((sum, c) => sum + (c.studentCount || 0), 0)}
+                />
               </section>
             )}
           </div>
@@ -172,7 +504,22 @@ export const InstructorDashboard: React.FC = () => {
         return (
           <div>
             <h1>Create New Course</h1>
+            {createError && (
+              <div
+                style={{
+                  backgroundColor: "#f8d7da",
+                  color: "#721c24",
+                  padding: "12px",
+                  borderRadius: 6,
+                  marginBottom: "20px",
+                  border: "1px solid #f5c6cb",
+                }}
+              >
+                {createError}
+              </div>
+            )}
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+<<<<<<< HEAD
               <input
                 type="text"
                 placeholder="Course Title"
@@ -212,9 +559,129 @@ export const InstructorDashboard: React.FC = () => {
                 onChange={(e) => setNewCourse({ ...newCourse, price: e.target.value })}
                 style={{ padding: "10px", borderRadius: 6, border: "1px solid #ccc" }}
               />
+=======
+              {/* Basic Course Info */}
+              <div style={{ borderTop: "2px solid #ddd", paddingTop: "20px" }}>
+                <h3>Course Information</h3>
+                <input
+                  type="text"
+                  placeholder="Course Title *"
+                  value={newCourse.title}
+                  onChange={(e) => handleBasicFieldChange("title", e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                    marginBottom: "10px",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <textarea
+                  placeholder="Full Description *"
+                  value={newCourse.fullDescription}
+                  onChange={(e) =>
+                    handleBasicFieldChange("fullDescription", e.target.value)
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                    minHeight: "100px",
+                    marginBottom: "10px",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                  <input
+                    type="number"
+                    placeholder="Price ($) *"
+                    value={newCourse.price}
+                    onChange={(e) =>
+                      handleBasicFieldChange("price", parseFloat(e.target.value))
+                    }
+                    style={{
+                      flex: 1,
+                      padding: "10px",
+                      borderRadius: 6,
+                      border: "1px solid #ccc",
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Thumbnail URL"
+                    value={newCourse.thumbnailUrl}
+                    onChange={(e) =>
+                      handleBasicFieldChange("thumbnailUrl", e.target.value)
+                    }
+                    style={{
+                      flex: 1,
+                      padding: "10px",
+                      borderRadius: 6,
+                      border: "1px solid #ccc",
+                    }}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                  <select
+                    value={newCourse.language}
+                    onChange={(e) => handleBasicFieldChange("language", e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: "10px",
+                      borderRadius: 6,
+                      border: "1px solid #ccc",
+                    }}
+                  >
+                    <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="French">French</option>
+                    <option value="German">German</option>
+                    <option value="Arabic">Arabic</option>
+                  </select>
+                  <select
+                    value={newCourse.difficultyLevel}
+                    onChange={(e) =>
+                      handleBasicFieldChange("difficultyLevel", e.target.value)
+                    }
+                    style={{
+                      flex: 1,
+                      padding: "10px",
+                      borderRadius: 6,
+                      border: "1px solid #ccc",
+                    }}
+                  >
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                  </select>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Category IDs (comma separated)"
+                  value={newCourse.categoryIds.join(",")}
+                  onChange={(e) =>
+                    handleBasicFieldChange(
+                      "categoryIds",
+                      e.target.value
+                        .split(",")
+                        .map((id) => Number(id.trim()))
+                        .filter((id) => !isNaN(id))
+                    )
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                  }}
+                />
+              </div>
+>>>>>>> 1e1269ba59f8af66f6e096635d886b4a8f4acb1c
 
               {/* Objectives */}
-              <div>
+              <div style={{ borderTop: "2px solid #ddd", paddingTop: "20px" }}>
                 <h3>Learning Objectives</h3>
                 {newCourse.objectives.map((obj, idx) => (
                   <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
@@ -223,11 +690,23 @@ export const InstructorDashboard: React.FC = () => {
                       placeholder="Objective"
                       value={obj}
                       onChange={(e) => handleArrayChange("objectives", idx, e.target.value)}
-                      style={{ flex: 1, padding: "8px", borderRadius: 6, border: "1px solid #ccc" }}
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        borderRadius: 6,
+                        border: "1px solid #ccc",
+                      }}
                     />
                     <button
                       onClick={() => removeArrayItem("objectives", idx)}
-                      style={{ padding: "8px 12px", backgroundColor: "#ff4d4f", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}
+                      style={{
+                        padding: "8px 12px",
+                        backgroundColor: "#ff4d4f",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 6,
+                        cursor: "pointer",
+                      }}
                     >
                       X
                     </button>
@@ -235,14 +714,21 @@ export const InstructorDashboard: React.FC = () => {
                 ))}
                 <button
                   onClick={() => addArrayItem("objectives")}
-                  style={{ padding: "8px 12px", backgroundColor: "#646cff", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}
+                  style={{
+                    padding: "8px 12px",
+                    backgroundColor: "#646cff",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 6,
+                    cursor: "pointer",
+                  }}
                 >
                   + Add Objective
                 </button>
               </div>
 
               {/* Requirements */}
-              <div>
+              <div style={{ borderTop: "2px solid #ddd", paddingTop: "20px" }}>
                 <h3>Requirements</h3>
                 {newCourse.requirements.map((req, idx) => (
                   <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
@@ -250,12 +736,26 @@ export const InstructorDashboard: React.FC = () => {
                       type="text"
                       placeholder="Requirement"
                       value={req}
-                      onChange={(e) => handleArrayChange("requirements", idx, e.target.value)}
-                      style={{ flex: 1, padding: "8px", borderRadius: 6, border: "1px solid #ccc" }}
+                      onChange={(e) =>
+                        handleArrayChange("requirements", idx, e.target.value)
+                      }
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        borderRadius: 6,
+                        border: "1px solid #ccc",
+                      }}
                     />
                     <button
                       onClick={() => removeArrayItem("requirements", idx)}
-                      style={{ padding: "8px 12px", backgroundColor: "#ff4d4f", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}
+                      style={{
+                        padding: "8px 12px",
+                        backgroundColor: "#ff4d4f",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 6,
+                        cursor: "pointer",
+                      }}
                     >
                       X
                     </button>
@@ -263,77 +763,419 @@ export const InstructorDashboard: React.FC = () => {
                 ))}
                 <button
                   onClick={() => addArrayItem("requirements")}
-                  style={{ padding: "8px 12px", backgroundColor: "#646cff", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}
+                  style={{
+                    padding: "8px 12px",
+                    backgroundColor: "#646cff",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 6,
+                    cursor: "pointer",
+                  }}
                 >
                   + Add Requirement
                 </button>
               </div>
 
               {/* Target Audience */}
-              <div>
+              <div style={{ borderTop: "2px solid #ddd", paddingTop: "20px" }}>
                 <h3>Target Audience</h3>
-                {newCourse.targetAudience.map((aud, idx) => (
+                {newCourse.targetAudiences.map((aud, idx) => (
                   <div key={idx} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                     <input
                       type="text"
                       placeholder="Target Audience"
                       value={aud}
-                      onChange={(e) => handleArrayChange("targetAudience", idx, e.target.value)}
-                      style={{ flex: 1, padding: "8px", borderRadius: 6, border: "1px solid #ccc" }}
+                      onChange={(e) =>
+                        handleArrayChange("targetAudiences", idx, e.target.value)
+                      }
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        borderRadius: 6,
+                        border: "1px solid #ccc",
+                      }}
                     />
                     <button
-                      onClick={() => removeArrayItem("targetAudience", idx)}
-                      style={{ padding: "8px 12px", backgroundColor: "#ff4d4f", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}
+                      onClick={() => removeArrayItem("targetAudiences", idx)}
+                      style={{
+                        padding: "8px 12px",
+                        backgroundColor: "#ff4d4f",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 6,
+                        cursor: "pointer",
+                      }}
                     >
                       X
                     </button>
                   </div>
                 ))}
                 <button
-                  onClick={() => addArrayItem("targetAudience")}
-                  style={{ padding: "8px 12px", backgroundColor: "#646cff", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}
+                  onClick={() => addArrayItem("targetAudiences")}
+                  style={{
+                    padding: "8px 12px",
+                    backgroundColor: "#646cff",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 6,
+                    cursor: "pointer",
+                  }}
                 >
                   + Add Target Audience
                 </button>
               </div>
 
-              {/* Video Upload Drag & Drop */}
-              <div>
-                <h3>Course Introduction Video</h3>
-                <div
-                  onDrop={handleVideoDrop}
-                  onDragOver={(e) => e.preventDefault()}
+              {/* Sections and Lessons */}
+              <div style={{ borderTop: "2px solid #ddd", paddingTop: "20px" }}>
+                <h3>Course Sections & Lessons</h3>
+                {newCourse.sections.map((section, secIdx) => (
+                  <div
+                    key={secIdx}
+                    style={{
+                      backgroundColor: "#f0f0f5",
+                      padding: "15px",
+                      borderRadius: 8,
+                      marginBottom: "20px",
+                      border: "1px solid #ddd",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      <h4>Section {secIdx + 1}</h4>
+                      <button
+                        onClick={() => removeSection(secIdx)}
+                        style={{
+                          padding: "8px 12px",
+                          backgroundColor: "#ff4d4f",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 6,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Remove Section
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Section Title *"
+                      value={section.title}
+                      onChange={(e) => updateSection(secIdx, "title", e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: 6,
+                        border: "1px solid #ccc",
+                        marginBottom: "10px",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                    <textarea
+                      placeholder="Section Objective"
+                      value={section.objective}
+                      onChange={(e) =>
+                        updateSection(secIdx, "objective", e.target.value)
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: 6,
+                        border: "1px solid #ccc",
+                        minHeight: "70px",
+                        marginBottom: "10px",
+                        boxSizing: "border-box",
+                      }}
+                    />
+
+                    {/* Lessons */}
+                    <div style={{ marginLeft: "15px" }}>
+                      <h5>Lessons</h5>
+                      {section.lessons.map((lesson, lesIdx) => (
+                        <div
+                          key={lesIdx}
+                          style={{
+                            backgroundColor: "#fff",
+                            padding: "12px",
+                            borderRadius: 6,
+                            marginBottom: "12px",
+                            border: "1px solid #ddd",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginBottom: "10px",
+                            }}
+                          >
+                            <strong>Lesson {lesIdx + 1}</strong>
+                            <button
+                              onClick={() => removeLesson(secIdx, lesIdx)}
+                              style={{
+                                padding: "6px 10px",
+                                backgroundColor: "#ff4d4f",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: 4,
+                                cursor: "pointer",
+                                fontSize: "12px",
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Lesson Title *"
+                            value={lesson.title}
+                            onChange={(e) =>
+                              updateLesson(secIdx, lesIdx, "title", e.target.value)
+                            }
+                            style={{
+                              width: "100%",
+                              padding: "8px",
+                              borderRadius: 4,
+                              border: "1px solid #ccc",
+                              marginBottom: "8px",
+                              boxSizing: "border-box",
+                            }}
+                          />
+                          <select
+                            value={lesson.contentType}
+                            onChange={(e) =>
+                              updateLesson(secIdx, lesIdx, "contentType", e.target.value)
+                            }
+                            style={{
+                              width: "100%",
+                              padding: "8px",
+                              borderRadius: 4,
+                              border: "1px solid #ccc",
+                              marginBottom: "8px",
+                              boxSizing: "border-box",
+                            }}
+                          >
+                            <option value="Video">Video</option>
+                            <option value="Article">Article</option>
+                            <option value="Quiz">Quiz</option>
+                          </select>
+                          {lesson.contentType === "Video" && (
+                            <input
+                              type="text"
+                              placeholder="Video URL"
+                              value={lesson.videoUrl}
+                              onChange={(e) =>
+                                updateLesson(secIdx, lesIdx, "videoUrl", e.target.value)
+                              }
+                              style={{
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: 4,
+                                border: "1px solid #ccc",
+                                marginBottom: "8px",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                          )}
+                          {lesson.contentType === "Article" && (
+                            <textarea
+                              placeholder="Text Content"
+                              value={lesson.textContent}
+                              onChange={(e) =>
+                                updateLesson(secIdx, lesIdx, "textContent", e.target.value)
+                              }
+                              style={{
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: 4,
+                                border: "1px solid #ccc",
+                                minHeight: "60px",
+                                marginBottom: "8px",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                          )}
+                          <input
+                            type="number"
+                            placeholder="Duration (seconds)"
+                            value={lesson.durationSeconds}
+                            onChange={(e) =>
+                              updateLesson(
+                                secIdx,
+                                lesIdx,
+                                "durationSeconds",
+                                e.target.value
+                              )
+                            }
+                            style={{
+                              width: "100%",
+                              padding: "8px",
+                              borderRadius: 4,
+                              border: "1px solid #ccc",
+                              marginBottom: "8px",
+                              boxSizing: "border-box",
+                            }}
+                          />
+                          <label
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              marginBottom: "10px",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={lesson.isPreviewable}
+                              onChange={(e) =>
+                                updateLesson(secIdx, lesIdx, "isPreviewable", e.target.checked)
+                              }
+                            />
+                            Is Previewable
+                          </label>
+
+                          {/* Resources */}
+                          <div style={{ marginTop: "10px" }}>
+                            <h6 style={{ marginTop: 0 }}>Resources</h6>
+                            {lesson.resources.map((resource, resIdx) => (
+                              <div
+                                key={resIdx}
+                                style={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  marginBottom: "8px",
+                                }}
+                              >
+                                <input
+                                  type="text"
+                                  placeholder="Resource Name"
+                                  value={resource.name}
+                                  onChange={(e) =>
+                                    updateResource(
+                                      secIdx,
+                                      lesIdx,
+                                      resIdx,
+                                      "name",
+                                      e.target.value
+                                    )
+                                  }
+                                  style={{
+                                    flex: 1,
+                                    padding: "6px",
+                                    borderRadius: 4,
+                                    border: "1px solid #ccc",
+                                    fontSize: "12px",
+                                  }}
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Resource URL"
+                                  value={resource.url}
+                                  onChange={(e) =>
+                                    updateResource(
+                                      secIdx,
+                                      lesIdx,
+                                      resIdx,
+                                      "url",
+                                      e.target.value
+                                    )
+                                  }
+                                  style={{
+                                    flex: 1,
+                                    padding: "6px",
+                                    borderRadius: 4,
+                                    border: "1px solid #ccc",
+                                    fontSize: "12px",
+                                  }}
+                                />
+                                <button
+                                  onClick={() => removeResource(secIdx, lesIdx, resIdx)}
+                                  style={{
+                                    padding: "6px 10px",
+                                    backgroundColor: "#ff4d4f",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: 4,
+                                    cursor: "pointer",
+                                    fontSize: "12px",
+                                  }}
+                                >
+                                  X
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              onClick={() => addResource(secIdx, lesIdx)}
+                              style={{
+                                padding: "6px 10px",
+                                backgroundColor: "#646cff",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: 4,
+                                cursor: "pointer",
+                                fontSize: "12px",
+                              }}
+                            >
+                              + Add Resource
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => addLesson(secIdx)}
+                        style={{
+                          padding: "8px 12px",
+                          backgroundColor: "#28a745",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 6,
+                          cursor: "pointer",
+                        }}
+                      >
+                        + Add Lesson
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={addSection}
                   style={{
-                    border: "2px dashed #ccc",
+                    padding: "10px 16px",
+                    backgroundColor: "#17a2b8",
+                    color: "#fff",
+                    border: "none",
                     borderRadius: 6,
-                    padding: 40,
-                    textAlign: "center",
-                    backgroundColor: "#f9f9f9",
                     cursor: "pointer",
+                    fontSize: "16px",
                   }}
                 >
-                  {newCourse.videoFile ? (
-                    <p>Video: {newCourse.videoFile.name}</p>
-                  ) : (
-                    <p>Drag & drop a video file here</p>
-                  )}
-                </div>
+                  + Add Section
+                </button>
               </div>
 
+              {/* Submit Button */}
               <button
+                disabled={createLoading}
                 style={{
                   padding: "12px",
-                  backgroundColor: "#28a745",
+                  backgroundColor: createLoading ? "#ccc" : "#28a745",
                   color: "#fff",
                   border: "none",
                   borderRadius: 6,
-                  cursor: "pointer",
+                  cursor: createLoading ? "not-allowed" : "pointer",
                   fontSize: 16,
                   fontWeight: "bold",
+                  marginTop: "20px",
                 }}
-                onClick={() => console.log("Creating course:", newCourse)}
+                onClick={handleCreateCourse}
               >
-                Create Course
+                {createLoading ? "Creating Course..." : "Create Course"}
               </button>
             </div>
           </div>
@@ -373,7 +1215,8 @@ export const InstructorDashboard: React.FC = () => {
                   width: "100%",
                   padding: 12,
                   marginBottom: 10,
-                  backgroundColor: activeTab === "statistics" ? "#646cff" : "transparent",
+                  backgroundColor:
+                    activeTab === "statistics" ? "#646cff" : "transparent",
                   color: "#fff",
                   border: "1px solid #555",
                   borderRadius: 6,
@@ -389,7 +1232,8 @@ export const InstructorDashboard: React.FC = () => {
                   width: "100%",
                   padding: 12,
                   marginBottom: 10,
-                  backgroundColor: activeTab === "my-courses" ? "#646cff" : "transparent",
+                  backgroundColor:
+                    activeTab === "my-courses" ? "#646cff" : "transparent",
                   color: "#fff",
                   border: "1px solid #555",
                   borderRadius: 6,
@@ -404,7 +1248,8 @@ export const InstructorDashboard: React.FC = () => {
                 style={{
                   width: "100%",
                   padding: 12,
-                  backgroundColor: activeTab === "create-course" ? "#646cff" : "transparent",
+                  backgroundColor:
+                    activeTab === "create-course" ? "#646cff" : "transparent",
                   color: "#fff",
                   border: "1px solid #555",
                   borderRadius: 6,
