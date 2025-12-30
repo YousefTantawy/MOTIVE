@@ -1,0 +1,20 @@
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore VS Code / Editor settings
+.obj
+.bin
+
+# Ignore Node.js dependencies (HUGE performance saver)
+**/node_modules
+**/npm-debug.log
+
+# Ignore .NET build artifacts
+**/bin
+**/obj
+**/.vs
+
+# Ignore build outputs
+**/dist
+**/out
