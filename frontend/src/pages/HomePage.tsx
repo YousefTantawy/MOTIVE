@@ -75,19 +75,23 @@ export const HomePage: React.FC = () => {
       const courses = courseResponses
         .filter(Boolean)
         .map((course: any) => {
+          console.log("Raw course data:", course);
           const reviews = Array.isArray(course?.Reviews) ? course.Reviews : [];
           const avgRating = reviews.length
             ? reviews.reduce((sum: number, r: any) => sum + (Number(r.Rating ?? r.rating ?? 0) || 0), 0) /
               reviews.length
             : null;
 
-          return {
-            courseId: course?.Id ?? course?.courseId ?? course?.CourseId ?? 0,
+          const mapped = {
+            courseId: Number(course?.CourseId ?? course?.courseId ?? course?.Id ?? course?.id ?? 0),
             title: course?.Title ?? course?.title ?? "Untitled course",
-            price: course?.Price ?? course?.price ?? 0,
+            price: Number(course?.Price ?? course?.price ?? 0),
             createdAt: course?.CreatedAt ?? course?.createdAt ?? "",
             avgRating,
           } as SimpleCourse;
+          
+          console.log("Mapped course:", mapped);
+          return mapped;
         });
 
       setRecommendations(courses);
@@ -108,13 +112,19 @@ export const HomePage: React.FC = () => {
           ? await axiosInstance.post<any[]>(url, body)
           : await axiosInstance.get<any[]>(url);
       
-      const mapped = rawData.map((item: any) => ({
-        courseId: item?.CourseId ?? item?.courseId ?? 0,
-        title: item?.Title ?? item?.title ?? "Untitled course",
-        price: item?.Price ?? item?.price ?? 0,
-        createdAt: item?.CreatedAt ?? item?.createdAt ?? "",
-        avgRating: item?.AvgRating ?? item?.avgRating ?? null,
-      }));
+      console.log(`Raw data from ${url}:`, rawData);
+      
+      const mapped = rawData.map((item: any) => {
+        const result = {
+          courseId: Number(item?.CourseId ?? item?.courseId ?? 0),
+          title: item?.Title ?? item?.title ?? "Untitled course",
+          price: Number(item?.Price ?? item?.price ?? 0),
+          createdAt: item?.CreatedAt ?? item?.createdAt ?? "",
+          avgRating: item?.AvgRating ?? item?.avgRating ?? null,
+        };
+        console.log("Mapped item:", result);
+        return result;
+      });
       
       setter(mapped);
     } catch (err: any) {
