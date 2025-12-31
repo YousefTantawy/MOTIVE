@@ -18,7 +18,7 @@ def get_db_connection():
         host=os.getenv("DB_HOST", "motivedatabase.mysql.database.azure.com"),
         user=os.getenv("DB_USER", "YousefTantawy"),
         password=os.getenv("DB_PASSWORD", "el7amamsyel7amamsy!!"),
-        database=os.getenv("DB_NAME", "lms_db")
+        database=os.getenv("DB_NAME", "ecen424_db_project")
     )
 
 # --- LOAD AI MEMORY (Startup) ---
