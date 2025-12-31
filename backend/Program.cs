@@ -19,10 +19,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddHttpClient("AIService", client =>
+// Register the HTTP Client for the Python Microservice
+builder.Services.AddHttpClient("PythonAiService", client =>
 {
-    // Ensure this matches the port in your Python uvicorn.run command
-    client.BaseAddress = new Uri("http://localhost:5171/");
+    // Matches the port in your python script: os.environ.get("PORT", 5171)
+    client.BaseAddress = new Uri("http://127.0.0.1:5171/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
 builder.Services.AddControllers();
