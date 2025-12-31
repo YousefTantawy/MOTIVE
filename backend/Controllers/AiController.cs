@@ -43,6 +43,19 @@ namespace Motive.Backend.Controllers
                 // Python returns: {"status": "success", "ids": [101, 102]}
                 var jsonResponse = await response.Content.ReadAsStringAsync();
 
+                var data = System.Text.Json.Nodes.JsonNode.Parse(jsonResponse);
+                string status = data?["status"]?.ToString();
+
+                if (status == "cold_start")
+                {
+                    return Ok("User is new, showing default courses.");
+                }
+
+                if (status == "error")
+                {
+                    return StatusCode(500, "Error in fetching data");
+                }
+
                 // 5. Return directly to Frontend
                 return Content(jsonResponse, "application/json");
             }
