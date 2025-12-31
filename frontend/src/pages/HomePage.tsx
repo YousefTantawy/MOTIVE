@@ -11,6 +11,7 @@ export interface SimpleCourse {
 }
 
 export const HomePage: React.FC = () => {
+  const [recommendations, setRecommendations] = useState<SimpleCourse[]>([]);
   const [trending, setTrending] = useState<SimpleCourse[]>([]);
   const [recent, setRecent] = useState<SimpleCourse[]>([]);
   const [bestSellers, setBestSellers] = useState<SimpleCourse[]>([]);
@@ -18,12 +19,94 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const resolveUserId = () => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        const candidate = Number(parsed?.id ?? parsed?.userId);
+        if (Number.isFinite(candidate)) return candidate;
+      } catch (e) {
+        console.warn("Failed to parse stored user for id", e);
+      }
+    }
+
+    const storedId = localStorage.getItem("userId");
+    const numericId = storedId ? Number(storedId) : NaN;
+    return Number.isFinite(numericId) ? numericId : 0;
+  };
+
+  const fetchRecommendations = async () => {
+    const userId = resolveUserId();
+    if (!userId) {
+      setRecommendations([]);
+      return;
+    }
+
+    try {
+      const raw = await axiosInstance.post<any>("/Ai/recommendations", userId);
+      const payload = typeof raw === "string" ? safeParseJson(raw) : raw;
+
+      if (!payload) {
+        setRecommendations([]);
+        return;
+      }
+
+      if (payload.status === "cold_start") {
+        setRecommendations([]);
+        return;
+      }
+
+      if (payload.status === "error") {
+        setError("Unable to load recommendations");
+        return;
+      }
+
+      const ids: number[] = Array.isArray(payload.ids) ? payload.ids : [];
+      if (!ids.length) {
+        setRecommendations([]);
+        return;
+      }
+
+      const courseResponses = await Promise.all(
+        ids.map((id) => axiosInstance.get<any>(`/Courses/${id}`).catch(() => null))
+      );
+
+      const courses = courseResponses
+        .filter(Boolean)
+        .map((course: any) => {
+          const reviews = Array.isArray(course?.Reviews) ? course.Reviews : [];
+          const avgRating = reviews.length
+            ? reviews.reduce((sum: number, r: any) => sum + (Number(r.Rating ?? r.rating ?? 0) || 0), 0) /
+              reviews.length
+            : null;
+
+          return {
+            courseId: course?.Id ?? course?.courseId ?? course?.CourseId ?? 0,
+            title: course?.Title ?? course?.title ?? "Untitled course",
+            price: course?.Price ?? course?.price ?? 0,
+            createdAt: course?.CreatedAt ?? course?.createdAt ?? "",
+            avgRating,
+          } as SimpleCourse;
+        });
+
+      setRecommendations(courses);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   async function fetchSection(
     url: string,
-    setter: React.Dispatch<React.SetStateAction<SimpleCourse[]>>
+    setter: React.Dispatch<React.SetStateAction<SimpleCourse[]>>,
+    method: "GET" | "POST" = "GET",
+    body?: any
   ) {
     try {
-      const data = await axiosInstance.get<SimpleCourse[]>(url);
+      const data =
+        method === "POST"
+          ? await axiosInstance.post<SimpleCourse[]>(url, body)
+          : await axiosInstance.get<SimpleCourse[]>(url);
       setter(data);
     } catch (err: any) {
       setError(err.message);
@@ -34,12 +117,21 @@ export const HomePage: React.FC = () => {
     setLoading(true);
     setError(null);
     Promise.all([
+      fetchRecommendations(),
       fetchSection("/Courses/trending", setTrending),
       fetchSection("/Courses/recent", setRecent),
       fetchSection("/Courses/bestsellers", setBestSellers),
       fetchSection("/Courses/toprated", setTopRated),
     ]).finally(() => setLoading(false));
   }, []);
+
+  const safeParseJson = (value: string) => {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  };
 
   if (loading) return <p style={{ textAlign: "center" }}>Loading…</p>;
   if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
@@ -48,6 +140,9 @@ export const HomePage: React.FC = () => {
     <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
       <h1 style={{ textAlign: "center", marginBottom: 50 }}>Welcome at Motive</h1>
 
+      <div style={{ marginBottom: 120 }}>
+        <CarouselSection title="Recommended" courses={recommendations} />
+      </div>
       <div style={{ marginBottom: 120 }}>
         <CarouselSection title="Trending" courses={trending} />
       </div>
