@@ -26,9 +26,7 @@ export const HomePage: React.FC = () => {
         const parsed = JSON.parse(storedUser);
         const candidate = Number(parsed?.id ?? parsed?.userId);
         if (Number.isFinite(candidate)) return candidate;
-      } catch (e) {
-        console.warn("Failed to parse stored user for id", e);
-      }
+      } catch {}
     }
 
     const storedId = localStorage.getItem("userId");
@@ -47,12 +45,7 @@ export const HomePage: React.FC = () => {
       const raw = await axiosInstance.post<any>("/Ai/recommendations", userId);
       const payload = typeof raw === "string" ? safeParseJson(raw) : raw;
 
-      if (!payload) {
-        setRecommendations([]);
-        return;
-      }
-
-      if (payload.status === "cold_start") {
+      if (!payload || payload.status === "cold_start") {
         setRecommendations([]);
         return;
       }
@@ -69,49 +62,50 @@ export const HomePage: React.FC = () => {
       }
 
       const courseResponses = await Promise.all(
-        ids.map((id) => axiosInstance.get<any>(`/Courses/${id}`).catch(() => null))
+        ids.map(async (id) => {
+          try {
+            const res = await axiosInstance.get<any>(`/Courses/${id}`);
+            const ratingRes = await axiosInstance.get<any>(
+              `/api/Courses/rating/${id}`
+            );
+
+            const avgRating =
+              typeof ratingRes?.data?.rating === "number"
+                ? ratingRes.data.rating
+                : null;
+
+            return {
+              courseId: Number(
+                res?.Id ??
+                  res?.CourseId ??
+                  res?.courseId ??
+                  res?.id ??
+                  0
+              ),
+              title: res?.Title ?? res?.title ?? "Untitled course",
+              price: Number(res?.Price ?? res?.price ?? 0),
+              createdAt: res?.CreatedAt ?? res?.createdAt ?? "",
+              avgRating,
+            } as SimpleCourse;
+          } catch {
+            return null;
+          }
+        })
       );
 
-      const courses = courseResponses
-        .filter(Boolean)
-        .map((course: any) => {
-          const reviews = Array.isArray(course?.Reviews) ? course.Reviews : [];
-          const avgRating = reviews.length
-            ? reviews.reduce((sum: number, r: any) => sum + (Number(r.Rating ?? r.rating ?? 0) || 0), 0) /
-              reviews.length
-            : 0;
-
-          return {
-            courseId: Number(course?.Id ?? course?.CourseId ?? course?.courseId ?? course?.id ?? 0),
-            title: course?.Title ?? course?.title ?? "Untitled course",
-            price: Number(course?.Price ?? course?.price ?? 0),
-            createdAt: course?.CreatedAt ?? course?.createdAt ?? "",
-            avgRating: Number(avgRating),
-          } as SimpleCourse;
-        });
-
-      setRecommendations(courses);
+      setRecommendations(
+        courseResponses.filter(Boolean) as SimpleCourse[]
+      );
     } catch (err: any) {
       setError(err.message);
     }
   };
 
-  const updateRating = async (id: number, newRating: number) => {
-    try {
-      await axiosInstance.post(`/api/Courses/rating/${id}`, { rating: newRating });
-      setRecommendations((prev) =>
-        prev.map((course) =>
-          course.courseId === id ? { ...course, avgRating: newRating } : course
-        )
-      );
-    } catch (error) {
-      console.error("Failed to update rating:", error);
-    }
-  };
-  
   async function fetchSection(
     url: string,
-    setter: React.Dispatch<React.SetStateAction<SimpleCourse[]>>,
+    setter: React.Dispatch<
+      React.SetStateAction<SimpleCourse[]>
+    >,
     method: "GET" | "POST" = "GET",
     body?: any
   ) {
@@ -120,21 +114,32 @@ export const HomePage: React.FC = () => {
         method === "POST"
           ? await axiosInstance.post<any[]>(url, body)
           : await axiosInstance.get<any[]>(url);
-      
-      console.log(`Raw data from ${url}:`, rawData);
-      
-      const mapped = rawData.map((item: any) => {
-        const result = {
-          courseId: Number(item?.CourseId ?? item?.courseId ?? 0),
-          title: item?.Title ?? item?.title ?? "Untitled course",
-          price: Number(item?.Price ?? item?.price ?? 0),
-          createdAt: item?.CreatedAt ?? item?.createdAt ?? "",
-          avgRating: Number(item?.AvgRating ?? item?.avgRating ?? 0) || null,
-        };
-        console.log("Mapped item:", result);
-        return result;
-      });
-      
+
+      const data = Array.isArray(rawData?.data)
+        ? rawData.data
+        : rawData;
+
+      const mapped = data.map((item: any) => ({
+        courseId: Number(
+          item?.CourseId ?? item?.courseId ?? 0
+        ),
+        title:
+          item?.Title ??
+          item?.title ??
+          "Untitled course",
+        price: Number(item?.Price ?? item?.price ?? 0),
+        createdAt:
+          item?.CreatedAt ??
+          item?.createdAt ??
+          "",
+        avgRating:
+          typeof item?.AvgRating === "number"
+            ? item.AvgRating
+            : typeof item?.avgRating === "number"
+            ? item.avgRating
+            : null,
+      }));
+
       setter(mapped);
     } catch (err: any) {
       setError(err.message);
@@ -161,55 +166,115 @@ export const HomePage: React.FC = () => {
     }
   };
 
-  if (loading) return <p style={{ textAlign: "center" }}>Loading…</p>;
-  if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
+  if (loading)
+    return (
+      <p style={{ textAlign: "center" }}>Loading…</p>
+    );
+  if (error)
+    return (
+      <p
+        style={{
+          color: "red",
+          textAlign: "center",
+        }}
+      >
+        {error}
+      </p>
+    );
 
   return (
-    <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 20px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: 50 }}>Welcome at Motive</h1>
+    <div
+      style={{
+        maxWidth: "100%",
+        margin: "0 auto",
+        padding: "0 20px",
+      }}
+    >
+      <h1
+        style={{
+          textAlign: "center",
+          marginBottom: 50,
+        }}
+      >
+        Welcome at Motive
+      </h1>
 
       <div style={{ marginBottom: 120 }}>
-        <CarouselSection title="Recommended" courses={recommendations} />
+        <CarouselSection
+          title="Recommended"
+          courses={recommendations}
+        />
       </div>
       <div style={{ marginBottom: 120 }}>
-        <CarouselSection title="Trending" courses={trending} />
+        <CarouselSection
+          title="Trending"
+          courses={trending}
+        />
       </div>
       <div style={{ marginBottom: 120 }}>
-        <CarouselSection title="Recently Added" courses={recent} />
+        <CarouselSection
+          title="Recently Added"
+          courses={recent}
+        />
       </div>
       <div style={{ marginBottom: 120 }}>
-        <CarouselSection title="Best Sellers" courses={bestSellers} />
+        <CarouselSection
+          title="Best Sellers"
+          courses={bestSellers}
+        />
       </div>
       <div style={{ marginBottom: 120 }}>
-        <CarouselSection title="Top Rated" courses={topRated} />
+        <CarouselSection
+          title="Top Rated"
+          courses={topRated}
+        />
       </div>
     </div>
   );
 };
 
-// Horizontal Carousel Section
-const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
-  title,
-  courses,
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const CarouselSection: React.FC<{
+  title: string;
+  courses: SimpleCourse[];
+}> = ({ title, courses }) => {
+  const containerRef =
+    useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;
-    const cardWidth = 300; // fixed card width
+    const cardWidth = 300;
     const gap = 16;
-    const scrollAmount = (cardWidth + gap) * 4; // move by 4 cards
+    const scrollAmount =
+      (cardWidth + gap) * 4;
     containerRef.current.scrollBy({
-      left: direction === "right" ? scrollAmount : -scrollAmount,
+      left:
+        direction === "right"
+          ? scrollAmount
+          : -scrollAmount,
       behavior: "smooth",
     });
   };
 
   return (
-    <div style={{ marginTop: 25, position: "relative" }}>
-      <h2 style={{ marginLeft: 0, marginBottom: 20 }}>{title}</h2>
+    <div
+      style={{
+        marginTop: 25,
+        position: "relative",
+      }}
+    >
+      <h2
+        style={{
+          marginLeft: 0,
+          marginBottom: 20,
+        }}
+      >
+        {title}
+      </h2>
 
-      <div style={{ position: "relative" }} className="carousel-wrapper">
+      <div
+        style={{ position: "relative" }}
+        className="carousel-wrapper"
+      >
         <button
           onClick={() => scroll("left")}
           className="carousel-arrow left"
@@ -238,7 +303,13 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
           className="carousel-container"
         >
           {courses.map((c) => (
-            <div key={c.courseId} style={{ minWidth: 300, flexShrink: 0 }}>
+            <div
+              key={c.courseId}
+              style={{
+                minWidth: 300,
+                flexShrink: 0,
+              }}
+            >
               {renderCourseCard(c)}
             </div>
           ))}
@@ -267,7 +338,6 @@ const CarouselSection: React.FC<{ title: string; courses: SimpleCourse[] }> = ({
   );
 };
 
-// Arrow button style
 const arrowStyle: React.CSSProperties = {
   position: "absolute",
   top: "50%",
@@ -281,11 +351,20 @@ const arrowStyle: React.CSSProperties = {
   cursor: "pointer",
 };
 
-// Render CourseCard with stars
 const renderCourseCard = (c: SimpleCourse) => {
   const reviews =
-    c.avgRating !== null && c.avgRating !== undefined
-      ? Array.from({ length: 5 }, (_, i) => Math.min(Math.max(c.avgRating - i, 0), 1))
+    typeof c.avgRating === "number"
+      ? Array.from(
+          { length: 5 },
+          (_, i) =>
+            Math.min(
+              Math.max(
+                c.avgRating - i,
+                0
+              ),
+              1
+            )
+        )
       : [0, 0, 0, 0, 0];
 
   return (
