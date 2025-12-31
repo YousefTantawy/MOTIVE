@@ -80,14 +80,14 @@ export const HomePage: React.FC = () => {
           const avgRating = reviews.length
             ? reviews.reduce((sum: number, r: any) => sum + (Number(r.Rating ?? r.rating ?? 0) || 0), 0) /
               reviews.length
-            : (course?.AvgRating ?? course?.avgRating ?? null);
+            : 0;
 
           const mapped = {
-            courseId: Number(course?.CourseId ?? course?.courseId ?? course?.Id ?? course?.id ?? 0),
+            courseId: Number(course?.Id ?? course?.CourseId ?? course?.courseId ?? course?.id ?? 0),
             title: course?.Title ?? course?.title ?? "Untitled course",
             price: Number(course?.Price ?? course?.price ?? 0),
             createdAt: course?.CreatedAt ?? course?.createdAt ?? "",
-            avgRating: avgRating !== null ? Number(avgRating) : null,
+            avgRating: Number(avgRating),
           } as SimpleCourse;
           
           console.log("Mapped course:", mapped);
@@ -120,7 +120,7 @@ export const HomePage: React.FC = () => {
           title: item?.Title ?? item?.title ?? "Untitled course",
           price: Number(item?.Price ?? item?.price ?? 0),
           createdAt: item?.CreatedAt ?? item?.createdAt ?? "",
-          avgRating: item?.AvgRating ?? item?.avgRating ?? null,
+          avgRating: Number(item?.AvgRating ?? item?.avgRating ?? 0) || null,
         };
         console.log("Mapped item:", result);
         return result;
@@ -277,7 +277,7 @@ const renderCourseCard = (c: SimpleCourse) => {
   const reviews =
     c.avgRating !== null && c.avgRating !== undefined
       ? Array.from({ length: 5 }, (_, i) => Math.min(Math.max(c.avgRating - i, 0), 1))
-      : [];
+      : [0, 0, 0, 0, 0];
 
   return (
     <CourseCard
