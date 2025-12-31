@@ -23,22 +23,40 @@ def get_db_connection():
 
 # --- LOAD AI MEMORY (Startup) ---
 def load_vectors():
+    print("Connecting to Azure DB to fetch courses...")
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        # Fetch only what is needed for Math (ID + Text)
+        
+        # FIX 1: Select 'full_text' (the real text), NOT 'description_id'
         cursor.execute("""
-            SELECT c.course_id, c.title, cd.description 
+            SELECT c.course_id, c.title, cd.full_text 
             FROM courses c
             JOIN course_descriptions cd ON c.course_id = cd.course_id
         """)
         courses = cursor.fetchall()
         conn.close()
         
+        if not courses:
+            print("WARNING: No courses found in the database.")
+            return [], []
+
+        print(f"Found {len(courses)} courses. Generating embeddings...")
+        
         ids = [c['course_id'] for c in courses]
-        texts = [f"{c['title']} {c['description']}" for c in courses]
-        embeddings = model.encode(texts) # type: ignore
+        
+        # FIX 2: Use the correct key 'full_text'
+        # We also handle None in case a description is empty
+        texts = [
+            f"{c['title']} {c['full_text'] if c['full_text'] else ''}" 
+            for c in courses
+        ]
+        
+        embeddings = model.encode(texts) 
+        
+        print("Embeddings generated successfully!")
         return ids, embeddings
+
     except Exception as e:
         print(f"Startup Error: {e}")
         return [], []
