@@ -54,7 +54,7 @@ screen -dmS motive-frontend bash -c "cd $FRONTEND_DIR && npm install && npm run 
 
 echo "Starting Ai-service on port $AI_PORT..."
 
-screen -dmS motive-ai bash -c "cd $AI_PORT && python3 recommendation_service.py"
+screen -dmS motive-ai bash -c "cd $AI_DIR && python3 recommendation_service.py; exec bash"
 
 echo "--------------------------------------------------"
 
