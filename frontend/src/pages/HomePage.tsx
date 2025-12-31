@@ -75,23 +75,19 @@ export const HomePage: React.FC = () => {
       const courses = courseResponses
         .filter(Boolean)
         .map((course: any) => {
-          console.log("Raw course data:", course);
           const reviews = Array.isArray(course?.Reviews) ? course.Reviews : [];
           const avgRating = reviews.length
             ? reviews.reduce((sum: number, r: any) => sum + (Number(r.Rating ?? r.rating ?? 0) || 0), 0) /
               reviews.length
             : 0;
 
-          const mapped = {
+          return {
             courseId: Number(course?.Id ?? course?.CourseId ?? course?.courseId ?? course?.id ?? 0),
             title: course?.Title ?? course?.title ?? "Untitled course",
             price: Number(course?.Price ?? course?.price ?? 0),
             createdAt: course?.CreatedAt ?? course?.createdAt ?? "",
             avgRating: Number(avgRating),
           } as SimpleCourse;
-          
-          console.log("Mapped course:", mapped);
-          return mapped;
         });
 
       setRecommendations(courses);
@@ -100,6 +96,19 @@ export const HomePage: React.FC = () => {
     }
   };
 
+  const updateRating = async (id: number, newRating: number) => {
+    try {
+      await axiosInstance.post(`/api/Courses/rating/${id}`, { rating: newRating });
+      setRecommendations((prev) =>
+        prev.map((course) =>
+          course.courseId === id ? { ...course, avgRating: newRating } : course
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update rating:", error);
+    }
+  };
+  
   async function fetchSection(
     url: string,
     setter: React.Dispatch<React.SetStateAction<SimpleCourse[]>>,
