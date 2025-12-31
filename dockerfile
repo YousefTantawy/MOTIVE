@@ -5,21 +5,25 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0
 RUN apt-get update && \
     apt-get install -y curl screen python3 python3-pip python3-venv && \
     curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y nodejs 
 
 # 3. Set the working directory
 WORKDIR /app
 
-# 4. Copy all your files into the container
+# 4. Pip install
+COPY ai-service/requirements.txt ./ai-service/requirements.txt
+RUN pip3 install -r ai-service/requirements.txt --break-system-packages
+
+# 5. Copy all your files into the container
 COPY . .
 
-# 5. Give permission to execute your script
+# 6. Give permission to execute your script
 RUN chmod +x run.sh
 
-# 6. Expose the ports for Backend and Frontend
+# 7. Expose the ports for Backend and Frontend
 EXPOSE 5168
 EXPOSE 5173
 EXPOSE 5171
 
-# 7. Run your script and keep the container alive
+# 8. Run your script and keep the container alive
 CMD ./run.sh && tail -f /dev/null
