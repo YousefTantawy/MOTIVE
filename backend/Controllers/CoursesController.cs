@@ -76,6 +76,23 @@ namespace MotiveBackend.Controllers
             return Ok(searchResults);
         }
 
+        [HttpGet("rating/{id}")]
+        public async Task<IActionResult> GetRating(ulong id)
+        {
+            var course = await _context.Courses
+                .Where(c => c.CourseId == id)
+                .Select(c => new
+                {
+                    Rating = _context.UserReviews
+                        .Where(r => r.CourseId == c.CourseId)
+                        .Select(r => (double?)r.RatingValue)
+                        .Average() ?? 0
+                })
+                .FirstOrDefaultAsync();
+
+            return Ok(course);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCourseDetail(ulong id)
         {

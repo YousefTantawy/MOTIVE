@@ -48,7 +48,7 @@ namespace Motive.Backend.Controllers
 
                 if (status == "cold_start")
                 {
-                    return Ok("User is new, showing default courses.");
+                    return StatusCode(204, "Enroll in courses!");
                 }
 
                 if (status == "error")
