@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 
 namespace Motive.Backend.Controllers
 {
@@ -8,45 +9,21 @@ namespace Motive.Backend.Controllers
     [Route("api/[controller]")]
     public class AiController : ControllerBase
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        public AiController(IHttpClientFactory httpClientFactory)
+        public AiController()
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = new HttpClient();
         }
 
-        [HttpPost("recommend")]
-        public async Task<IActionResult> GetRecommendation([FromBody] object data)
+        [HttpGet("get-ai-result")]
+        public async Task<IActionResult> CallFastApi(string query)
         {
-            // 1. Create the Client
-            var client = _httpClientFactory.CreateClient("AiService");
+            // 1. CALL: Send request to FastAPI running on localhost:8000
+            // We pass the data in the URL query string
+            var response = await _httpClient.GetStringAsync($"http://127.0.0.1:8000/predict?input_val={query}");
 
-            // 2. Serialize the incoming data to send to Python
-            var jsonContent = new StringContent(
-                JsonSerializer.Serialize(data),
-                Encoding.UTF8,
-                "application/json");
-
-            try
-            {
-                // 3. Send POST request to Python (adjust endpoint '/predict' as needed)
-                var response = await client.PostAsync("predict", jsonContent);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode((int)response.StatusCode, "Error communicating with AI Service");
-                }
-
-                // 4. Read response string
-                var result = await response.Content.ReadAsStringAsync();
-
-                // 5. Return result to frontend
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal Server Error: {ex.Message}");
-            }
+            // 2. RECEIVE: Return the Python JSON back to the user
+            return Ok(response);
         }
     }
-}
