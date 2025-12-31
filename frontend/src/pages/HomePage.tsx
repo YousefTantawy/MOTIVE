@@ -65,10 +65,7 @@ export const HomePage: React.FC = () => {
         ids.map(async (id) => {
           try {
             const res = await axiosInstance.get<any>(`/Courses/${id}`);
-            const ratingRes = await axiosInstance.get<any>(
-              `/api/Courses/rating/${id}`
-            );
-
+            const ratingRes = await axiosInstance.get(`/Courses/rating/${id}`);
             const avgRating =
               typeof ratingRes?.data?.rating === "number"
                 ? ratingRes.data.rating
