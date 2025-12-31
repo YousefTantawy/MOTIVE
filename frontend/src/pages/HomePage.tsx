@@ -72,31 +72,23 @@ export const HomePage: React.FC = () => {
         ids.map((id) => axiosInstance.get<any>(`/Courses/${id}`).catch(() => null))
       );
 
-      const courseResponses = await Promise.all(
-  ids.map((id) =>
-    axiosInstance.get(`/Courses/${id}`).then(r => r.data).catch(() => null)
-  )
-);
+      const courses = courseResponses
+        .filter(Boolean)
+        .map((course: any) => {
+          const reviews = Array.isArray(course?.Reviews) ? course.Reviews : [];
+          const avgRating = reviews.length
+            ? reviews.reduce((sum: number, r: any) => sum + (Number(r.Rating ?? r.rating ?? 0) || 0), 0) /
+              reviews.length
+            : null;
 
-const courses = courseResponses
-  .filter(Boolean)
-  .map((course: any) => {
-    const reviews = Array.isArray(course?.Reviews) ? course.Reviews : [];
-    const avgRating = reviews.length
-      ? reviews.reduce((sum: number, r: any) =>
-          sum + (Number(r.Rating ?? r.rating ?? 0) || 0), 0
-        ) / reviews.length
-      : null;
-
-    return {
-      courseId: course?.Id ?? course?.courseId ?? course?.CourseId ?? 0,
-      title: course?.Title ?? course?.title ?? "Untitled course",
-      price: course?.Price ?? course?.price ?? 0,
-      createdAt: course?.CreatedAt ?? course?.createdAt ?? "",
-      avgRating,
-    } as SimpleCourse;
-  });
-
+          return {
+            courseId: course?.Id ?? course?.courseId ?? course?.CourseId ?? 0,
+            title: course?.Title ?? course?.title ?? "Untitled course",
+            price: course?.Price ?? course?.price ?? 0,
+            createdAt: course?.CreatedAt ?? course?.createdAt ?? "",
+            avgRating,
+          } as SimpleCourse;
+        });
 
       setRecommendations(courses);
     } catch (err: any) {
@@ -105,23 +97,30 @@ const courses = courseResponses
   };
 
   async function fetchSection(
-  url: string,
-  setter: React.Dispatch<React.SetStateAction<SimpleCourse[]>>,
-  method: "GET" | "POST" = "GET",
-  body?: any
-) {
-  try {
-    const res =
-      method === "POST"
-        ? await axiosInstance.post<SimpleCourse[]>(url, body)
-        : await axiosInstance.get<SimpleCourse[]>(url);
-
-    setter(res.data ?? []);   // ✅ set the actual data array
-  } catch (err: any) {
-    setError(err.message);
-    setter([]);               // optional: avoid stale UI
+    url: string,
+    setter: React.Dispatch<React.SetStateAction<SimpleCourse[]>>,
+    method: "GET" | "POST" = "GET",
+    body?: any
+  ) {
+    try {
+      const rawData =
+        method === "POST"
+          ? await axiosInstance.post<any[]>(url, body)
+          : await axiosInstance.get<any[]>(url);
+      
+      const mapped = rawData.map((item: any) => ({
+        courseId: item?.CourseId ?? item?.courseId ?? 0,
+        title: item?.Title ?? item?.title ?? "Untitled course",
+        price: item?.Price ?? item?.price ?? 0,
+        createdAt: item?.CreatedAt ?? item?.createdAt ?? "",
+        avgRating: item?.AvgRating ?? item?.avgRating ?? null,
+      }));
+      
+      setter(mapped);
+    } catch (err: any) {
+      setError(err.message);
+    }
   }
-}
 
   useEffect(() => {
     setLoading(true);
