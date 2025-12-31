@@ -80,14 +80,14 @@ export const HomePage: React.FC = () => {
           const avgRating = reviews.length
             ? reviews.reduce((sum: number, r: any) => sum + (Number(r.Rating ?? r.rating ?? 0) || 0), 0) /
               reviews.length
-            : null;
+            : (course?.AvgRating ?? course?.avgRating ?? null);
 
           const mapped = {
             courseId: Number(course?.CourseId ?? course?.courseId ?? course?.Id ?? course?.id ?? 0),
             title: course?.Title ?? course?.title ?? "Untitled course",
             price: Number(course?.Price ?? course?.price ?? 0),
             createdAt: course?.CreatedAt ?? course?.createdAt ?? "",
-            avgRating,
+            avgRating: avgRating !== null ? Number(avgRating) : null,
           } as SimpleCourse;
           
           console.log("Mapped course:", mapped);
