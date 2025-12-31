@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Motive.Backend.Controllers
 {
@@ -9,21 +9,47 @@ namespace Motive.Backend.Controllers
     [Route("api/[controller]")]
     public class AiController : ControllerBase
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public AiController()
+        public AiController(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = new HttpClient();
+            _httpClientFactory = httpClientFactory;
         }
 
-        [HttpGet("get-ai-result")]
-        public async Task<IActionResult> CallFastApi(string query)
+        [HttpPost("recommendations")]
+        public async Task<IActionResult> GetRecommendations([FromBody] int userId)
         {
-            // 1. CALL: Send request to FastAPI running on localhost:8000
-            // We pass the data in the URL query string
-            var response = await _httpClient.GetStringAsync($"http://127.0.0.1:8000/predict?input_val={query}");
+            // 1. Create the client configured in Program.cs
+            var client = _httpClientFactory.CreateClient("PythonAiService");
 
-            // 2. RECEIVE: Return the Python JSON back to the user
-            return Ok(response);
+            // 2. Prepare the data for Python (matches class UserRequest in Python)
+            var payload = new { user_id = userId };
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(payload),
+                Encoding.UTF8,
+                "application/json");
+
+            try
+            {
+                // 3. Send POST to Python endpoint '/get-ids'
+                var response = await client.PostAsync("get-ids", jsonContent);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode((int)response.StatusCode, "Error from Python Service");
+                }
+
+                // 4. Read the result
+                // Python returns: {"status": "success", "ids": [101, 102]}
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+
+                // 5. Return directly to Frontend
+                return Content(jsonResponse, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
         }
     }
+}
