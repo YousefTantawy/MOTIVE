@@ -4,7 +4,15 @@ using MotiveBackend.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = "Server=motivedatabase.mysql.database.azure.com;Database=ecen424_db_project;User ID=YousefTantawy;Password=el7amamsyel7amamsy!!;SslMode=Required;";
+var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    connectionString = "Server=localhost;Database=ecen424_db_project;User ID=root;Password=rootpassword;";
+}
+
+builder.Services.AddDbContext<Ecen424DbProjectContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddDbContext<Ecen424DbProjectContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
