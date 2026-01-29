@@ -13,4 +13,4 @@ services:
       MYSQL_DATABASE: 
     volumes:
       # This loads your schema automatically so the stranger gets a working DB
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./motiveDB.sql:/docker-entrypoint-initdb.d/motiveDB.sql
