@@ -62,12 +62,6 @@ echo "Servers are running!"
 
 echo "--------------------------------------------------"
 
-echo "Website: https://motive.italynorth.cloudapp.azure.com"
-
-echo "Swagger: https://motive.italynorth.cloudapp.azure.com/swagger/index.html"
-
-echo "--------------------------------------------------"
-
 echo "To view logs, type:"
 
 echo "  screen -r motive-backend"
