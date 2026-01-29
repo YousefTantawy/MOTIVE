@@ -1,0 +1,16 @@
+services:
+  motive-app:
+    build: .
+    environment:
+      - DB_CONNECTION_STRING=Server=motive-db;Database=ecen424_db_project;User ID=root;Password=rootpassword;
+    depends_on:
+      - motive-db
+
+  motive-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: 
+    volumes:
+      # This loads your schema automatically so the stranger gets a working DB
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
