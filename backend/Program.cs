@@ -4,18 +4,13 @@ using MotiveBackend.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-
-if (string.IsNullOrEmpty(connectionString))
-{
-    connectionString = "Server=localhost;Database=ecen424_db_project;User ID=root;Password=rootpassword;";
-}
+string connectionString = "Server=motive-db;Database=ecen424_db_project;User ID=root;Password=motivepassword123;SslMode=None;AllowPublicKeyRetrieval=True;";
 
 builder.Services.AddDbContext<Ecen424DbProjectContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21))));
 
 builder.Services.AddDbContext<Ecen424DbProjectContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21))));
 
 builder.Services.AddCors(options =>
 {

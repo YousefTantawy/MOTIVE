@@ -1,16 +1,30 @@
+version: '3.8'
+
 services:
-  motive-app:
+  motive-stack:
     build: .
+    container_name: motive_stack_1
+    ports:
+      - "5173:5173" # Frontend accessible to Host
+      - "5168:5168" # Backend accessible to Host
+      - "5171:5171" # AI accessible to Host
     environment:
-      - DB_CONNECTION_STRING=Server=motive-db;Database=ecen424_db_project;User ID=root;Password=rootpassword;
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - motive-db
 
   motive-db:
     image: mysql:8.0
+    container_name: motive-db
+    ports:
+      - "3306:3306" # Expose DB to Host (Optional, but good for debugging)
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: 
+      MYSQL_ROOT_PASSWORD: "motivepassword123"
+      MYSQL_DATABASE: ecen424_db_project
+      MYSQL_ROOT_HOST: "%"
     volumes:
-      # This loads your schema automatically so the stranger gets a working DB
-      - ./motiveDB.sql:/docker-entrypoint-initdb.d/motiveDB.sql
+      - motive-db-data:/var/lib/mysql
+      - ./database/motiveDB.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  motive-db-data:
