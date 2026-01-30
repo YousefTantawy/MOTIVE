@@ -1,5 +1,5 @@
 // src/lib/axios.ts
-const API_BASE_URL = "http://4.232.177.165:5168/api";
+const API_BASE_URL = "http://127.0.0.1:5168/api";
 
 export const axiosInstance = {
   async request<T>(url: string, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET", body?: any): Promise<T> {

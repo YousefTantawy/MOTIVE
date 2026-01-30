@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using MotiveBackend.Data;
+using MotiveBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string connectionString = "Server=motive-db;Database=ecen424_db_project;User ID=root;Password=motivepassword123;SslMode=None;AllowPublicKeyRetrieval=True;";
+string connectionString = "Server=127.0.0.1;Database=ecen424_db_project;User ID=root;Password=motivepassword;SslMode=None;AllowPublicKeyRetrieval=True;";
 
 builder.Services.AddDbContext<Ecen424DbProjectContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21))));

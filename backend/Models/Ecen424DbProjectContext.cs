@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using MotiveBackend.Models;
-using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
-namespace MotiveBackend.Data;
+namespace MotiveBackend.Models;
 
 public partial class Ecen424DbProjectContext : DbContext
 {
-    public Ecen424DbProjectContext()
-    {
-    }
-
     public Ecen424DbProjectContext(DbContextOptions<Ecen424DbProjectContext> options)
         : base(options)
     {

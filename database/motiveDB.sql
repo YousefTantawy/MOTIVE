@@ -1,10 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `ecen424_db_project` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `ecen424_db_project`;
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: motivedatabase.mysql.database.azure.com    Database: ecen424_db_project
+-- Host: 127.0.0.1    Database: ecen424_db_project
 -- ------------------------------------------------------
--- Server version	8.0.42-azure
+-- Server version	8.0.45
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -833,7 +831,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `view_most_enrolled` AS select `c`.`course_id` AS `course_id`,`c`.`title` AS `title`,`c`.`price` AS `price`,`c`.`created_at` AS `created_at`,coalesce(avg(`r`.`rating_value`),0) AS `avg_rating` from ((`courses` `c` left join `enrollments` `e` on((`c`.`course_id` = `e`.`course_id`))) left join `user_reviews` `r` on((`c`.`course_id` = `r`.`course_id`))) group by `c`.`course_id`,`c`.`title`,`c`.`price`,`c`.`created_at` order by count(distinct `e`.`enrollment_id`) desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -851,7 +849,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `view_most_recent` AS select `c`.`course_id` AS `course_id`,`c`.`title` AS `title`,`c`.`price` AS `price`,`c`.`created_at` AS `created_at`,coalesce(avg(`r`.`rating_value`),0) AS `avg_rating` from (`courses` `c` left join `user_reviews` `r` on((`c`.`course_id` = `r`.`course_id`))) group by `c`.`course_id`,`c`.`title`,`c`.`price`,`c`.`created_at` order by `c`.`created_at` desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -869,7 +867,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `view_most_trending` AS select `c`.`course_id` AS `course_id`,`c`.`title` AS `title`,`c`.`price` AS `price`,`c`.`created_at` AS `created_at`,coalesce(avg(`r`.`rating_value`),0) AS `avg_rating` from ((`courses` `c` left join `enrollments` `e` on((`c`.`course_id` = `e`.`course_id`))) left join `user_reviews` `r` on((`c`.`course_id` = `r`.`course_id`))) group by `c`.`course_id`,`c`.`title`,`c`.`price`,`c`.`created_at` order by (((count(distinct `e`.`enrollment_id`) * 1.0) + (coalesce(avg(`r`.`rating_value`),0) * 10)) + (case when (`c`.`created_at` >= (now() - interval 30 day)) then 20 else 0 end)) desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -887,7 +885,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `view_top_rated` AS select `c`.`course_id` AS `course_id`,`c`.`title` AS `title`,`c`.`price` AS `price`,`c`.`created_at` AS `created_at`,coalesce(avg(`r`.`rating_value`),0) AS `avg_rating` from (`courses` `c` left join `user_reviews` `r` on((`c`.`course_id` = `r`.`course_id`))) group by `c`.`course_id`,`c`.`title`,`c`.`price`,`c`.`created_at` order by `avg_rating` desc,count(`r`.`review_id`) desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -902,4 +900,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-25 22:41:16
+-- Dump completed on 2026-01-30 21:17:12
