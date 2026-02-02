@@ -4,13 +4,8 @@ services:
   motive-stack:
     build: .
     container_name: motive_stack_1
-    ports:
-      - "5173:5173" # Frontend
-      - "5168:5168" # Backend
-      - "5171:5171" # AI
+    network_mode: host
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      # Use the container name 'motive-db' as the server address
       - ConnectionStrings__DefaultConnection=Server=motive-db;Port=3306;Database=ecen424_db_project;User ID=root;Password=motivepassword;SslMode=None;AllowPublicKeyRetrieval=True;
     depends_on:
       - motive-db
@@ -18,16 +13,9 @@ services:
   motive-db:
     image: mysql:8.0
     container_name: motive-db
-    ports:
-      - "3306:3306" 
+    network_mode: host 
     environment:
-      # This sets the root password for the person running your code
       - MYSQL_ROOT_PASSWORD=motivepassword
       - MYSQL_DATABASE=ecen424_db_project
     volumes:
-      # This ensures their DB starts with your tables and views already in it
       - ./database/motiveDB.sql:/docker-entrypoint-initdb.d/init.sql
-      - motive-db-data:/var/lib/mysql
-
-volumes:
-  motive-db-data:
