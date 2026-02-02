@@ -94,7 +94,7 @@ The application is configured to run in **Host Mode**.
     sudo docker-compose restart motive-stack
     ```
 ### Database Explanation
-* [**Click here for the full Database Documentation & Schema**]()
+* [**Click here for the full Database Documentation & Schema**](https://github.com/YousefTantawy/MOTIVE/blob/main/database/databaseReadMe.md)
 ---
 
 ## 👥 Contributors
@@ -107,4 +107,5 @@ The application is configured to run in **Host Mode**.
 * Add more monitoring features, specifically for ai-service
 * Add more DevOps related concepts
 * Utilize GitHubs hosting services to make this into a fully fledged website
+
 
