@@ -25,6 +25,7 @@ All services run within a unified environment sharing the same network namespace
     * `.NET Web API` (Port 5168)
     * `React Frontend` (Port 5173)
     * `Python AI Engine` (Port 5171)
+    * `mySql Database` (Port 3060)
 * **`motive-db`**: A dedicated MySQL 8.0 container with persistent volume storage.
 
 ---
@@ -66,7 +67,7 @@ This project is fully containerized. You do not need to install .NET, Node, or P
 | Service | URL |
 | :--- | :--- |
 | **Web App** | `http://localhost:5173` |
-| **API Swagger** | `http://localhost:5168/swagger` |
+| **API Swagger** | `http://localhost:5168/swagger/index.html` |
 
 ---
 
@@ -92,7 +93,8 @@ The application is configured to run in **Host Mode**.
     ```bash
     sudo docker-compose restart motive-stack
     ```
-
+### Database Explanation
+* [**Click here for the full Database Documentation & Schema**]()
 ---
 
 ## 👥 Contributors
@@ -105,3 +107,4 @@ The application is configured to run in **Host Mode**.
 * Add more monitoring features, specifically for ai-service
 * Add more DevOps related concepts
 * Utilize GitHubs hosting services to make this into a fully fledged website
+
