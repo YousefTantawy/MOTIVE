@@ -6,7 +6,7 @@ services:
     container_name: motive_stack_1
     network_mode: host
     environment:
-      - ConnectionStrings__DefaultConnection=Server=motive-db;Port=3306;Database=ecen424_db_project;User ID=root;Password=motivepassword;SslMode=None;AllowPublicKeyRetrieval=True;
+      - ConnectionStrings__DefaultConnection=Server=127.0.0.1;Port=3306;Database=ecen424_db_project;User ID=root;Password=motivepassword;SslMode=None;AllowPublicKeyRetrieval=True;
     depends_on:
       - motive-db
 
