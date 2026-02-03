@@ -9,9 +9,6 @@ string connectionString = "Server=127.0.0.1;Database=ecen424_db_project;User ID=
 builder.Services.AddDbContext<Ecen424DbProjectContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21))));
 
-builder.Services.AddDbContext<Ecen424DbProjectContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21))));
-
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -53,3 +50,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
