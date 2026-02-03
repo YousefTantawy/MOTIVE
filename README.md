@@ -106,6 +106,7 @@ The application is configured to run in **Host Mode**.
 ## ⚙️ Future updates
 * Add more monitoring features, specifically for ai-service
 * Add more DevOps related concepts
-* Utilize GitHubs hosting services to make this into a fully fledged website
+* Re-Work the backend to fit more industrial standards
+
 
 
