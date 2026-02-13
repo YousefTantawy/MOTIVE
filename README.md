@@ -107,6 +107,8 @@ The application is configured to run in **Host Mode**.
 * Add more monitoring features, specifically for ai-service
 * Add more DevOps related concepts
 * Re-Work the backend to fit more industrial standards
+* Implement JWT tokens for more security
+
 
 
 
