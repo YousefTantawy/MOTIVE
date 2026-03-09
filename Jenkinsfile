@@ -20,11 +20,9 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                echo 'Verifying the API is actually alive...'
-                // This is the exact curl command you just ran!
-                // We give it a few seconds to boot up first.
-                sh 'sleep 10'
-                sh 'curl http://172.17.0.1:5168/api/Courses/recent'
+                echo 'Verifying the API is actually alive via docker exec...'
+                sleep 10
+                sh 'docker exec motive_stack_1 curl -s -f http://localhost:8080/api/Courses/recent'
             }
         }
     }
