@@ -24,7 +24,7 @@ pipeline {
                 // This is the exact curl command you just ran!
                 // We give it a few seconds to boot up first.
                 sh 'sleep 10'
-                sh 'curl http://host.docker.internal:5168/api/Courses/recent'
+                sh 'curl http://172.17.0.1:5168/api/Courses/recent'
             }
         }
     }
