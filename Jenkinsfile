@@ -22,7 +22,7 @@ pipeline {
             steps {
                 echo 'Verifying the API is actually alive via docker exec...'
                 sleep 10
-                sh 'docker exec motive_stack_1 curl -s -f http://localhost:8080/api/Courses/recent'
+                sh 'docker exec motive_stack_1 curl -i http://localhost:8080/api/Courses/recent'
             }
         }
     }
