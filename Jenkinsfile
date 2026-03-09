@@ -12,7 +12,6 @@ pipeline {
         stage('Build & Launch') {
             steps {
                 echo 'Automating the Docker Compose build...'
-                // Try with the hyphen version which is standard on older Linux/Jenkins setups
                 sh 'docker-compose down' // Stop any old versions first
                 sh 'docker-compose up -d --build'
             }
@@ -20,7 +19,7 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                echo 'Verifying the API is actually alive via docker exec...'
+                echo 'Verifying an API is actually alive via docker exec...'
                 sleep 10
                 sh 'docker exec motive_stack_1 curl -i http://localhost:8080/api/Courses/recent'
             }
