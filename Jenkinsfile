@@ -12,8 +12,9 @@ pipeline {
         stage('Build & Launch') {
             steps {
                 echo 'Automating the Docker Compose build...'
-                // We use -d so Jenkins doesn't hang waiting for logs
-                sh 'docker compose up -d --build'
+                // Try with the hyphen version which is standard on older Linux/Jenkins setups
+                sh 'docker-compose down' // Stop any old versions first
+                sh 'docker-compose up -d --build'
             }
         }
 
