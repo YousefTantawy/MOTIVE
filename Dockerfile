@@ -12,6 +12,9 @@ WORKDIR /app
 
 # 4. Pip install
 COPY ai-service/requirements.txt ./ai-service/requirements.txt
+RUN pip3 install torch torchvision torchaudio \
+    --index-url https://download.pytorch.org/whl/cpu \
+    --break-system-packages
 RUN pip3 install -r ai-service/requirements.txt --break-system-packages
 
 # 5. Copy all your files into the container
