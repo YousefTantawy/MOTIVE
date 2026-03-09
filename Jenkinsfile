@@ -23,7 +23,8 @@ pipeline {
                 echo 'Verifying the API is actually alive...'
                 // This is the exact curl command you just ran!
                 // We give it a few seconds to boot up first.
-                sh 'sleep 10 && curl http://localhost:5168/api/Courses/recent'
+                sh 'sleep 10'
+                sh 'curl http://host.docker.internal:5168/api/Courses/recent'
             }
         }
     }
