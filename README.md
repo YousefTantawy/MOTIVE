@@ -41,7 +41,7 @@ This project is fully containerized. You do not need to install .NET, Node, or P
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/YourUsername/MOTIVE.git](https://github.com/YourUsername/MOTIVE.git)
+    git clone https://github.com/YousefTantawy/MOTIVE
     cd MOTIVE
     ```
 
