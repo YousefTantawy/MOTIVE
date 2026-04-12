@@ -11,7 +11,7 @@ Date: April 2026
 import logging
 import pandas as pd
 from typing import Tuple, List
-from src.utils.logger import setup_logging
+from course_recommender.src.utils.logger import setup_logging
 
 # Initialize environment and logging
 setup_logging()
