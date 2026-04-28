@@ -110,7 +110,7 @@ class DatabaseConnection:
             if connection and connection.is_connected():
                 connection.close()
     
-    def fetch_column(self, query: str) -> list[int] | None:
+    def fetch_column(self, query: str): #-> list[int] | None:
         """Execute a SQL query and return the results as a list of integers.
 
         This method manages the full lifecycle of a database request:
@@ -149,7 +149,7 @@ class DatabaseConnection:
                 logger.warning(self.ZERO_ROWS_WARNING_MSG) 
                 return []
             # 3. Convert the dictionary into a list
-            return [row[0] for row in data]
+            return [list(row.values())[0] for row in data]
         
         except Exception as e:
             # Log the specific exception details before raising a custom error

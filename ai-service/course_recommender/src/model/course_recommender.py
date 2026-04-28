@@ -52,7 +52,7 @@ class CourseRecommender:
     """Error message raised when prediction/saving is attempted before embedding generation."""
 
     # --- Constants for artifact management ---
-    DEFAULT_ARTIFACT_DIR = 'models'
+    DEFAULT_ARTIFACT_DIR = 'course_recommender/artifacts'
     """Default directory for saving generated embeddings."""
     
     ARTIFACT_EXTENSION = '.joblib'
