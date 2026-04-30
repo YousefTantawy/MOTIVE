@@ -116,4 +116,4 @@ async def get_course_recommendation_ids(request: UserRequest) -> Dict[str, Any]:
 
 if __name__ == '__main__':
     # Run the application locally for development
-    uvicorn.run("course_recommender.src.router:app", host="127.0.0.1", port=5171, reload=True)
+    uvicorn.run("course_recommender.src.router:app", host="127.0.0.1", port=8000, reload=True)
