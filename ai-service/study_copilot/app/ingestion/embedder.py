@@ -12,11 +12,12 @@ import logging
 from typing import List
 from sentence_transformers import SentenceTransformer
 from study_copilot.app.utils.logger import setup_logging
+from study_copilot.app.core.config import Settings
 
 # Initialize environment and logging
 setup_logging()
 logger = logging.getLogger(__name__)
-
+settings = Settings()
 
 class DocumentEmbedder:
     """Handles the conversion of text chunks into semantic embeddings.
@@ -25,21 +26,15 @@ class DocumentEmbedder:
     and providing a robust interface to process batches of text into vectors.
     """
 
-    # --- Constants for Configuration and Error Handling ---
-    DEFAULT_MODEL_NAME = 'all-MiniLM-L6-v2'
-    """The default lightweight transformer model used for generating embeddings."""
-
+    # --- Constants for Error Handling ---
     ERROR_INVALID_TYPE = "Invalid input type. Expected a list of strings."
     """Error message raised when a non-list object is passed to the embedder."""
 
-    def __init__(self, model_name: str = DEFAULT_MODEL_NAME) -> None:
-        """Initializes the embedder and loads the specified transformer model.
+    def __init__(self) -> None:
+        """Initializes the embedder and loads the specified transformer model."""
 
-        Args:
-            model_name (str): The HuggingFace model identifier to load.
-        """
         logger.info(f"Loading embedding model: {model_name}...")
-        self.model_name = model_name
+        self.model_name = settings.EMBEDDING_MODEL_NAME
         self.model = SentenceTransformer(self.model_name)
         logger.info("Embedding model loaded successfully.")
 

@@ -12,11 +12,12 @@ import logging
 from typing import List
 from langchain_text_splitters import MarkdownTextSplitter
 from study_copilot.app.utils.logger import setup_logging
+from study_copilot.app.core.config import Settings
 
-# Initialize environment and logging
+# Initialize logging and configuration
 setup_logging()
 logger = logging.getLogger(__name__)
-
+settings = Settings()
 
 class DocumentSplitter:
     """Handles the chunking of markdown text documents.
@@ -26,29 +27,14 @@ class DocumentSplitter:
     when feeding data into embedding models or vector databases.
     """
 
-    # --- Constants for Configuration and Error Handling ---
-    DEFAULT_CHUNK_SIZE = 500
-    """The default maximum number of characters per chunk."""
-
-    DEFAULT_CHUNK_OVERLAP = 25
-    """The default number of characters chunks should overlap to preserve context."""
-
+    # --- Constants for Error Handling ---
     ERROR_INVALID_TYPE = "Invalid input for text splitting. Expected a string."
     """Error message raised when a non-string object is passed to the splitter."""
 
-    def __init__(
-        self, 
-        chunk_size: int = DEFAULT_CHUNK_SIZE, 
-        chunk_overlap: int = DEFAULT_CHUNK_OVERLAP
-    ) -> None:
-        """Initializes the document splitter with specified dimensions.
-
-        Args:
-            chunk_size (int): The maximum size of each text chunk.
-            chunk_overlap (int): The amount of text overlap between consecutive chunks.
-        """
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
+    def __init__(self) -> None:
+        """Initializes the document splitter with specified dimensions."""
+        self.chunk_size = settings.CHUNK_SIZE
+        self.chunk_overlap = settings.CHUNK_OVERLAP
         
         # Initialize the underlying LangChain utility
         self.splitter = MarkdownTextSplitter(
