@@ -40,7 +40,7 @@ class DocumentRepository:
         """Initializes the repository with a database connection."""
         self.db = DatabaseConnection()
 
-    def get_pdf_link(self, pdf_id: int) -> Optional[str]:
+    def get_document(self, pdf_id: int) -> Optional[str]:
         """Retrieves the file path (link) for a given PDF document ID.
 
         Args:
