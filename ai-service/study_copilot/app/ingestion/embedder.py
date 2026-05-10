@@ -33,8 +33,8 @@ class DocumentEmbedder:
     def __init__(self) -> None:
         """Initializes the embedder and loads the specified transformer model."""
 
-        logger.info(f"Loading embedding model: {model_name}...")
         self.model_name = settings.EMBEDDING_MODEL_NAME
+        logger.info(f"Loading embedding model: {self.model_name}...")
         self.model = SentenceTransformer(self.model_name)
         logger.info("Embedding model loaded successfully.")
 
