@@ -1,6 +1,24 @@
+# --- API & Web Framework ---
 fastapi
 uvicorn
-mysql-connector-python
+pydantic
+pydantic-settings[dotenv]
+
+# --- Machine Learning & NLP ---
 sentence-transformers
-scikit-learn
 numpy
+pandas
+scikit-learn
+joblib
+
+# --- Vector Database & LLM Integration ---
+chromadb
+langchain-community
+langchain-text-splitters
+
+# --- Document Processing ---
+gdown
+pymupdf4llm
+
+# --- Relational Database ---
+mysql-connector-python

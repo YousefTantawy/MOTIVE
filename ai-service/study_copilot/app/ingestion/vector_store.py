@@ -22,11 +22,12 @@ from chromadb.api.models.Collection import Collection
 
 # 3. Local Application Imports
 from study_copilot.app.utils.logger import setup_logging
-from study_copilot.app.core.config import Settings as AppSettings
+from study_copilot.app.core.config import get_settings
 
-# Initialize environment and logging
+# Initialize environment, logging and config
 setup_logging()
 logger = logging.getLogger(__name__)
+settings = get_settings()
 
 # Base path calculation for local database routing
 BASE_ENV = Path(__file__).resolve().parent.parent.parent
@@ -49,12 +50,10 @@ class VectorStore:
 
     def __init__(self) -> None:
         """Initializes the vector store client based on configuration mode."""
-
-        self.settings = AppSettings()
-        self.collection_name: str = self.settings.COLLECTION_NAME
+        self.collection_name: str = settings.COLLECTION_NAME
         
         # Determine execution mode and initialize the corresponding client
-        db_mode: str = self.settings.VECTOR_DB_MODE.lower()
+        db_mode: str = settings.VECTOR_DB_MODE.lower()
         
         if db_mode == self.MODE_LOCAL:
             self._init_local_client()
@@ -67,7 +66,7 @@ class VectorStore:
 
     def _init_local_client(self) -> None:
         """Sets up a persistent local ChromaDB client."""
-        vector_db_path = BASE_ENV / self.settings.VECTOR_DB_DIR
+        vector_db_path = BASE_ENV / settings.VECTOR_DB_DIR
         
         try:
             # Ensure the target directory exists before initializing Chroma
@@ -88,12 +87,12 @@ class VectorStore:
         try:
             # Configure HTTP client with authentication credentials
             chroma_settings = ChromaSettings(
-                chroma_client_auth_credentials=self.settings.VECTOR_DB_API_KEY
+                chroma_client_auth_credentials=settings.VECTOR_DB_API_KEY
             )
             
             self.client: ClientAPI = chromadb.HttpClient(
-                host=self.settings.VECTOR_DB_HOST,
-                port=self.settings.VECTOR_DB_PORT,
+                host=settings.VECTOR_DB_HOST,
+                port=settings.VECTOR_DB_PORT,
                 settings=chroma_settings
             )
             self.collection: Collection = self.client.get_or_create_collection(name=self.collection_name)

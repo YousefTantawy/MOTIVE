@@ -58,7 +58,7 @@ class DatabaseConnection:
         self.db_name = os.getenv('DB_NAME')
         self.db_password = os.getenv('DB_PASSWORD')
 
-    def fetch_dataframe(self, query: str) -> pd.DataFrame | None:
+    def fetch_dataframe(self, query: str, params: tuple = None) -> pd.DataFrame | None:
         """Execute a SQL query and return the results as a Pandas DataFrame.
 
         This method manages the full lifecycle of a database request:
@@ -67,6 +67,7 @@ class DatabaseConnection:
 
         Args:
             query (str): The SQL query string to be executed.
+            params (tuple): ensures the input is server secure.
 
         Returns:
             pd.DataFrame: A DataFrame containing the fetched data.
@@ -88,7 +89,7 @@ class DatabaseConnection:
 
             # 2. Use a dictionary cursor to map column names to values
             with connection.cursor(dictionary=self.DICTIONARY_CURSOR) as cursor:
-                cursor.execute(query)
+                cursor.execute(query, params)
                 data = cursor.fetchall()
 
             logger.info(self.CONNECTION_SUCCESS_MSG)
@@ -110,7 +111,7 @@ class DatabaseConnection:
             if connection and connection.is_connected():
                 connection.close()
     
-    def fetch_column(self, query: str): #-> list[int] | None:
+    def fetch_column(self, query: str, params: tuple) -> list[str | int] | None:
         """Execute a SQL query and return the results as a list of integers.
 
         This method manages the full lifecycle of a database request:
@@ -119,6 +120,7 @@ class DatabaseConnection:
 
         Args:
             query (str): The SQL query string to be executed.
+            params (tuple): ensures the input is server secure
 
         Returns:
             list[int]: A list containing the fetched data.
@@ -139,7 +141,7 @@ class DatabaseConnection:
 
             # 2. Use a dictionary cursor to map column names to values
             with connection.cursor(dictionary=self.DICTIONARY_CURSOR) as cursor:
-                cursor.execute(query)
+                cursor.execute(query, params)
                 data = cursor.fetchall()
 
             logger.info(self.CONNECTION_SUCCESS_MSG)
@@ -151,6 +153,59 @@ class DatabaseConnection:
             # 3. Convert the dictionary into a list
             return [list(row.values())[0] for row in data]
         
+        except Exception as e:
+            # Log the specific exception details before raising a custom error
+            logger.exception(f"{self.ERROR_PREFIX}{e}")
+            raise ConnectionError(f"Failed to fetch data from database: {e}")
+
+        finally:
+            # 4. Ensure the connection is released back to the system
+            if connection and connection.is_connected():
+                connection.close()
+                
+    def fetch_scalar(self, query: str, params: tuple) -> str | int | None:
+        """Execute a SQL query and return the results as a Pandas DataFrame.
+
+        This method manages the full lifecycle of a database request:
+        establishing a connection, executing the query via a dictionary 
+        cursor, and ensuring the connection is closed.
+
+        Args:
+            query (str): The SQL query string to be executed.
+            params (tuple): ensures the input is server secure.
+
+        Returns:
+            returns 
+
+        Raises:
+            ConnectionError: If there is an issue connecting to the database 
+                             or executing the query.
+        """
+        connection = None
+        
+        try:
+            # 1. Establish the database connection
+            connection = mysql.connector.connect(
+                host=self.db_host,
+                user=self.db_user,
+                database=self.db_name,
+                password=self.db_password
+            )
+
+            # 2. Use a dictionary cursor to map column names to values
+            with connection.cursor(dictionary=self.DICTIONARY_CURSOR) as cursor:
+                cursor.execute(query, params)
+                data = cursor.fetchone()
+
+            logger.info(self.CONNECTION_SUCCESS_MSG)
+            
+            # check data in rows 
+            if not data:
+                logger.warning(self.ZERO_ROWS_WARNING_MSG) 
+                return None
+            # 3. return the data
+            return list(data.values())[0]
+
         except Exception as e:
             # Log the specific exception details before raising a custom error
             logger.exception(f"{self.ERROR_PREFIX}{e}")

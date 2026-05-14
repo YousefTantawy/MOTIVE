@@ -23,6 +23,26 @@ class Settings(BaseSettings):
     not found, the safe fallbacks defined here are used.
     """
 
+# --- Logging Configuration ---
+    LOG_LEVEL: str = "INFO"
+    """The threshold for logging output (e.g., 'DEBUG', 'INFO', 'WARNING')."""
+    
+    LOG_FILE: Path = Path("logs/app.log")
+    """The file path where application logs will be saved."""
+    
+    # --- Relational Database Configuration ---
+    DB_HOST: str | None = None
+    """The hostname or IP address of the relational database."""
+    
+    DB_USER: str | None = None
+    """The username for database authentication."""
+    
+    DB_NAME: str | None = None
+    """The specific name of the primary database to connect to."""
+    
+    DB_PASSWORD: str | None = None 
+    """The secret password for database authentication."""
+    
     # --- Vector Database Configuration ---
     VECTOR_DB_MODE: str = 'local'
     """Deployment mode for ChromaDB. Must be 'local' or 'cloud'."""
@@ -49,11 +69,18 @@ class Settings(BaseSettings):
     """The HuggingFace transformer model used for semantic embeddings."""
 
     # --- Document Splitting Configuration ---
-    CHUNK_SIZE: int = 500
+    CHUNK_SIZE: int = 1000
     """Maximum character count for a single document chunk."""
 
-    CHUNK_OVERLAP: int = 25
+    CHUNK_OVERLAP: int = 50
     """Number of characters to overlap between consecutive chunks."""
+
+    # --- LLM Engine Configuration ---
+    LLM_MODEL_NAME: str = 'llama3'
+    """The specific language model to be invoked (e.g., 'llama3')."""
+    
+    LLM_HOST: str = "http://localhost:11434"
+    """The URL where the local or remote LLM service is hosted."""
 
     # --- Pydantic Configuration ---
     # model_config instructs Pydantic on how to load external variables
