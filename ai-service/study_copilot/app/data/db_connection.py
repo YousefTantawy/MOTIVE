@@ -8,18 +8,17 @@ Author: Hassan Darwish
 Date: April 2026
 """
 
-import os
 import logging
-from dotenv import load_dotenv
 import mysql.connector
 import pandas as pd
 from typing import Any
 from study_copilot.app.utils.logger import setup_logging
+from study_copilot.app.core.config import get_settings
 
-# Initialize environment and logging
+# Initialize environment, logging and settings
 setup_logging()
 logger = logging.getLogger(__name__)
-load_dotenv()
+settings = get_settings()
 
 class DatabaseConnection:
     """Handles connections to a MySQL database and facilitates data retrieval.
@@ -51,13 +50,13 @@ class DatabaseConnection:
     def __init__(self) -> None:
         """Initializes the DatabaseConnection with credentials from environment.
         
-        Loads configuration from the system environment variables. It is 
+        Loads configuration from the system config. It is 
         expected that DB_HOST, DB_USER, DB_NAME, and DB_PASSWORD are set.
         """
-        self.db_host = os.getenv('DB_HOST')
-        self.db_user = os.getenv('DB_USER')
-        self.db_name = os.getenv('DB_NAME')
-        self.db_password = os.getenv('DB_PASSWORD')
+        self.db_host = settings.DB_HOST
+        self.db_user = settings.DB_USER
+        self.db_name = settings.DB_NAME
+        self.db_password = settings.DB_PASSWORD
 
     def fetch_dataframe(self, query: str, params: tuple = None) -> pd.DataFrame | None:
         """Execute a SQL query and return the results as a Pandas DataFrame.

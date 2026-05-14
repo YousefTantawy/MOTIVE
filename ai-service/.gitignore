@@ -1,5 +1,15 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.pyc
 .env
 venv/
 .vscode/
+
+# Ignore the vector data directory
+study_copilot/data
+
+# pytests cach
+.pytest_cache
+
+# current logs
+logs/

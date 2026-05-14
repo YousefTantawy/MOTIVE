@@ -32,7 +32,7 @@ class DocumentRepository:
     QUERY_GET_FILE_PATH = """
         SELECT file_path
         FROM course_materials
-        WHERE material = %s;
+        WHERE material_id = %s;
     """
     """SQL query to fetch the file path of a specific material by its ID."""
 

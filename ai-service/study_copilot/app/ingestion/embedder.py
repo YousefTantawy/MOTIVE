@@ -12,12 +12,12 @@ import logging
 from typing import List
 from sentence_transformers import SentenceTransformer
 from study_copilot.app.utils.logger import setup_logging
-from study_copilot.app.core.config import Settings
+from study_copilot.app.core.config import get_settings
 
 # Initialize environment and logging
 setup_logging()
 logger = logging.getLogger(__name__)
-settings = Settings()
+settings = get_settings()
 
 class DocumentEmbedder:
     """Handles the conversion of text chunks into semantic embeddings.
