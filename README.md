@@ -1,114 +1,136 @@
-# 🎓 MOTIVE - Intelligent Online Learning Platform
+# MOTIVE - Intelligent Online Learning Platform
 
 > **ECEN424 Database Design Project**
 > An advanced e-learning platform featuring real-time course management, AI-driven recommendations, and a modern interactive frontend.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Component | Technology | Description |
 | :--- | :--- | :--- |
 | **Frontend** | ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB) **Vite** | Interactive UI with Hot Module Replacement |
 | **Backend** | ![.NET](https://img.shields.io/badge/.NET%2010-512BD4?style=flat&logo=dotnet&logoColor=white) **ASP.NET Core** | High-performance REST API |
-| **AI Service** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) | Machine Learning service for course recommendations |
-| **Database** | ![MySQL](https://img.shields.io/badge/MySQL-000000?style=flat&logo=mysql&logoColor=white) | Relational Data Store (Normalized Schema) |
-| **DevOps** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white) | Containerized Monolith Architecture |
+| **AI Service** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) **FastAPI** | Course recommendations + RAG study assistant |
+| **Database** | ![MySQL](https://img.shields.io/badge/MySQL-000000?style=flat&logo=mysql&logoColor=white) | Relational data store (normalized schema) |
+| **DevOps** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) | Multi-container bridge network via Docker Compose |
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
-All services run within a unified environment sharing the same network namespace in Docker(`host` mode), ensuring zero-latency communication between the Backend API and the Database.
+Services run as isolated containers connected through Docker's bridge network. Each service communicates using its container name as a hostname — no hardcoded IPs.
 
-* **`motive-stack`**: A single robust container orchestrating:
-    * `.NET Web API` (Port 5168)
-    * `React Frontend` (Port 5173)
-    * `Python AI Engine` (Port 5171)
-    * `mySql Database` (Port 3060)
-* **`motive-db`**: A dedicated MySQL 8.0 container with persistent volume storage.
+```
+motive-network (bridge)
+├── motive-frontend   → port 5173
+├── motive-backend    → port 5168
+├── motive-ai         → port 5171
+└── motive-db         → port 3306
+```
+
+**Communication flow:**
+- Browser → `motive-frontend:5173`
+- Frontend (browser) → `motive-backend:5168`
+- Backend → `motive-db:3306` (via service name)
+- Backend → `motive-ai:5171` (via service name)
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
-* Docker & Docker Compose
-* Git
+- Docker & Docker Compose
+- Git
 
 ### Installation & Running
-This project is fully containerized. You do not need to install .NET, Node, or Python locally.
 
-1.  **Clone the Repository**
+1. **Clone the repository**
     ```bash
     git clone https://github.com/YousefTantawy/MOTIVE
     cd MOTIVE
     ```
 
-2.  **Launch the Application**
+2. **Launch all services**
     ```bash
-    sudo docker-compose up -d --build
+    DOCKER_BUILDKIT=1 docker compose up --build
     ```
+    > `DOCKER_BUILDKIT=1` enables pip layer caching — packages are only downloaded once even if dependencies change.
 
-3.  **Verify Running Services**
-    The application uses a startup script (`run.sh`) to manage processes. Check the status:
-    ```bash
-    sudo docker logs motive_motive-stack_1
+3. **Wait for startup**
+
+    The AI service downloads the embedding model on first run (~90MB). Watch for:
     ```
-    In the case in which the user may want to check the logs of each service individually,
-    ```bash
-    sudo docker exec -it motive_motive-stack_1 bash
-    screen -ls
-    screen -r (id of screen)
+    motive-ai | INFO: Application startup complete.
     ```
-    and to exit screen: ctrl A then D
+    before hitting the recommendations endpoint.
 
 ### Access Points
+
 | Service | URL |
 | :--- | :--- |
 | **Web App** | `http://localhost:5173` |
 | **API Swagger** | `http://localhost:5168/swagger/index.html` |
+| **AI Docs** | `http://localhost:5171/docs` |
 
 ---
 
-## ⚡ Key Features
+## Key Features
 
-* **Course Discovery:** Users can browse top-rated and most recent courses.
-* **AI Recommendations:** Python-based engine suggests courses based on user interests.
-* **Robust Backend:** C# Architecture with Entity Framework Core and Dependency Injection.
-* **Optimized Database:** Fully normalized MySQL schema (3NF) handling complex relationships.
+- **Course Discovery:** Browse trending, recently added, best-selling, and top-rated courses.
+- **AI Recommendations:** Semantic similarity engine suggests courses based on enrollment history.
+- **Study Copilot:** RAG-based assistant that answers questions grounded in course documents.
+- **Robust Backend:** ASP.NET Core with Entity Framework Core and dependency injection.
+- **Optimized Database:** Fully normalized MySQL schema (3NF) with pre-built views for performance.
 
 ---
 
-## 🔧 Configuration & Troubleshooting
+## Configuration
 
-### Database Connection
-The application is configured to run in **Host Mode**.
-* **Connection String:** Uses `127.0.0.1` to access the database container directly.
-* **SSL:** Disabled (`SslMode=None`) for local development compatibility.
+All service configuration is handled through `docker-compose.yml` environment variables. No `.env` files are needed to run the stack.
 
-### Common Issues
-* **"Unable to Connect":** ensure the `motive-db` container is healthy (`docker ps`).
-* **Database Not Ready:** On the very first run, MySQL takes ~30 seconds to initialize. If the app crashes, simply restart the stack:
-    ```bash
-    sudo docker-compose restart motive-stack
-    ```
-### Database Explanation
-* [**Click here for the full Database Documentation & Schema**](https://github.com/YousefTantawy/MOTIVE/blob/main/database/databaseReadMe.md)
+| Variable | Service | Description |
+| :--- | :--- | :--- |
+| `ConnectionStrings__DefaultConnection` | backend | MySQL connection string |
+| `AiService__BaseUrl` | backend | AI service base URL |
+| `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | ai | MySQL credentials for the AI service |
+
 ---
 
-## 👥 Contributors
-* **Yousef Tantawy** - Backend & DevOps
-* **Amr Tarek** - Frontend
-* **Omar Ashraf && Ahmed Alaa** - Database Design
-* **Hassan Darwish** - Ai service
+## Troubleshooting
 
-## ⚙️ Future updates
-* Add more monitoring features, specifically for ai-service
-* Add more DevOps related concepts
-* Re-Work the backend to fit more industrial standards
-* Implement JWT tokens for more security
+**"Connection refused" on first load**
+The AI service takes ~30–60s to initialize on first boot (model loading). Refresh after it fully starts.
 
+**Database not ready**
+On the very first run, MySQL takes ~20s to initialize the schema. The backend and AI service will wait automatically via healthcheck — no manual restart needed.
 
+**Rebuild without re-downloading packages**
+```bash
+DOCKER_BUILDKIT=1 docker compose up --build
+```
+Subsequent builds use the host pip cache and skip re-downloading.
 
+---
 
+## Database
+
+- [Full Database Documentation & Schema](https://github.com/YousefTantawy/MOTIVE/blob/main/database/databaseReadMe.md)
+
+---
+
+## Contributors
+
+- **Yousef Tantawy** — Backend & DevOps
+- **Amr Tarek** — Frontend
+- **Omar Ashraf & Ahmed Alaa** — Database Design
+- **Hassan Darwish** — AI Service
+
+---
+
+## Future Updates
+
+- Add healthcheck dependency so backend waits for AI service before accepting traffic
+- Implement JWT authentication
+- Add monitoring and observability for the AI service
+- Rework backend to fit more industrial standards
