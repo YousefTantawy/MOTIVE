@@ -32,7 +32,7 @@ namespace Motive.Backend.Controllers
             try
             {
                 // 3. Send POST to Python endpoint '/get-ids'
-                var response = await client.PostAsync("get-ids", jsonContent);
+                var response = await client.PostAsync("recommend/get-ids", jsonContent);
 
                 if (!response.IsSuccessStatusCode)
                 {

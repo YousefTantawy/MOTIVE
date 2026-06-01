@@ -1,15 +1,12 @@
 # --- API & Web Framework ---
 fastapi
 uvicorn
-pydantic
 pydantic-settings[dotenv]
 
 # --- Machine Learning & NLP ---
 sentence-transformers
-numpy
 pandas
 scikit-learn
-joblib
 
 # --- Vector Database & LLM Integration ---
 chromadb

@@ -1,21 +1,67 @@
 version: '3.8'
 
 services:
-  motive-stack:
-    build: .
-    container_name: motive_stack_1
-    network_mode: host
-    environment:
-      - ConnectionStrings__DefaultConnection=Server=127.0.0.1;Port=3306;Database=ecen424_db_project;User ID=root;Password=motivepassword;SslMode=None;AllowPublicKeyRetrieval=True;
-    depends_on:
-      - motive-db
-
   motive-db:
     image: mysql:8.0
     container_name: motive-db
-    network_mode: host 
     environment:
       - MYSQL_ROOT_PASSWORD=motivepassword
       - MYSQL_DATABASE=ecen424_db_project
     volumes:
       - ./database/motiveDB.sql:/docker-entrypoint-initdb.d/init.sql
+      - motive-db-data:/var/lib/mysql
+    networks:
+      - motive-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pmotivepassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  motive-backend:
+    build: ./backend
+    container_name: motive-backend
+    environment:
+      - ASPNETCORE_HTTP_PORTS=5168
+      - ConnectionStrings__DefaultConnection=Server=motive-db;Port=3306;Database=ecen424_db_project;User ID=root;Password=motivepassword;SslMode=None;AllowPublicKeyRetrieval=True;
+      - AiService__BaseUrl=http://motive-ai:5171/
+    ports:
+      - "5168:5168"
+    depends_on:
+      motive-db:
+        condition: service_healthy
+    networks:
+      - motive-network
+
+  motive-ai:
+    build: ./ai-service
+    container_name: motive-ai
+    environment:
+      - DB_HOST=motive-db
+      - DB_USER=root
+      - DB_PASSWORD=motivepassword
+      - DB_NAME=ecen424_db_project
+    ports:
+      - "5171:5171"
+    depends_on:
+      motive-db:
+        condition: service_healthy
+    networks:
+      - motive-network
+
+  motive-frontend:
+    build: ./frontend
+    container_name: motive-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - motive-backend
+    networks:
+      - motive-network
+
+networks:
+  motive-network:
+    driver: bridge
+
+volumes:
+  motive-db-data:

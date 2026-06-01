@@ -5,8 +5,8 @@ FROM python:3.10-slim
 # Grouping these into a single ENV command reduces the number of image layers
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    HF_HOME=/app/.cache/huggingface
 
 # 3. Work Directory: Set the default execution context
 WORKDIR /app
@@ -17,12 +17,18 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # 5. Dependency Installation: Leverage Docker layer caching
+# Install CPU-only torch first so sentence-transformers doesn't pull the CUDA variant (~2GB saved)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install torch --index-url https://download.pytorch.org/whl/cpu
+
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 
 # 6. Least Privilege Security: Create a non-root user and group
 # This is a critical security measure to prevent container breakout attacks
-RUN addgroup --system appgroup && adduser --system --group appuser
+RUN addgroup --system appgroup && adduser --system --group appuser \
+    && mkdir -p /app/.cache/huggingface \
+    && chown -R appuser:appgroup /app/.cache
 
 # 7. Source Code: Copy the application code and transfer ownership to the new user
 COPY --chown=appuser:appgroup . .

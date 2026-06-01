@@ -55,7 +55,7 @@ export const HomePage: React.FC = () => {
         return;
       }
 
-      const ids: number[] = Array.isArray(payload.ids) ? payload.ids : [];
+      const ids: number[] = Array.isArray(payload.recommended_ids) ? payload.recommended_ids : [];
       if (!ids.length) {
         setRecommendations([]);
         return;
